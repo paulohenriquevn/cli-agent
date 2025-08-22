@@ -1,0 +1,87 @@
+{
+  "root": true,
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaVersion": 2020,
+    "sourceType": "module"
+  },
+  "plugins": ["@typescript-eslint"],
+  "extends": ["eslint:recommended"],
+  "env": {
+    "node": true,
+    "es6": true,
+    "browser": true
+  },
+  "globals": {
+    "HTMLElement": "readonly",
+    "HTMLDivElement": "readonly", 
+    "HTMLInputElement": "readonly",
+    "HTMLTextAreaElement": "readonly",
+    "MouseEvent": "readonly",
+    "KeyboardEvent": "readonly", 
+    "Node": "readonly",
+    "MutationObserver": "readonly",
+    "navigator": "readonly",
+    "document": "readonly",
+    "window": "readonly",
+    "NodeJS": "readonly"
+  },
+  "rules": {
+    // Basic rules that work without TypeScript presets
+    "no-unused-vars": "off", // Turn off to avoid conflicts with TypeScript
+    "@typescript-eslint/no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }],
+    "no-console": "off",
+    "no-debugger": "error",
+    "no-var": "error",
+    "prefer-const": "error",
+    "eqeqeq": ["error", "always"],
+    "curly": ["error", "all"],
+    
+    // Code style
+    "indent": ["error", 4, { "SwitchCase": 1 }],
+    "quotes": ["error", "single", { "avoidEscape": true, "allowTemplateLiterals": true }],
+    "semi": ["error", "always"],
+    "comma-dangle": ["error", "never"],
+    "object-curly-spacing": ["error", "always"],
+    "array-bracket-spacing": ["error", "never"],
+    "space-before-function-paren": ["error", "never"],
+    "keyword-spacing": ["error", { "before": true, "after": true }],
+    "space-infix-ops": "error",
+    "no-trailing-spaces": "error",
+    "no-multiple-empty-lines": ["error", { "max": 2, "maxEOF": 1 }],
+    "no-case-declarations": "error",
+    "no-misleading-character-class": "error"
+  },
+  "overrides": [
+    {
+      "files": ["**/*.test.ts", "**/*.spec.ts"],
+      "env": {
+        "jest": true
+      },
+      "rules": {
+        "no-console": "off",
+        "@typescript-eslint/no-unused-vars": "off"
+      }
+    },
+    {
+      "files": ["webpack.*.js", "*.config.js"],
+      "env": {
+        "node": true
+      },
+      "parser": "espree",
+      "parserOptions": {
+        "ecmaVersion": 2020,
+        "sourceType": "module"
+      }
+    }
+  ],
+  "ignorePatterns": [
+    "dist/**",
+    "out/**", 
+    "node_modules/**",
+    "*.js",
+    "*.d.ts",
+    "coverage/**",
+    ".vscode-test/**"
+  ]
+}

@@ -1,0 +1,29 @@
+# Build output
+dist/
+out/
+*.vsix
+
+# Dependencies
+node_modules/
+
+# Generated files
+*.d.ts
+*.js.map
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# VSCode test
+.vscode-test/
+
+# Logs
+logs/
+*.log
+
+# Webpack bundles
+*.bundle.js
+
+# Temporary files
+.tmp/
+temp/

@@ -1,0 +1,143 @@
+/*---------------------------------------------------------------------------------------------
+ * CLI Types - Substitutos para tipos VSCode
+ * Remove completamente dependência do VSCode
+ *--------------------------------------------------------------------------------------------*/
+
+/**
+ * Cancellation token for CLI operations
+ */
+export class CliCancellationToken {
+    private _isCancelled = false;
+    private _onCancellationRequestedCallbacks: (() => void)[] = [];
+
+    get isCancellationRequested(): boolean {
+        return this._isCancelled;
+    }
+
+    cancel(): void {
+        this._isCancelled = true;
+        this._onCancellationRequestedCallbacks.forEach(callback => callback());
+    }
+
+    onCancellationRequested(callback: () => void): void {
+        this._onCancellationRequestedCallbacks.push(callback);
+    }
+}
+
+/**
+ * Tool result parts for CLI output
+ */
+export class CliTextPart {
+    constructor(public value: string) {}
+}
+
+export class CliErrorPart {
+    constructor(public value: Error | string) {}
+}
+
+export type CliResultPart = CliTextPart | CliErrorPart;
+
+/**
+ * Tool invocation result for CLI
+ */
+export class CliToolResult {
+    constructor(public parts: CliResultPart[]) {}
+
+    getText(): string {
+        return this.parts
+            .filter(part => part instanceof CliTextPart)
+            .map(part => (part as CliTextPart).value)
+            .join('');
+    }
+
+    getErrors(): (Error | string)[] {
+        return this.parts
+            .filter(part => part instanceof CliErrorPart)
+            .map(part => (part as CliErrorPart).value);
+    }
+
+    hasErrors(): boolean {
+        return this.parts.some(part => part instanceof CliErrorPart);
+    }
+}
+
+/**
+ * Tool invocation options for CLI
+ */
+export interface CliToolInvocationOptions<T = any> {
+    input: T;
+    toolName: string;
+    requestId?: string;
+    context?: {
+        workingDirectory?: string;
+        environment?: Record<string, string>;
+        user?: string;
+        sessionId?: string;
+    };
+}
+
+/**
+ * Prepared tool invocation for CLI
+ */
+export interface CliPreparedToolInvocation {
+    invocationMessage: string;
+}
+
+/**
+ * Tool preparation options for CLI
+ */
+export interface CliToolInvocationPrepareOptions<T = any> {
+    input: T;
+    toolName: string;
+}
+
+/**
+ * CLI Tool interface definition
+ */
+export interface CliToolInformation {
+    name: string;
+    description: string;
+    inputSchema: any;
+    outputSchema?: any;
+    category?: string;
+    tags?: string[];
+    complexity?: 'core' | 'advanced' | 'essential';
+}
+
+/**
+ * Tool execution context for CLI
+ */
+export interface CliExecutionContext {
+    workingDirectory: string;
+    environment: Record<string, string>;
+    user?: string;
+    sessionId?: string;
+    timeout?: number;
+    verbose?: boolean;
+}
+
+/**
+ * Default CLI execution context
+ */
+export const createDefaultCliContext = (): CliExecutionContext => ({
+    workingDirectory: process.cwd(),
+    environment: process.env as Record<string, string>,
+    sessionId: `cli-${Date.now()}`,
+    timeout: 30000,
+    verbose: false
+});
+
+/**
+ * Markdown string replacement for CLI
+ */
+export class CliMarkdownString {
+    constructor(public value: string) {}
+
+    appendMarkdown(value: string): void {
+        this.value += value;
+    }
+
+    appendText(value: string): void {
+        this.value += value;
+    }
+}
