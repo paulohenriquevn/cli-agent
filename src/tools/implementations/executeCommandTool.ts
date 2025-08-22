@@ -5,15 +5,12 @@
 
 import { exec } from 'child_process';
 import { promisify } from 'util';
-import * as path from 'path';
 import { BaseTool } from '../base/baseTool';
 import { ToolRegistry } from '../registry/toolRegistry';
 import { 
     CliToolInvocationOptions,
     CliCancellationToken,
-    CliToolResult,
-    CliTextPart,
-    CliExecutionContext
+    CliToolResult
 } from '../types/cliTypes';
 
 const execAsync = promisify(exec);
@@ -92,7 +89,7 @@ Examples: Run build scripts, execute tests with specific config, run commands wi
         workingDirectory?: string,
         environment?: Record<string, string>,
         timeout?: number,
-        token?: CliCancellationToken
+_token?: CliCancellationToken
     ): Promise<CliToolResult> {
         // Validate workspace
         const workspaceError = this.validateWorkspace();
@@ -110,7 +107,7 @@ Examples: Run build scripts, execute tests with specific config, run commands wi
         }
 
         // Check for cancellation
-        if (token?.isCancellationRequested) {
+        if (_token?.isCancellationRequested) {
             return this.createErrorResult('Command execution was cancelled');
         }
 
@@ -155,10 +152,11 @@ Examples: Run build scripts, execute tests with specific config, run commands wi
                 stderr: result.stderr
             }, summary);
 
-        } catch (error: any) {
+        } catch (error: unknown) {
             const executionTime = Date.now() - Date.now();
             
-            if (error.killed && error.signal === 'SIGTERM') {
+            const errorObj = error as { stdout?: string; stderr?: string; code?: number; killed?: boolean; signal?: string };
+            if (errorObj.killed && errorObj.signal === 'SIGTERM') {
                 return this.createErrorResult(`Command timed out after ${timeout}ms`);
             }
 
@@ -168,9 +166,9 @@ Examples: Run build scripts, execute tests with specific config, run commands wi
                 cwd,
                 environment,
                 executionTime,
-                error.stdout || '',
-                error.stderr || '',
-                error.code || 1
+                errorObj.stdout || '',
+                errorObj.stderr || '',
+                errorObj.code || 1
             );
 
             return this.createErrorResult(summary);

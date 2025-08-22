@@ -8,9 +8,7 @@ import { ToolRegistry } from '../registry/toolRegistry';
 import { 
     CliToolInvocationOptions,
     CliCancellationToken,
-    CliToolResult,
-    CliTextPart,
-    CliExecutionContext
+    CliToolResult
 } from '../types/cliTypes';
 
 interface IWebSearchParams {

@@ -4,15 +4,12 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as fs from 'fs';
-import * as path from 'path';
 import { BaseTool } from '../base/baseTool';
 import { ToolRegistry } from '../registry/toolRegistry';
 import { 
     CliToolInvocationOptions,
     CliCancellationToken,
-    CliToolResult,
-    CliTextPart,
-    CliExecutionContext
+    CliToolResult
 } from '../types/cliTypes';
 
 interface IEditOperation {
@@ -129,7 +126,6 @@ Examples: Update imports + function names, fix multiple bugs in one file, batch 
 
         for (let i = 0; i < edits.length; i++) {
             const edit = edits[i];
-            const beforeContent = currentContent;
 
             try {
                 const result = this.applyEdit(currentContent, edit);

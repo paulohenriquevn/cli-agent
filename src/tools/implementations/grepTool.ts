@@ -5,15 +5,12 @@
 
 import { exec } from 'child_process';
 import { promisify } from 'util';
-import * as path from 'path';
 import { BaseTool } from '../base/baseTool';
 import { ToolRegistry } from '../registry/toolRegistry';
 import { 
     CliToolInvocationOptions,
     CliCancellationToken,
-    CliToolResult,
-    CliTextPart,
-    CliExecutionContext
+    CliToolResult
 } from '../types/cliTypes';
 
 const execAsync = promisify(exec);
@@ -242,14 +239,16 @@ ${formattedOutput}`;
                 results: lines
             }, summary);
 
-        } catch (error: any) {
+        } catch (error: unknown) {
+            const errorObj = error as { code?: string | number; stderr?: string; signal?: string; message?: string };
+            
             // Handle ripgrep not found
-            if (error.code === 'ENOENT') {
+            if (errorObj.code === 'ENOENT') {
                 return this.createErrorResult('ripgrep (rg) not found. Please install ripgrep first.');
             }
 
             // Handle no matches (ripgrep exits with code 1 when no matches)
-            if (error.code === 1 && !error.stderr) {
+            if (errorObj.code === 1 && !errorObj.stderr) {
                 return this.createSuccessResult(
                     { pattern, matchCount: 0, searchPath: targetPath },
                     `No matches found for pattern: "${pattern}"`
@@ -257,11 +256,11 @@ ${formattedOutput}`;
             }
 
             // Handle cancellation
-            if (error.signal === 'SIGTERM' || error.code === 'ABORT_ERR') {
+            if (errorObj.signal === 'SIGTERM' || errorObj.code === 'ABORT_ERR') {
                 return this.createErrorResult('Search was cancelled');
             }
 
-            return this.createErrorResult(`Search failed: ${error.message}`);
+            return this.createErrorResult(`Search failed: ${errorObj.message || 'Unknown error'}`);
         }
     }
 }

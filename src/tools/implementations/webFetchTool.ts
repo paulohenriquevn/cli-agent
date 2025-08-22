@@ -8,9 +8,7 @@ import { ToolRegistry } from '../registry/toolRegistry';
 import { 
     CliToolInvocationOptions,
     CliCancellationToken,
-    CliToolResult,
-    CliTextPart,
-    CliExecutionContext
+    CliToolResult
 } from '../types/cliTypes';
 
 interface IWebFetchParams {
@@ -72,7 +70,7 @@ Examples: Analyze API documentation, research technical articles, extract key in
                 validUrl.protocol = 'https:';
                 console.log(`🔒 Upgraded to HTTPS: ${validUrl.toString()}`);
             }
-        } catch (error) {
+        } catch {
             return this.createErrorResult(`Invalid URL format: ${url}`);
         }
 

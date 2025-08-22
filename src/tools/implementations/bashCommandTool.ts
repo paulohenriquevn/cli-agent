@@ -5,15 +5,12 @@
 
 import { exec } from 'child_process';
 import { promisify } from 'util';
-import * as path from 'path';
 import { BaseTool } from '../base/baseTool';
 import { ToolRegistry } from '../registry/toolRegistry';
 import { 
     CliToolInvocationOptions,
     CliCancellationToken,
-    CliToolResult,
-    CliTextPart,
-    CliExecutionContext
+    CliToolResult
 } from '../types/cliTypes';
 
 const execAsync = promisify(exec);
@@ -133,7 +130,7 @@ Examples: "npm run build", "git status", "npm test", "mkdir src/components". SEC
         cwd: string,
         timeout: number,
         token: CliCancellationToken,
-        runInBackground: boolean
+        _runInBackground: boolean
     ): Promise<CliToolResult> {
         const startTime = Date.now();
 
@@ -191,21 +188,22 @@ Examples: "npm run build", "git status", "npm test", "mkdir src/components". SEC
                 exitCode: 0
             }, summary);
 
-        } catch (error: any) {
+        } catch (error: unknown) {
             const executionTime = Date.now() - startTime;
             
             // Handle different error types
-            if (error.signal === 'SIGTERM' || error.code === 'ABORT_ERR') {
+            const errorObj = error as { signal?: string; code?: string; killed?: boolean; stdout?: string; stderr?: string; };
+            if (errorObj.signal === 'SIGTERM' || errorObj.code === 'ABORT_ERR') {
                 return this.createErrorResult('Command execution was cancelled');
             }
             
-            if (error.killed && error.signal === 'SIGTERM') {
+            if (errorObj.killed && errorObj.signal === 'SIGTERM') {
                 return this.createErrorResult(`Command timed out after ${timeout}ms`);
             }
 
-            const stdout = error.stdout || '';
-            const stderr = error.stderr || '';
-            const exitCode = error.code || 1;
+            const stdout = errorObj.stdout || '';
+            const stderr = errorObj.stderr || '';
+            const exitCode = typeof errorObj.code === 'number' ? errorObj.code : 1;
 
             // Format error response with details
             const summary = this.formatCommandOutput(command, stdout, stderr, executionTime, cwd, exitCode);

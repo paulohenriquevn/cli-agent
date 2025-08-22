@@ -14,8 +14,7 @@ import {
     CliPreparedToolInvocation,
     CliToolInvocationPrepareOptions,
     CliExecutionContext,
-    createDefaultCliContext,
-    CliMarkdownString
+    createDefaultCliContext
 } from '../types/cliTypes';
 
 export interface IToolParams {
@@ -24,7 +23,7 @@ export interface IToolParams {
 
 export interface IToolResult {
     success: boolean;
-    data?: any;
+    data?: unknown;
     error?: string;
     message?: string;
 }
@@ -61,7 +60,7 @@ export abstract class BaseTool<T extends IToolParams = IToolParams> {
      * Filter and confirm edits before execution
      * Returns confirmation data if user approval is needed
      */
-    async filterEdits?(filePath: string): Promise<IEditFilterData | undefined> {
+    async filterEdits?(_filePath: string): Promise<IEditFilterData | undefined> {
         return undefined; // No filtering by default
     }
 
@@ -69,7 +68,7 @@ export abstract class BaseTool<T extends IToolParams = IToolParams> {
      * Provide dynamic input based on context
      * Allows tools to suggest parameters based on current state
      */
-    async provideInput?(context: CliExecutionContext): Promise<T | undefined> {
+    async provideInput?(_context: CliExecutionContext): Promise<T | undefined> {
         return undefined; // No dynamic input by default
     }
 
@@ -77,7 +76,7 @@ export abstract class BaseTool<T extends IToolParams = IToolParams> {
      * Resolve and modify input parameters before execution
      * Allows for parameter transformation and validation
      */
-    async resolveInput?(input: T, context: CliExecutionContext): Promise<T> {
+    async resolveInput?(input: T, _context: CliExecutionContext): Promise<T> {
         return input; // Return unchanged by default
     }
 
@@ -85,7 +84,7 @@ export abstract class BaseTool<T extends IToolParams = IToolParams> {
      * Alternative tool definition for conditional availability
      * Allows tools to change their schema based on context
      */
-    alternativeDefinition?(): { name: string; description: string; inputSchema: any; } | undefined {
+    alternativeDefinition?(): { name: string; description: string; inputSchema: unknown; } | undefined {
         return undefined; // Use standard definition by default
     }
 
@@ -110,7 +109,7 @@ export abstract class BaseTool<T extends IToolParams = IToolParams> {
     }
 
     // Helper methods for creating results
-    protected createSuccessResult(data?: any, message?: string): CliToolResult {
+    protected createSuccessResult(data?: unknown, message?: string): CliToolResult {
         const content = message || (data ? JSON.stringify(data, null, 2) : 'Operation completed successfully');
         return new CliToolResult([
             new CliTextPart(content)

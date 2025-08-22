@@ -10,9 +10,7 @@ import { ToolRegistry } from '../registry/toolRegistry';
 import { 
     CliToolInvocationOptions,
     CliCancellationToken,
-    CliToolResult,
-    CliTextPart,
-    CliExecutionContext
+    CliToolResult
 } from '../types/cliTypes';
 
 interface IListDirectoryParams {
@@ -112,7 +110,7 @@ Examples: List "src/" directory, show all files recursively, ignore node_modules
             if (!stats.isDirectory()) {
                 return this.createErrorResult(`Path is not a directory: ${dirPath}`);
             }
-        } catch (error) {
+        } catch {
             return this.createErrorResult(`Directory not found: ${dirPath}`);
         }
 
@@ -206,7 +204,7 @@ Examples: List "src/" directory, show all files recursively, ignore node_modules
                         );
                         results.push(...subResults);
                     }
-                } catch (error) {
+                } catch {
                     // Skip entries that can't be accessed
                     console.warn(`Warning: Cannot access ${entryPath}`);
                 }

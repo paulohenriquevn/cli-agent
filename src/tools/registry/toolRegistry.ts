@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { BaseTool } from '../base/baseTool';
-import { CliExecutionContext } from '../types/cliTypes';
+import { CliExecutionContext, CliToolResult } from '../types/cliTypes';
 
 export type ToolConstructor = new (context?: CliExecutionContext) => BaseTool;
 
@@ -46,12 +46,53 @@ export class ToolRegistry {
     }
 
     /**
+     * List all registered tools
+     */
+    listTools(): Array<{ name: string; description: string; category: string; complexity: string; tags: string[] }> {
+        const toolList: Array<{ name: string; description: string; category: string; complexity: string; tags: string[] }> = [];
+        
+        for (const [, constructor] of this.tools) {
+            const tempInstance = new constructor();
+            toolList.push({
+                name: tempInstance.name,
+                description: tempInstance.description,
+                category: tempInstance.category,
+                complexity: tempInstance.complexity,
+                tags: tempInstance.tags
+            });
+        }
+        
+        return toolList.sort((a, b) => a.name.localeCompare(b.name));
+    }
+
+    /**
+     * Get default context
+     */
+    getDefaultContext(): CliExecutionContext {
+        return this.defaultContext;
+    }
+
+    /**
+     * Get tools by category
+     */
+    getToolsByCategory(category: string): Array<{ name: string; description: string; category: string; complexity: string; tags: string[] }> {
+        return this.listTools().filter(tool => tool.category === category);
+    }
+
+    /**
+     * Get tools by tag
+     */
+    getToolsByTag(tag: string): Array<{ name: string; description: string; category: string; complexity: string; tags: string[] }> {
+        return this.listTools().filter(tool => tool.tags.includes(tag));
+    }
+
+    /**
      * Get a tool instance by name
      */
-    getTool(name: string, context?: CliExecutionContext): BaseTool | undefined {
+    getTool(name: string, context?: CliExecutionContext): BaseTool | null {
         const ToolConstructor = this.tools.get(name);
         if (!ToolConstructor) {
-            return undefined;
+            return null;
         }
         
         return new ToolConstructor(context || this.defaultContext);
@@ -97,7 +138,7 @@ export class ToolRegistry {
         toolName: string, 
         input: any, 
         context?: CliExecutionContext
-    ): Promise<any> {
+    ): Promise<CliToolResult> {
         const tool = this.getTool(toolName, context);
         if (!tool) {
             throw new Error(`Tool '${toolName}' not found in registry`);
@@ -114,12 +155,12 @@ export class ToolRegistry {
         return await tool.invoke(options, token);
     }
 
-    // Category and tag-based filtering
-    getToolsByCategory(category: string, context?: CliExecutionContext): BaseTool[] {
+    // Category and tag-based filtering (instances)
+    getToolInstancesByCategory(category: string, context?: CliExecutionContext): BaseTool[] {
         return this.getAllTools(context).filter(tool => tool.getCategory() === category);
     }
 
-    getToolsByTag(tag: string, context?: CliExecutionContext): BaseTool[] {
+    getToolInstancesByTag(tag: string, context?: CliExecutionContext): BaseTool[] {
         return this.getAllTools(context).filter(tool => tool.hasTag(tag));
     }
 
@@ -161,7 +202,7 @@ export class ToolRegistry {
         category: string;
         complexity: string;
         tags: string[];
-        inputSchema: any;
+        inputSchema: unknown;
     }> {
         return this.getAllTools().map(tool => tool.getMetadata());
     }

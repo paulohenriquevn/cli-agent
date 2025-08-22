@@ -10,9 +10,7 @@ import { ToolRegistry } from '../registry/toolRegistry';
 import { 
     CliToolInvocationOptions,
     CliCancellationToken,
-    CliToolResult,
-    CliTextPart,
-    CliExecutionContext
+    CliToolResult
 } from '../types/cliTypes';
 
 interface IGlobParams {
@@ -98,7 +96,7 @@ Examples: Find "**/*.test.js" for tests, "src/**/*.tsx" for React components, "*
             if (!stats.isDirectory()) {
                 return this.createErrorResult(`Search path is not a directory: ${searchPath || '.'}`);
             }
-        } catch (error) {
+        } catch {
             return this.createErrorResult(`Search path not found: ${searchPath || '.'}`);
         }
 
@@ -192,12 +190,12 @@ Examples: Find "**/*.test.js" for tests, "src/**/*.tsx" for React components, "*
                             includeHidden
                         );
                     }
-                } catch (error) {
+                } catch {
                     // Skip entries that can't be accessed
                     console.warn(`Warning: Cannot access ${entryPath}`);
                 }
             }
-        } catch (error) {
+        } catch {
             // Skip directories that can't be read
             console.warn(`Warning: Cannot read directory ${currentPath}`);
         }
@@ -209,7 +207,7 @@ Examples: Find "**/*.test.js" for tests, "src/**/*.tsx" for React components, "*
         // * matches any characters except /
         // ? matches any single character except /
         
-        let regexStr = pattern
+        const regexStr = pattern
             .replace(/\./g, '\\.')  // Escape dots
             .replace(/\*\*/g, '§DOUBLE_STAR§')  // Temporarily replace **
             .replace(/\*/g, '[^/]*')  // * matches anything except /
@@ -237,7 +235,10 @@ Examples: Find "**/*.test.js" for tests, "src/**/*.tsx" for React components, "*
             if (!grouped.has(dir)) {
                 grouped.set(dir, []);
             }
-            grouped.get(dir)!.push(match);
+            const dirFiles = grouped.get(dir);
+            if (dirFiles) {
+                dirFiles.push(match);
+            }
         }
 
         // Display results
