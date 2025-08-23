@@ -105,6 +105,40 @@ export interface CliToolInformation {
 }
 
 /**
+ * File system interface for CLI operations
+ */
+export interface CliFileSystem {
+    readFile(path: string): Promise<string>;
+    writeFile(path: string, content: string): Promise<void>;
+    exists(path: string): Promise<boolean>;
+    readdir(path: string): Promise<string[]>;
+}
+
+/**
+ * Tool parameters interface for healing system
+ */
+export interface ToolParameters {
+    [key: string]: any;
+    oldString?: string;
+    newString?: string;
+    filePath?: string;
+}
+
+/**
+ * No match error for tool healing
+ */
+export class NoMatchError extends Error {
+    public readonly type = 'NoMatchError';
+    public filePath?: string;
+    
+    constructor(message: string, filePath?: string) {
+        super(message);
+        this.name = 'NoMatchError';
+        this.filePath = filePath;
+    }
+}
+
+/**
  * Tool execution context for CLI
  */
 export interface CliExecutionContext {
@@ -114,6 +148,7 @@ export interface CliExecutionContext {
     sessionId?: string;
     timeout?: number;
     verbose?: boolean;
+    fileSystem?: CliFileSystem;
 }
 
 /**
