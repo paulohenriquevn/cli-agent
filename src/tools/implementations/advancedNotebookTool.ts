@@ -19,6 +19,7 @@ interface IAdvancedNotebookParams {
     target_index?: number;
     target_position?: 'before' | 'after';
     search_pattern?: string;
+    [key: string]: unknown;
 }
 
 interface INotebookEditResult {

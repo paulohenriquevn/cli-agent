@@ -8,12 +8,10 @@ import {
     OLD_STRING_CORRECTION_SCHEMA,
     NEW_STRING_CORRECTION_SCHEMA,
     PATCH_HEALING_SCHEMA,
-    Raw,
     ChatRole,
     ChatCompletionContentPartKind,
     ChatFetchResponseType,
-    ChatLocation,
-    CHAT_MODEL
+    ChatLocation
 } from './healingTypes';
 
 /**
@@ -23,7 +21,7 @@ export async function correctOldStringMismatch(
     healEndpoint: HealingEndpoint,
     fileContent: string,
     problematicSnippet: string,
-    token: any,
+    token: string,
 ): Promise<string> {
     const prompt = `
 Context: A process needs to find an exact literal, unique match for a specific text snippet within a file's content. The provided snippet failed to match exactly.
@@ -60,7 +58,7 @@ export async function correctNewString(
     originalOldString: string,
     correctedOldString: string,
     originalNewString: string,
-    token: any,
+    token: string,
 ): Promise<string> {
     const prompt = `
 Context: A string replacement operation needs to correct the new string to match the corrected old string format.
@@ -101,7 +99,7 @@ export async function healPatch(
     healEndpoint: HealingEndpoint,
     patch: string,
     explanation: string,
-    token: any,
+    token: string,
 ): Promise<string | undefined> {
     const prompt = `The following patch failed to apply cleanly. Please fix it:
 
@@ -130,8 +128,8 @@ async function getJsonResponse(
     endpoint: HealingEndpoint,
     prompt: string,
     schema: ObjectJsonSchema,
-    token: any
-): Promise<any> {
+    token: string
+): Promise<{ corrected_target_snippet?: string; corrected_new_string?: string; corrected_patch?: string }> {
     const messages = [
         {
             role: ChatRole.User,
@@ -291,7 +289,7 @@ export function trimPairIfPossible(
 /**
  * Extrai patch da resposta do LLM
  */
-export function extractPatchFromResponse(response: any): string | undefined {
+export function extractPatchFromResponse(response: { content?: unknown }): string | undefined {
     if (!response) {return undefined;}
     
     const content = Array.isArray(response.content) 

@@ -101,7 +101,7 @@ export class ToolCallIdManager extends DisposableBase {
             name: toolCall.name,
             arguments: toolCall.arguments,
             context: enhancedContext,
-            createdAt: enhancedContext.timestamp!,
+            createdAt: enhancedContext.timestamp ?? Date.now(),
             parentId: context.parentCallId,
             children: [],
             status: 'pending'
@@ -291,7 +291,7 @@ export class ToolCallIdManager extends DisposableBase {
         const sortedRecords = Array.from(this.registry.entries())
             .sort(([, a], [, b]) => b.createdAt - a.createdAt);
 
-        const toKeep = sortedRecords.slice(0, this.config.maxHistorySize);
+        // const _toKeep = sortedRecords.slice(0, this.config.maxHistorySize); // Unused variable - cleanup logic can be added here"
         const toRemove = sortedRecords.slice(this.config.maxHistorySize);
 
         // Remove registros antigos
@@ -483,7 +483,7 @@ export class ToolCallIdUtils {
         roundNumber?: number;
     } {
         const parts = id.split(separator);
-        const result: any = {};
+        const result: Record<string, string | number | boolean | undefined> = {};
 
         for (let i = 0; i < parts.length; i++) {
             const part = parts[i];

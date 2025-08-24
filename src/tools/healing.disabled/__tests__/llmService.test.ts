@@ -2,8 +2,8 @@
  * LLM Service Tests
  *--------------------------------------------------------------------------------------------*/
 
-import { LLMService, MetacognitionRequest, MetacognitionResponse } from '../llmService';
-import { ToolParameters, NoMatchError } from '../../types/cliTypes';
+import { LLMService, MetacognitionRequest } from '../llmService';
+import { NoMatchError } from '../../types/cliTypes';
 
 const createMockRequest = (overrides: Partial<MetacognitionRequest> = {}): MetacognitionRequest => ({
     sourceModel: 'gpt-4',

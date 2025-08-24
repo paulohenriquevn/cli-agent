@@ -5,15 +5,13 @@
 import {
     HealedError,
     HealingEndpoint,
-    HealingResult,
     TelemetryService,
     CHAT_MODEL,
     ChatFetchResponseType
 } from './healingTypes';
 
 import {
-    healPatch,
-    extractPatchFromResponse
+    healPatch
 } from './healingUtils';
 
 /**
@@ -61,10 +59,10 @@ export class ApplyPatchTool {
         patch: string,
         docText: DocText,
         explanation: string = '',
-        token?: any
+        token?: string
     ): Promise<{ commit: Commit; wasHealed: boolean; healedPatch?: string }> {
         const startTime = Date.now();
-        const telemetryData: Record<string, any> = {
+        const telemetryData: Record<string, unknown> = {
             model: CHAT_MODEL.GPT4OMINI,
             healed: 0,
             success: 0,
@@ -105,7 +103,7 @@ export class ApplyPatchTool {
         patch: string,
         docText: DocText,
         explanation: string,
-        token?: any
+        token?: string
     ): Promise<CommitBuildResult> {
         try {
             // 🎯 Primeira tentativa normal
@@ -143,7 +141,7 @@ export class ApplyPatchTool {
         patch: string,
         docText: DocText,
         explanation: string,
-        token?: any
+        token?: string
     ): Promise<string | undefined> {
         try {
             const healEndpoint = await this.healEndpointProvider();
@@ -246,7 +244,7 @@ export class ApplyPatchTool {
      */
     private async buildCommit(patch: string, docText: DocText): Promise<Commit> {
         // Simula aplicação do patch - implementação real dependeria do sistema de versionamento
-        const patchLines = patch.split('\n');
+        // const patchLines = patch.split('\n');
         const fileChanges = this.parsePatchForFileChanges(patch);
         
         if (fileChanges.length === 0) {
@@ -254,7 +252,7 @@ export class ApplyPatchTool {
         }
         
         // Simula aplicação no conteúdo do arquivo
-        const patchedContent = await this.simulatePatchApplication(patch, docText.content);
+        await this.simulatePatchApplication(patch, docText.content);
         
         return {
             patch,
@@ -316,7 +314,7 @@ export class ApplyPatchTool {
      */
     private async simulatePatchApplication(patch: string, content: string): Promise<string> {
         // Implementação simplificada - versão real usaria bibliotecas de patch como 'diff' ou 'patch-package'
-        const lines = content.split('\n');
+        // const _lines = content.split('\n');
         const patchLines = patch.split('\n');
         
         // Esta é uma simulação básica - implementação real seria mais robusta
@@ -430,7 +428,7 @@ export class ApplyPatchTool {
     /**
      * Envia telemetria
      */
-    private sendTelemetry(eventName: string, data: Record<string, any>): void {
+    private sendTelemetry(eventName: string, data: Record<string, unknown>): void {
         try {
             this.telemetryService.sendMSFTTelemetryEvent(eventName, data);
         } catch (error) {
@@ -458,7 +456,7 @@ export class PatchToolFactory {
      */
     static createMockHealEndpoint(): HealingEndpoint {
         return {
-            async makeChatRequest(requestName: string, messages: any[]): Promise<any> {
+            async makeChatRequest(requestName: string, messages: Array<{ content?: Array<{ text?: string }> }>): Promise<{ type: string; value?: { content: Array<{ text: string }> } }> {
                 // Mock que retorna um patch "curado"
                 const originalPatch = messages[0]?.content?.[0]?.text || '';
                 const mockPatch = originalPatch.replace(/\-old_line/g, '-corrected_line');
@@ -478,7 +476,7 @@ export class PatchToolFactory {
      */
     static createMockTelemetryService(): TelemetryService {
         return {
-            sendMSFTTelemetryEvent(eventName: string, properties: Record<string, any>): void {
+            sendMSFTTelemetryEvent(eventName: string, properties: Record<string, unknown>): void {
                 console.log(`Patch Telemetry: ${eventName}`, properties);
             }
         };

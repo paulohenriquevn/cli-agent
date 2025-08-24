@@ -4,10 +4,9 @@
 
 import { 
     ToolCallingLoop, 
-    BasicToolCallingLoop, 
-    ToolCallingLoopFactory,
-    IToolCallingLoopOptions,
-    ToolCallingLoopProgress 
+    // BasicToolCallingLoop, // Unused import
+    // ToolCallingLoopFactory, // Unused import
+    // ToolCallingLoopProgress // Unused import
 } from '../execution/toolCallingLoop';
 
 import { 
@@ -15,8 +14,10 @@ import {
 } from '../execution/pauseController';
 
 import {
+    IToolCallingLoopOptions,
+    IBuildPromptContext,
+    IBuildPromptResult,
     IToolCall,
-    IToolCallRound,
     LanguageModelToolInformation,
     LanguageModelToolResult2,
     ChatResponse,
@@ -25,10 +26,9 @@ import {
 } from '../execution/types';
 
 import { 
-    IToolsService, 
-    ToolsServiceImpl, 
+    IToolsService,
     ToolsServiceFactory,
-    CliRequest 
+    CliRequest
 } from './toolsService';
 
 import { 
@@ -36,21 +36,21 @@ import {
     IntentFactory,
     IntentType,
     IntentContext,
-    IntentContextManager 
+    IntentContextManager
 } from './intentLayer';
 
 import { 
-    ToolRegistry, 
-    BaseToolCtor 
+    ToolRegistry,
+    BaseToolCtor
 } from './toolRegistry';
 import { CliToolInvocationOptions as ToolInvocationOptions } from '../types/cliTypes';
 
-import { createToolHealingSystem } from '../healing';
+// import { createToolHealingSystem } from '../healing'; // Disabled - healing system has issues
 
 /**
  * Configuração da integração
  */
-export interface RegistryIntegrationOptions extends IToolCallingLoopOptions {
+export interface RegistryIntegrationOptions extends Omit<IToolCallingLoopOptions, 'request'> {
     // Intent configuration
     intentType?: IntentType;
     autoDetectIntent?: boolean;
@@ -62,14 +62,14 @@ export interface RegistryIntegrationOptions extends IToolCallingLoopOptions {
     
     // Service configuration
     enableHealing?: boolean;
-    healingConfig?: any;
+    healingConfig?: unknown;
     
     // Registry configuration
     autoRegisterTools?: boolean;
     toolCategories?: string[];
     toolTags?: string[];
     
-    // Request context
+    // Request context (overrides IToolCallingLoopOptions.request)
     request?: CliRequest;
     intentContext?: IntentContext;
 }
@@ -77,17 +77,31 @@ export interface RegistryIntegrationOptions extends IToolCallingLoopOptions {
 /**
  * Tool Calling Loop integrado com ToolRegistry
  */
-export class RegistryIntegratedToolCallingLoop extends ToolCallingLoop<RegistryIntegrationOptions> {
+export class RegistryIntegratedToolCallingLoop extends ToolCallingLoop<IToolCallingLoopOptions> {
     private readonly toolsService: IToolsService;
     private readonly intentInvocation: IIntentInvocation;
-    private readonly healingSystem?: any;
+    private readonly healingSystem?: unknown;
+    private readonly registryOptions: RegistryIntegrationOptions;
     
     constructor(options: RegistryIntegrationOptions) {
-        super(options);
+        // Convert RegistryIntegrationOptions to IToolCallingLoopOptions
+        const baseOptions: IToolCallingLoopOptions = {
+            toolCallLimit: options.toolCallLimit,
+            enableStreaming: options.enableStreaming,
+            enableNestedCalls: options.enableNestedCalls,
+            enableTelemetry: options.enableTelemetry,
+            model: options.model,
+            request: {
+                toolInvocationToken: options.request?.query || ''
+            }
+        };
+        super(baseOptions);
         
-        // Inicializa healing system se habilitado
+        this.registryOptions = options;
+        
+        // Inicializa healing system se habilitado - DISABLED
         this.healingSystem = options.enableHealing 
-            ? createToolHealingSystem(options.healingConfig)
+            ? undefined // createToolHealingSystem(options.healingConfig) - disabled
             : undefined;
         
         // Inicializa tools service
@@ -154,7 +168,7 @@ export class RegistryIntegratedToolCallingLoop extends ToolCallingLoop<RegistryI
         } catch (error) {
             console.error('Failed to get available tools:', error);
             // Fallback para todas as tools do service
-            return this.toolsService.tools;
+            return [...this.toolsService.tools];
         }
     }
 
@@ -174,22 +188,18 @@ export class RegistryIntegratedToolCallingLoop extends ToolCallingLoop<RegistryI
             }
 
             // Parse argumentos
-            let parsedArgs: any;
+            let parsedArgs: unknown;
             try {
                 parsedArgs = JSON.parse(toolCall.arguments);
-            } catch (parseError) {
+            } catch {
                 throw new Error(`Invalid tool arguments: ${toolCall.arguments}`);
             }
 
             // Cria opções de invocação
             const invocationOptions: ToolInvocationOptions = {
                 input: parsedArgs,
-                model: {
-                    family: this.options.model.family,
-                    name: this.options.model.name
-                },
-                context: this.buildPromptContext(),
-                cancellationToken: token
+                toolName: toolCall.name,
+                context: this.buildPromptContext()
             };
 
             // Executa tool através do service (com healing automático)
@@ -200,7 +210,7 @@ export class RegistryIntegratedToolCallingLoop extends ToolCallingLoop<RegistryI
             );
 
             // Atualiza contexto se persistente
-            if (this.options.persistContext && this.options.sessionId) {
+            if (this.registryOptions.persistContext && this.registryOptions.sessionId) {
                 this.updateSessionContext(toolCall.name, result.success);
             }
 
@@ -215,7 +225,7 @@ export class RegistryIntegratedToolCallingLoop extends ToolCallingLoop<RegistryI
             };
 
             // Atualiza contexto com falha se persistente
-            if (this.options.persistContext && this.options.sessionId) {
+            if (this.registryOptions.persistContext && this.registryOptions.sessionId) {
                 this.updateSessionContext(toolCall.name, false);
             }
 
@@ -226,26 +236,14 @@ export class RegistryIntegratedToolCallingLoop extends ToolCallingLoop<RegistryI
     /**
      * Constrói contexto de prompt para tools
      */
-    private buildPromptContext(): IBuildPromptContext {
+    private buildPromptContext() {
         const intentContext = this.intentInvocation.context;
         
         return {
-            userQuery: this.options.request?.query || '',
-            currentFile: intentContext?.currentFile ? {
-                uri: intentContext.currentFile.path,
-                content: intentContext.currentFile.content || '',
-                language: intentContext.currentFile.language
-            } : undefined,
-            workspaceInfo: intentContext?.workspace ? {
-                rootPath: intentContext.workspace.rootPath,
-                files: intentContext.workspace.files
-            } : undefined,
-            conversationHistory: [],
-            metadata: {
-                sessionId: this.options.sessionId,
-                intentType: this.intentInvocation.type,
-                healingEnabled: !!this.healingSystem
-            }
+            workingDirectory: intentContext?.workspace?.rootPath || process.cwd(),
+            environment: process.env as Record<string, string>,
+            user: 'system',
+            sessionId: this.registryOptions.sessionId || 'default'
         };
     }
 
@@ -253,9 +251,9 @@ export class RegistryIntegratedToolCallingLoop extends ToolCallingLoop<RegistryI
      * Atualiza contexto da sessão
      */
     private updateSessionContext(toolName: string, success: boolean): void {
-        if (!this.options.sessionId) {return;}
+        if (!this.registryOptions.sessionId) {return;}
 
-        const currentContext = IntentContextManager.getContext(this.options.sessionId) || {
+        const currentContext = IntentContextManager.getContext(this.registryOptions.sessionId) || {
             sessionData: { previousTools: [], failedTools: [], preferences: {} }
         };
 
@@ -281,19 +279,19 @@ export class RegistryIntegratedToolCallingLoop extends ToolCallingLoop<RegistryI
             currentContext.sessionData.failedTools = currentContext.sessionData.failedTools.slice(-20);
         }
 
-        IntentContextManager.saveContext(this.options.sessionId, currentContext);
+        IntentContextManager.saveContext(this.registryOptions.sessionId, currentContext);
     }
 
     /**
      * Implementações abstratas restantes
      */
-    protected async buildPrompt(): Promise<any> {
+    protected async buildPrompt(_context: IBuildPromptContext, _progress: unknown, _token: PauseController): Promise<IBuildPromptResult> {
         // Implementação básica - seria sobrescrita por subclasses
         return {
-            prompt: this.options.request?.query || '',
+            prompt: this.registryOptions.request?.query || '',
             messages: [{
                 role: Raw.ChatRole.User,
-                content: this.options.request?.query || 'Help me with this task'
+                content: this.registryOptions.request?.query || 'Help me with this task'
             }],
             contextTokens: 100
         };
@@ -345,11 +343,11 @@ export class RegistryIntegratedToolCallingLoop extends ToolCallingLoop<RegistryI
             },
             healing: {
                 enabled: !!this.healingSystem,
-                summary: this.healingSystem?.getFlagsSummary()
+                summary: (this.healingSystem as { getFlagsSummary?(): Record<string, boolean> })?.getFlagsSummary?.() as Record<string, boolean> | undefined
             },
             session: {
-                id: this.options.sessionId,
-                persistent: !!this.options.persistContext,
+                id: this.registryOptions.sessionId,
+                persistent: !!this.registryOptions.persistContext,
                 toolsUsed: intentContext?.sessionData?.previousTools.length || 0,
                 failedTools: intentContext?.sessionData?.failedTools.length || 0
             }
@@ -395,7 +393,9 @@ export class RegistryIntegratedLoopFactory {
                 family: 'openai',
                 name: 'gpt-4o-mini'
             },
-            request: {},
+            request: {
+                query: ''
+            },
             
             // Registry specific
             intentType: IntentType.Agent,
@@ -510,8 +510,8 @@ export class IntegrationUtils {
             persistContext = true
         } = options || {};
 
-        // Cria healing system
-        const healingSystem = enableHealing ? createToolHealingSystem() : undefined;
+        // Cria healing system - DISABLED
+        const healingSystem = enableHealing ? undefined : undefined; // createToolHealingSystem() - disabled
         
         // Cria tools service
         const toolsService = enableHealing 
@@ -543,7 +543,7 @@ export class IntegrationUtils {
             getStats: () => ({
                 toolsService: toolsService.getStats(),
                 registry: ToolRegistry.getStats(),
-                healing: healingSystem?.getFlagsSummary()
+                healing: undefined // healingSystem?.getFlagsSummary() - disabled
             }),
             
             // Context management

@@ -18,7 +18,7 @@ import {
 } from '../types/cliTypes';
 
 export interface IToolParams {
-    [key: string]: any;
+    [key: string]: unknown;
 }
 
 export interface IToolResult {

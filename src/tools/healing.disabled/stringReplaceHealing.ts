@@ -4,20 +4,16 @@
 
 import {
     NoMatchError,
-    HealingResult,
     HealingTelemetry,
-    StringHealingParams,
     StringHealingResult,
     HealingEndpoint,
     ExperimentationService,
-    TelemetryService,
-    CHAT_MODEL
+    TelemetryService
 } from './healingTypes';
 
 import {
     correctOldStringMismatch,
     correctNewString,
-    _unescapeStringForGeminiBug,
     count,
     matchAndCount,
     trimPairIfPossible,
@@ -45,7 +41,7 @@ export abstract class AbstractReplaceStringTool {
         newString: string,
         fileContent: string,
         model?: { family: string; name: string },
-        token?: any
+        token?: string
     ): Promise<string> {
         const startTime = Date.now();
         const telemetry: Partial<HealingTelemetry> = {
@@ -135,7 +131,7 @@ export abstract class AbstractReplaceStringTool {
         originalNewString: string,
         currentContent: string,
         model?: { family: string; name: string },
-        token?: any
+        token?: string
     ): Promise<StringHealingResult> {
         const expectedReplacements = 1; // Assumindo 1 replacement esperado
         const eol = detectLineEnding(currentContent);
@@ -270,7 +266,7 @@ export abstract class AbstractReplaceStringTool {
      */
     private sendTelemetry(eventName: string, telemetry: Partial<HealingTelemetry>): void {
         try {
-            this.telemetryService.sendMSFTTelemetryEvent(eventName, telemetry as Record<string, any>);
+            this.telemetryService.sendMSFTTelemetryEvent(eventName, telemetry as Record<string, unknown>);
         } catch (error) {
             console.warn('Failed to send healing telemetry:', error);
         }
@@ -326,7 +322,7 @@ export class EditStringTool extends AbstractReplaceStringTool {
         newString: string,
         fileContent: string,
         model?: { family: string; name: string },
-        token?: any
+        token?: string
     ): Promise<string> {
         return this.applyEditWithHealing(uri, oldString, newString, fileContent, model, token);
     }
@@ -352,7 +348,7 @@ export class StringReplaceToolFactory {
      */
     static createMockHealEndpoint(): HealingEndpoint {
         return {
-            async makeChatRequest(requestName: string, messages: any[]): Promise<any> {
+            async makeChatRequest(_requestName: string, _messages: Array<{ role: string; content: string }>): Promise<{ type: string; value?: unknown }> {
                 // Mock implementation para testes
                 return {
                     type: 'success',
@@ -371,7 +367,7 @@ export class StringReplaceToolFactory {
         return {
             getTreatmentVariable<T>(key: string, defaultValue: T): T {
                 if (key === 'codeEditingWithLLMStringReplaceHealing') {
-                    return healingEnabled as any;
+                    return healingEnabled as { type: string; value?: unknown };
                 }
                 return defaultValue;
             }
@@ -383,7 +379,7 @@ export class StringReplaceToolFactory {
      */
     static createMockTelemetryService(): TelemetryService {
         return {
-            sendMSFTTelemetryEvent(eventName: string, properties: Record<string, any>): void {
+            sendMSFTTelemetryEvent(eventName: string, properties: Record<string, unknown>): void {
                 console.log(`Telemetry: ${eventName}`, properties);
             }
         };

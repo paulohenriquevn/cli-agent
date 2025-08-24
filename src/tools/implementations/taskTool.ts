@@ -15,6 +15,7 @@ interface ITaskParams {
     description: string;
     prompt: string;
     subagent_type: string;
+    [key: string]: unknown;
 }
 
 export class TaskTool extends BaseTool<ITaskParams> {

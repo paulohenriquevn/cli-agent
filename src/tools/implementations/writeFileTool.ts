@@ -17,6 +17,7 @@ interface IWriteFileParams {
     filePath: string;
     content: string;
     createDirectory?: boolean; // Create parent directories if they don't exist
+    [key: string]: unknown;
 }
 
 export class WriteFileTool extends BaseTool<IWriteFileParams> {

@@ -2,7 +2,7 @@
  * Tool Calling Loop - Types and Interfaces
  *--------------------------------------------------------------------------------------------*/
 
-import { CliCancellationToken } from '../types/cliTypes';
+// import { CliCancellationToken } from '../types/cliTypes'; // Unused import
 
 export interface IToolCallingLoopOptions {
     toolCallLimit: number;
@@ -35,7 +35,7 @@ export interface LanguageModelToolResult2 {
 export interface LanguageModelToolInformation {
     name: string;
     description: string;
-    inputSchema: any;
+    inputSchema: unknown;
     tags?: string[];
 }
 
@@ -126,7 +126,7 @@ export interface ThinkingDataItem {
     isEncrypted: boolean;
     timestamp: number;
     
-    static createOrUpdate(existing: ThinkingDataItem | undefined, delta: Partial<ThinkingDataItem>): ThinkingDataItem;
+    createOrUpdate?(existing: ThinkingDataItem | undefined, delta: Partial<ThinkingDataItem>): ThinkingDataItem;
     updateWithFetchResult(result: ChatFetchResponse): void;
 }
 
@@ -219,8 +219,8 @@ export class CancellationError extends Error {
     }
 }
 
-export function isCancellationError(error: any): error is CancellationError {
-    return error instanceof CancellationError || error?.name === 'CancellationError';
+export function isCancellationError(error: unknown): error is CancellationError {
+    return error instanceof CancellationError || (error as {name?: string})?.name === 'CancellationError';
 }
 
 export enum ToolName {
@@ -232,5 +232,5 @@ export enum ToolName {
 }
 
 export interface TelemetryService {
-    sendMSFTTelemetryEvent(eventName: string, data: Record<string, any>): void;
+    sendMSFTTelemetryEvent(eventName: string, data: Record<string, unknown>): void;
 }

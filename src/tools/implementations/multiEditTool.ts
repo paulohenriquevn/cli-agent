@@ -21,6 +21,7 @@ interface IEditOperation {
 interface IMultiEditParams {
     file_path: string;
     edits: IEditOperation[];
+    [key: string]: unknown;
 }
 
 export class MultiEditTool extends BaseTool<IMultiEditParams> {

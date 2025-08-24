@@ -19,6 +19,7 @@ interface ISearchCodeParams {
     max_results?: number;
     context_lines?: number;
     search_type?: 'text' | 'function' | 'class' | 'variable' | 'import';
+    [key: string]: unknown;
 }
 
 interface ISearchResult {

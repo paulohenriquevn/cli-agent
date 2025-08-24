@@ -9,7 +9,7 @@
  * - Format inconsistencies
  *--------------------------------------------------------------------------------------------*/
 
-import { LLMService, MetacognitionRequest, MetacognitionResponse } from './llmService';
+import { LLMService, MetacognitionRequest } from './llmService';
 import { ToolParameters, NoMatchError } from '../types/cliTypes';
 
 export interface ToolHealingOptions {
@@ -38,7 +38,7 @@ export interface HealingResult {
 export interface ModelBugPattern {
     name: string;
     pattern: RegExp;
-    fix: (match: string, ...groups: any[]) => string;
+    fix: (match: string, ...groups: unknown[]) => string;
     confidence: number;
 }
 
@@ -84,7 +84,7 @@ export class ToolHealer {
     private bugPatterns: Map<string, ModelBugPattern[]>;
     private healingCache: Map<string, ToolParameters>;
     private metrics: HealingMetrics;
-    private logger?: (level: string, message: string, data?: any) => void;
+    private logger?: (level: string, message: string, data?: unknown) => void;
 
     constructor(options: ToolHealingOptions = {}) {
         this.options = {
@@ -114,7 +114,7 @@ export class ToolHealer {
         this.resetMetrics();
     }
 
-    public setLogger(logger: (level: string, message: string, data?: any) => void): void {
+    public setLogger(logger: (level: string, message: string, data?: unknown) => void): void {
         this.logger = logger;
         this.llmService.setLogger(logger);
     }
@@ -168,7 +168,10 @@ export class ToolHealer {
             // Check cache first
             const cacheKey = this.generateCacheKey(originalParams, error);
             if (this.options.enableCaching && this.healingCache.has(cacheKey)) {
-                const cachedResult = this.healingCache.get(cacheKey)!;
+                const cachedResult = this.healingCache.get(cacheKey);
+                if (!cachedResult) {
+                    throw new Error('Cache entry not found');
+                }
                 this.updateCacheStats(true);
                 
                 this.logger?.('debug', 'Using cached healing result');
@@ -330,7 +333,7 @@ export class ToolHealer {
     private async attemptPatternHealing(
         fileContent: string,
         originalParams: ToolParameters,
-        sourceModel: string
+        _sourceModel: string
     ): Promise<HealingResult> {
         
         this.logger?.('debug', 'Attempting pattern-based healing');
@@ -460,7 +463,7 @@ export class ToolHealer {
      */
     private async attemptNewStringAdjustment(
         originalParams: ToolParameters,
-        error: NoMatchError
+        _error: NoMatchError
     ): Promise<HealingResult> {
         
         this.logger?.('debug', 'Attempting newString adjustment healing');
@@ -615,7 +618,7 @@ export class ToolHealer {
         
         this.metrics.successfulHealings++;
         this.updateModelMetrics(sourceModel, true, duration);
-        this.updateMethodMetrics(result.healingMethod!, true, duration);
+        this.updateMethodMetrics(result.healingMethod || 'unknown', true, duration);
 
         // Cache successful healing
         if (this.options.enableCaching && result.healedParameters) {

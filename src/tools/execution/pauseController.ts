@@ -3,19 +3,19 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { 
-    CliCancellationToken,
     DeferredPromise, 
     Event, 
     Disposable,
     CancellationError
 } from './types';
+import { CliCancellationToken } from '../types/cliTypes';
 
 /**
  * Implementação de DeferredPromise
  */
 export class DeferredPromiseImpl<T> implements DeferredPromise<T> {
     private _resolve!: (value: T | PromiseLike<T>) => void;
-    private _reject!: (reason: any) => void;
+    private _reject!: (reason: unknown) => void;
     private _isSettled = false;
     
     public readonly p: Promise<T>;
@@ -52,14 +52,10 @@ export class DeferredPromiseImpl<T> implements DeferredPromise<T> {
 /**
  * Implementação de Event Emitter simples
  */
-export class EventEmitter<T> implements Event<T> {
+export class EventEmitter<T> {
     private listeners: Array<(e: T) => void> = [];
 
-    constructor() {
-        return this.addListener.bind(this);
-    }
-
-    private addListener(listener: (e: T) => void): { dispose(): void } {
+    addListener(listener: (e: T) => void): { dispose(): void } {
         this.listeners.push(listener);
         return {
             dispose: () => {
@@ -129,14 +125,12 @@ export class DisposableBase implements Disposable {
  * Permite pausar/despausar operações de forma granular e implementa
  * cancelamento gracioso com cleanup automático de recursos.
  */
-export class PauseController extends DisposableBase implements CliCancellationToken {
+export class PauseController extends DisposableBase {
     private _isCancelled = false;
     private _pausePromise = new DeferredPromiseImpl<void>();
     private readonly _onCancellationRequestedEmitter = new EventEmitter<void>();
     private readonly _onDidChangePauseEmitter = new EventEmitter<boolean>();
     
-    public readonly onCancellationRequested = this._onCancellationRequestedEmitter;
-    public readonly onDidChangePause = this._onDidChangePauseEmitter;
 
     constructor(
         onDidChangePause?: Event<boolean>, 
@@ -153,9 +147,9 @@ export class PauseController extends DisposableBase implements CliCancellationTo
 
         // 🔗 Propaga cancelamento do token pai
         if (parentToken) {
-            this._register(parentToken.onCancellationRequested(() => {
+            parentToken.onCancellationRequested(() => {
                 this.cancel();
-            }));
+            });
         }
 
         // Completa o promise inicial (não pausado por padrão)
@@ -194,13 +188,21 @@ export class PauseController extends DisposableBase implements CliCancellationTo
     /**
      * Registra callback para cancelamento
      */
-    onCancellationRequested(callback: () => void): void {
+    onCancellationRequested(callback: () => void): { dispose(): void } {
         if (this._isCancelled) {
             // Se já cancelado, executa callback imediatamente
             setImmediate(callback);
+            return { dispose: () => {} };
         } else {
-            this._register(this._onCancellationRequestedEmitter(callback));
+            return this._register(this._onCancellationRequestedEmitter.addListener(callback));
         }
+    }
+
+    /**
+     * Registra callback para mudanças de pausa
+     */
+    onDidChangePause(callback: (isPaused: boolean) => void): { dispose(): void } {
+        return this._register(this._onDidChangePauseEmitter.addListener(callback));
     }
 
     /**
@@ -421,13 +423,23 @@ export class PauseController extends DisposableBase implements CliCancellationTo
                 break;
             }
             
-            combined._register(token.onCancellationRequested(() => {
-                combined.cancel();
-            }));
+            if (token instanceof PauseController) {
+                combined._register(token.onCancellationRequested(() => {
+                    combined.cancel();
+                }));
+            } else {
+                token.onCancellationRequested(() => {
+                    combined.cancel();
+                });
+            }
 
             if (token instanceof PauseController) {
                 combined._register(token.onDidChangePause((isPaused) => {
-                    combined.setPaused(isPaused);
+                    if (isPaused) {
+                        combined.pause();
+                    } else {
+                        combined.unpause();
+                    }
                 }));
             }
         }
@@ -495,6 +507,6 @@ export class CancellationUtils {
     }
 }
 
-function isCancellationError(error: any): boolean {
-    return error instanceof CancellationError || error?.name === 'CancellationError';
+function isCancellationError(error: unknown): boolean {
+    return error instanceof CancellationError || (error as { name?: string })?.name === 'CancellationError';
 }

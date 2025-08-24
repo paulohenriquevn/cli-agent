@@ -4,7 +4,7 @@
 
 import { promises as fs } from 'fs';
 import * as path from 'path';
-import { ToolRegistry } from '../registry/toolRegistry';
+// ToolRegistry is imported via tool implementations
 import { CliExecutionContext } from '../types/cliTypes';
 
 // Import all tools to register them

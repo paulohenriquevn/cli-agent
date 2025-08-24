@@ -12,6 +12,7 @@ import { ToolRegistry } from '../registry/toolRegistry';
 interface INotebookReadParams {
     notebook_path: string;
     cell_id?: string;
+    [key: string]: unknown;
 }
 
 interface INotebookCell {

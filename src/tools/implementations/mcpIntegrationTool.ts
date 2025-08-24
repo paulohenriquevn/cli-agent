@@ -14,6 +14,7 @@ interface IMCPParams {
     tool_name?: string;
     tool_params?: any;
     config?: IMCPServerConfig;
+    [key: string]: unknown;
 }
 
 interface IMCPServerConfig {

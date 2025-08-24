@@ -2,11 +2,14 @@
   "name": "llm-code-agent",
   "version": "1.0.0",
   "description": "Autonomous LLM Code Agent with OpenRouter - Updated Dependencies",
-  "main": "test-cli-tools.ts",
+  "main": "dist/cli.js",
+  "bin": {
+    "cli-agent": "dist/cli.js"
+  },
   "scripts": {
     "build": "tsc",
-    "start": "node dist/login-server.js",
-    "dev": "ts-node login-server.ts",
+    "start": "node dist/cli.js",
+    "dev": "ts-node src/cli.ts",
     "test": "cd src/tools/tests && npx jest --config jest.config.js",
     "lint": "npx eslint src/**/*.ts --fix",
     "lint:check": "npx eslint src/**/*.ts",

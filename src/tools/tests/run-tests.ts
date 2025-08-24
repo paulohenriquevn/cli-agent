@@ -2,7 +2,7 @@
  * Test Runner Summary for CLI Tools
  *--------------------------------------------------------------------------------------------*/
 
-const { execSync } = require('child_process');
+import { execSync } from 'child_process';
 
 console.log('🧪 Running CLI Tools Test Suite...\n');
 

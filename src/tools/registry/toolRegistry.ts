@@ -3,7 +3,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { BaseTool, IToolParams } from '../base/baseTool';
-import { CliExecutionContext, CliToolInvocationOptions, CliCancellationToken, CliToolResult, createDefaultCliContext } from '../types/cliTypes';
+import { CliExecutionContext, /* CliToolInvocationOptions, */ CliCancellationToken, CliToolResult, /* createDefaultCliContext */ } from '../types/cliTypes';
 
 /**
  * Constructor para BaseTool
@@ -36,7 +36,7 @@ export interface IToolValidationResult {
         message: string;
         severity: 'error' | 'warning';
     }>;
-    sanitizedInput?: any;
+    sanitizedInput?: unknown;
 }
 
 /**
@@ -71,7 +71,10 @@ export const ToolRegistry = new class {
             if (!this._categories.has(instance.category)) {
                 this._categories.set(instance.category, []);
             }
-            this._categories.get(instance.category)!.push(instance);
+            const categoryTools = this._categories.get(instance.category);
+            if (categoryTools) {
+                categoryTools.push(instance);
+            }
         }
 
         // Organiza por tags
@@ -80,7 +83,10 @@ export const ToolRegistry = new class {
                 if (!this._tags.has(tag)) {
                     this._tags.set(tag, []);
                 }
-                this._tags.get(tag)!.push(instance);
+                const tagTools = this._tags.get(tag);
+                if (tagTools) {
+                    tagTools.push(instance);
+                }
             }
         }
 
@@ -184,7 +190,7 @@ export const ToolRegistry = new class {
 
         if (criteria.tags) {
             filtered = filtered.filter(tool => 
-                criteria.tags!.some(tag => tool.tags?.includes(tag))
+                criteria.tags?.some(tag => tool.tags?.includes(tag))
             );
         }
 
@@ -193,7 +199,7 @@ export const ToolRegistry = new class {
         }
 
         if (criteria.name) {
-            filtered = filtered.filter(tool => criteria.name!.test(tool.name));
+            filtered = filtered.filter(tool => criteria.name?.test(tool.name) === true);
         }
 
         return filtered;
@@ -391,7 +397,7 @@ export class ToolRegistryUtils {
     /**
      * Auto-registra tools de um módulo
      */
-    static autoRegisterFromModule(module: any): number {
+    static autoRegisterFromModule(module: Record<string, unknown>): number {
         let registered = 0;
         
         for (const exportName of Object.keys(module)) {
@@ -405,12 +411,12 @@ export class ToolRegistryUtils {
                 typeof exported.prototype.constructor === 'function') {
                 
                 try {
-                    const instance = new exported();
+                    const instance = new (exported as BaseToolCtor)();
                     if (typeof instance.invoke === 'function' && 
                         instance.name &&
                         instance.description) {
                 
-                        ToolRegistry.registerTool(exported);
+                        ToolRegistry.registerTool(exported as BaseToolCtor);
                         registered++;
                     }
                 } catch (error) {
@@ -461,7 +467,7 @@ export class ToolRegistryUtils {
     /**
      * Carrega tools de configuração JSON
      */
-    static loadFromConfig(config: {
+    static loadFromConfig(_config: {
         tools: Array<{
             module: string;
             export?: string;

@@ -2,7 +2,7 @@
  * Tool Healing Integration - Connects healing system with CLI agent pipeline
  *--------------------------------------------------------------------------------------------*/
 
-import { ToolHealer, HealingResult, HealingMetrics, ModelBugPattern } from './toolHealer';
+import { ToolHealer, HealingMetrics, ModelBugPattern } from './toolHealer';
 import { BaseTool } from '../base/baseTool';
 import { NoMatchError, ToolParameters } from '../types/cliTypes';
 import { CliExecutionContext } from '../types/cliTypes';
@@ -42,7 +42,7 @@ export class HealingIntegration {
         cacheHealings: boolean;
         metacognitionModel: string;
     };
-    private logger?: (level: string, message: string, data?: any) => void;
+    private logger?: (level: string, message: string, data?: unknown) => void;
 
     constructor(config: HealingConfig = {}) {
         this.config = {
@@ -68,7 +68,7 @@ export class HealingIntegration {
         });
     }
 
-    public setLogger(logger: (level: string, message: string, data?: any) => void): void {
+    public setLogger(logger: (level: string, message: string, data?: unknown) => void): void {
         this.logger = logger;
     }
 
@@ -109,7 +109,7 @@ export class HealingIntegration {
         if (error.filePath && context?.fileSystem) {
             try {
                 fileContent = await context.fileSystem.readFile(error.filePath);
-            } catch (readError) {
+            } catch {
                 this.logger?.('debug', `Could not read file for healing context: ${error.filePath}`);
             }
         }
@@ -290,7 +290,12 @@ export class HealingIntegration {
         const successRate = totalAttempts > 0 ? metrics.successfulHealings / totalAttempts : 0;
 
         // Calculate model breakdown
-        const modelBreakdown: Record<string, any> = {};
+        const modelBreakdown: Record<string, {
+            attempts: number;
+            successes: number;
+            avgTime: number;
+            commonPatterns: string[];
+        }> = {};
         for (const [model, data] of Object.entries(metrics.healingsByModel)) {
             modelBreakdown[model] = {
                 attempts: data.attempts,
@@ -327,7 +332,7 @@ export class HealingIntegration {
     /**
      * Sanitize parameters for logging (remove sensitive data)
      */
-    private sanitizeParametersForLogging(params: ToolParameters): any {
+    private sanitizeParametersForLogging(params: ToolParameters): ToolParameters {
         const sanitized = { ...params };
         
         // Remove or mask sensitive fields

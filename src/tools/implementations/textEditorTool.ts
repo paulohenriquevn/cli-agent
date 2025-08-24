@@ -17,6 +17,7 @@ interface ITextEditorParams {
     new_str?: string;
     insert_line?: number;
     view_range?: [number, number];
+    [key: string]: unknown;
 }
 
 interface IEditHistory {

@@ -15,6 +15,7 @@ interface INotebookEditParams {
     cell_id?: string;
     cell_type?: 'code' | 'markdown';
     edit_mode?: 'replace' | 'insert' | 'delete';
+    [key: string]: unknown;
 }
 
 export class NotebookEditTool extends BaseTool<INotebookEditParams> {

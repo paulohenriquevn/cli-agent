@@ -23,6 +23,7 @@ export interface ExecutionPlan {
 interface ICreateExecutionPlanParams {
     tasks: Task[];
     projectContext: string;
+    [key: string]: unknown;
 }
 
 export class CreateExecutionPlanTool extends BaseTool<ICreateExecutionPlanParams> {

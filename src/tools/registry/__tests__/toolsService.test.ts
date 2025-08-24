@@ -7,13 +7,14 @@ import {
     ToolsServiceFactory, 
     ToolsServiceSingleton,
     IToolsService,
-    CliRequest 
+    CliRequest,
+    ToolFilter
 } from '../toolsService';
-import { ToolRegistry, BaseToolCtor } from '../toolRegistry';
+import { ToolRegistry } from '../toolRegistry';
 import { BaseTool, IToolParams } from '../../base/baseTool';
 import { CliToolInvocationOptions, CliCancellationToken, CliToolResult } from '../../types/cliTypes';
 import { PauseController } from '../../execution/pauseController';
-import { LanguageModelToolResult2 } from '../../execution/types';
+import { LanguageModelToolInformation } from '../../execution/types';
 
 // Mock healing system
 const mockHealingSystem = {
@@ -51,7 +52,7 @@ class MockSuccessTool extends BaseTool<{ message: string }> {
         required: ['message']
     };
 
-    async invoke(options: CliToolInvocationOptions<{ message: string }>, token: CliCancellationToken): Promise<CliToolResult> {
+    async invoke(options: CliToolInvocationOptions<{ message: string }>, _token: CliCancellationToken): Promise<CliToolResult> {
         return this.createSuccessResult(`Success: ${options.input.message}`);
     }
 }
@@ -71,12 +72,17 @@ class MockFailureTool extends BaseTool<{ input: string }> {
         required: ['input']
     };
 
-    async invoke(options: CliToolInvocationOptions<{ input: string }>, token: CliCancellationToken): Promise<CliToolResult> {
+    async invoke(_options: CliToolInvocationOptions<{ input: string }>, _token: CliCancellationToken): Promise<CliToolResult> {
         return this.createErrorResult('Mock failure');
     }
 }
 
-class MockEditTool extends BaseTool<any> {
+interface MockEditToolParams extends IToolParams {
+    content?: string;
+    [key: string]: unknown;
+}
+
+class MockEditTool extends BaseTool<MockEditToolParams> {
     readonly name = 'mockEdit';
     readonly description = 'Mock edit tool for healing tests';
     readonly category = 'test' as const;
@@ -87,7 +93,7 @@ class MockEditTool extends BaseTool<any> {
         type: 'object'
     };
 
-    async invoke(options: CliToolInvocationOptions<any>, token: CliCancellationToken): Promise<CliToolResult> {
+    async invoke(_options: CliToolInvocationOptions<MockEditToolParams>, _token: CliCancellationToken): Promise<CliToolResult> {
         return this.createErrorResult('Edit failed');
     }
 }
@@ -119,7 +125,11 @@ describe('ToolsServiceImpl', () => {
         });
 
         test('should handle tool initialization errors', () => {
-            class BrokenTool extends BaseTool<any> {
+            interface BrokenToolParams extends IToolParams {
+                [key: string]: unknown;
+            }
+            
+            class BrokenTool extends BaseTool<BrokenToolParams> {
                 readonly category = 'test' as const;
                 readonly tags = ['test', 'broken'];
                 readonly complexity = 'core' as const;
@@ -134,7 +144,7 @@ describe('ToolsServiceImpl', () => {
                     throw new Error('Constructor fails');
                 }
                 
-                async invoke(options: CliToolInvocationOptions<any>, token: CliCancellationToken): Promise<CliToolResult> {
+                async invoke(_options: CliToolInvocationOptions<BrokenToolParams>, _token: CliCancellationToken): Promise<CliToolResult> {
                     return this.createErrorResult('Broken tool error');
                 }
             }
@@ -190,7 +200,9 @@ describe('ToolsServiceImpl', () => {
 
         test('should execute successful tool', async () => {
             const result = await service.invokeTool('mockSuccess', {
-                input: { message: 'test message' }            });
+                input: { message: 'test message' },
+                toolName: 'mockSuccess'
+            });
 
             expect(result.success).toBe(true);
             expect(result.content).toBe('Success: test message');
@@ -199,14 +211,18 @@ describe('ToolsServiceImpl', () => {
         test('should handle tool execution failure', async () => {
             await expect(
                 service.invokeTool('mockFailure', {
-                    input: { input: 'test' }                })
+                    input: { input: 'test' },
+                    toolName: 'mockFailure'
+                })
             ).rejects.toThrow('Mock failure');
         });
 
         test('should handle non-existent tool', async () => {
             await expect(
                 service.invokeTool('nonExistent', {
-                    input: {}                })
+                    input: {},
+                    toolName: 'nonExistent'
+                })
             ).rejects.toThrow("Tool 'nonExistent' not found");
         });
 
@@ -214,7 +230,9 @@ describe('ToolsServiceImpl', () => {
             const token = new PauseController();
             
             const executionPromise = service.invokeTool('mockSuccess', {
-                input: { message: 'test' }            }, token);
+                input: { message: 'test' },
+                toolName: 'mockSuccess'
+            }, token);
 
             token.cancel();
 
@@ -238,7 +256,9 @@ describe('ToolsServiceImpl', () => {
                     oldString: 'old',
                     newString: 'new',
                     fileContent: 'old content'
-                }            });
+                },
+                toolName: 'mockEdit'
+            });
 
             expect(mockHealingSystem.healString).toHaveBeenCalled();
             expect(result.content).toBe('Healed string result');
@@ -255,7 +275,9 @@ describe('ToolsServiceImpl', () => {
                         oldString: 'old',
                         newString: 'new',
                         fileContent: 'old content'
-                    }                })
+                    },
+                    toolName: 'mockEdit'
+                })
             ).rejects.toThrow('Mock failure'); // Original error
         });
     });
@@ -313,7 +335,7 @@ describe('ToolsServiceImpl', () => {
 
         test('should apply custom filter', () => {
             const request: CliRequest = { query: 'test' };
-            const filter = (tool: any) => tool.name === 'mockSuccess';
+            const filter: ToolFilter = (tool: LanguageModelToolInformation) => tool.name === 'mockSuccess';
 
             const tools = service.getEnabledTools(request, filter);
 
@@ -328,7 +350,11 @@ describe('ToolsServiceImpl', () => {
             };
 
             // Mock a destructive tool
-            class DestructiveTool extends BaseTool<any> {
+            interface DestructiveToolParams extends IToolParams {
+                [key: string]: unknown;
+            }
+            
+            class DestructiveTool extends BaseTool<DestructiveToolParams> {
                 readonly name = 'destructive';
                 readonly description = 'Destructive tool';
                 readonly category = 'test' as const;
@@ -336,7 +362,7 @@ describe('ToolsServiceImpl', () => {
                 readonly complexity = 'core' as const;
                 readonly inputSchema = { type: 'object' };
 
-                async invoke(options: CliToolInvocationOptions<any>, token: CliCancellationToken): Promise<CliToolResult> {
+                async invoke(_options: CliToolInvocationOptions<DestructiveToolParams>, _token: CliCancellationToken): Promise<CliToolResult> {
                     return this.createSuccessResult('Destructive operation completed');
                 }
             }
@@ -479,7 +505,7 @@ describe('Integration Tests', () => {
         // Execute tool
         const result = await service.invokeTool('mockSuccess', {
             input: { message: 'integration test' },
-            model: { family: 'openai', name: 'gpt-4' }
+            toolName: 'mockSuccess'
         });
         expect(result.success).toBe(true);
 
@@ -504,7 +530,7 @@ describe('Integration Tests', () => {
                 newString: 'new',
                 fileContent: 'content'
             },
-            model: { family: 'openai', name: 'gpt-4' }
+            toolName: 'mockEdit'
         });
 
         expect(result.success).toBe(true);

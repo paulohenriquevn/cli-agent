@@ -5,16 +5,16 @@
 import { 
     IToolCall, 
     IToolCallingLoopOptions,
-    LanguageModelToolInformation,
+    // LanguageModelToolInformation, // Unused import
     LanguageModelToolResult2,
-    Raw
+    // Raw // Unused import
 } from './types';
 import { DisposableBase } from './pauseController';
 
 /**
  * Resultado de validação
  */
-export interface ValidationResult<T = any> {
+export interface ValidationResult<T = unknown> {
     valid: boolean;
     data?: T;
     errors: ValidationError[];
@@ -30,7 +30,7 @@ export interface ValidationError {
     code: string;
     message: string;
     severity: 'error' | 'critical';
-    metadata?: Record<string, any>;
+    metadata?: Record<string, unknown>;
 }
 
 /**
@@ -41,7 +41,7 @@ export interface ValidationWarning {
     code: string;
     message: string;
     suggestion?: string;
-    metadata?: Record<string, any>;
+    metadata?: Record<string, unknown>;
 }
 
 /**
@@ -85,7 +85,7 @@ export interface ValidationSchema {
     minLength?: number;
     maxLength?: number;
     pattern?: string;
-    enum?: any[];
+    enum?: unknown[];
     additionalProperties?: boolean | ValidationSchema;
 }
 
@@ -97,7 +97,7 @@ export interface ValidationContext {
     roundNumber?: number;
     executionId?: string;
     parentCallId?: string;
-    metadata?: Record<string, any>;
+    metadata?: Record<string, unknown>;
 }
 
 /**
@@ -204,7 +204,7 @@ export class ToolCallingValidator extends DisposableBase {
      */
     validateToolCall(
         toolCall: IToolCall, 
-        context?: ValidationContext
+        _context?: ValidationContext
     ): ValidationResult<IToolCall> {
         this.validationStats.totalValidations++;
         
@@ -349,7 +349,7 @@ export class ToolCallingValidator extends DisposableBase {
      */
     validateToolCalls(
         toolCalls: IToolCall[],
-        context?: ValidationContext
+        _context?: ValidationContext
     ): ValidationResult<IToolCall[]> {
         this.validationStats.totalValidations++;
         
@@ -383,8 +383,8 @@ export class ToolCallingValidator extends DisposableBase {
 
             // Valida tool call individual
             const validation = this.validateToolCall(toolCall, { 
-                ...context, 
-                metadata: { ...context?.metadata, index: i } 
+                ..._context, 
+                metadata: { ..._context?.metadata, index: i } 
             });
             
             if (!validation.valid) {
@@ -457,7 +457,7 @@ export class ToolCallingValidator extends DisposableBase {
      */
     validateToolResult(
         result: LanguageModelToolResult2,
-        context?: ValidationContext
+        _context?: ValidationContext
     ): ValidationResult<LanguageModelToolResult2> {
         this.validationStats.totalValidations++;
         
@@ -558,10 +558,10 @@ export class ToolCallingValidator extends DisposableBase {
      * Valida schema de tool contra definição
      */
     validateAgainstSchema(
-        data: any,
+        data: unknown,
         schema: ValidationSchema,
-        context?: ValidationContext
-    ): ValidationResult<any> {
+        _context?: ValidationContext
+    ): ValidationResult<unknown> {
         this.validationStats.totalValidations++;
         
         const errors: ValidationError[] = [];
@@ -618,7 +618,7 @@ export class ToolCallingValidator extends DisposableBase {
     /**
      * Sanitiza argumentos JSON
      */
-    private sanitizeArguments(args: any): any {
+    private sanitizeArguments(args: unknown): unknown {
         if (typeof args === 'string') {
             return this.sanitizeString(args);
         }
@@ -628,7 +628,7 @@ export class ToolCallingValidator extends DisposableBase {
         }
 
         if (args && typeof args === 'object') {
-            const sanitized: any = {};
+            const sanitized: Record<string, unknown> = {};
             for (const [key, value] of Object.entries(args)) {
                 const sanitizedKey = this.sanitizeString(key);
                 sanitized[sanitizedKey] = this.sanitizeArguments(value);
@@ -642,7 +642,7 @@ export class ToolCallingValidator extends DisposableBase {
     /**
      * Detecta dados sensíveis em objeto
      */
-    private detectSensitiveData(obj: any, path = ''): string[] {
+    private detectSensitiveData(obj: unknown, path = ''): string[] {
         const sensitiveFields: string[] = [];
 
         if (typeof obj === 'object' && obj !== null) {
@@ -669,7 +669,7 @@ export class ToolCallingValidator extends DisposableBase {
      * Validação recursiva de schema
      */
     private validateSchemaRecursive(
-        data: any,
+        data: unknown,
         schema: ValidationSchema,
         path: string,
         errors: ValidationError[],
@@ -689,16 +689,16 @@ export class ToolCallingValidator extends DisposableBase {
         // Validação específica por tipo
         switch (schema.type) {
             case 'string':
-                this.validateStringSchema(data, schema, path, errors, warnings);
+                this.validateStringSchema(data as string, schema, path, errors, warnings);
                 break;
             case 'number':
-                this.validateNumberSchema(data, schema, path, errors, warnings);
+                this.validateNumberSchema(data as number, schema, path, errors, warnings);
                 break;
             case 'object':
-                this.validateObjectSchema(data, schema, path, errors, warnings);
+                this.validateObjectSchema(data as object, schema, path, errors, warnings);
                 break;
             case 'array':
-                this.validateArraySchema(data, schema, path, errors, warnings);
+                this.validateArraySchema(data as unknown[], schema, path, errors, warnings);
                 break;
         }
     }
@@ -708,7 +708,7 @@ export class ToolCallingValidator extends DisposableBase {
         schema: ValidationSchema,
         path: string,
         errors: ValidationError[],
-        warnings: ValidationWarning[]
+        _warnings: ValidationWarning[]
     ): void {
         if (schema.minLength && data.length < schema.minLength) {
             errors.push({
@@ -752,7 +752,7 @@ export class ToolCallingValidator extends DisposableBase {
         schema: ValidationSchema,
         path: string,
         errors: ValidationError[],
-        warnings: ValidationWarning[]
+        _warnings: ValidationWarning[]
     ): void {
         if (schema.minimum !== undefined && data < schema.minimum) {
             errors.push({
@@ -815,7 +815,7 @@ export class ToolCallingValidator extends DisposableBase {
     }
 
     private validateArraySchema(
-        data: any[],
+        data: unknown[],
         schema: ValidationSchema,
         path: string,
         errors: ValidationError[],
@@ -823,13 +823,15 @@ export class ToolCallingValidator extends DisposableBase {
     ): void {
         if (schema.items) {
             data.forEach((item, index) => {
-                this.validateSchemaRecursive(
-                    item,
-                    schema.items!,
-                    `${path}[${index}]`,
-                    errors,
-                    warnings
-                );
+                if (schema.items) {
+                    this.validateSchemaRecursive(
+                        item,
+                        schema.items,
+                        `${path}[${index}]`,
+                        errors,
+                        warnings
+                    );
+                }
             });
         }
     }
@@ -865,7 +867,7 @@ export class ToolCallingValidator extends DisposableBase {
      */
     resetStats(): void {
         Object.keys(this.validationStats).forEach(key => {
-            (this.validationStats as any)[key] = 0;
+            (this.validationStats as Record<string, number>)[key] = 0;
         });
     }
 }

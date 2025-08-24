@@ -14,6 +14,7 @@ import {
 interface IWebFetchParams {
     url: string;
     prompt: string;
+    [key: string]: unknown;
 }
 
 export class WebFetchTool extends BaseTool<IWebFetchParams> {

@@ -6,7 +6,6 @@ import OpenAI from 'openai';
 import { ToolParameters, NoMatchError } from '../types/cliTypes';
 import { 
     APIConfig, 
-    ModelConfig, 
     DEFAULT_API_CONFIG, 
     getModelConfig, 
     validateApiConfig 
@@ -80,7 +79,7 @@ export class LLMService {
     private client: OpenAI;
     private config: APIConfig;
     private metrics: LLMServiceMetrics;
-    private logger?: (level: string, message: string, data?: any) => void;
+    private logger?: (level: string, message: string, data?: unknown) => void;
 
     constructor(config: Partial<APIConfig> = {}) {
         this.config = { ...DEFAULT_API_CONFIG, ...config };
@@ -95,7 +94,7 @@ export class LLMService {
         // Initialize OpenAI client with OpenRouter
         this.client = new OpenAI({
             baseURL: 'https://openrouter.ai/api/v1',
-            apiKey: this.config.openRouterApiKey!,
+            apiKey: this.config.openRouterApiKey || '',
             defaultHeaders: {
                 'HTTP-Referer': this.config.siteUrl,
                 'X-Title': this.config.siteName,
@@ -105,7 +104,7 @@ export class LLMService {
         this.resetMetrics();
     }
 
-    public setLogger(logger: (level: string, message: string, data?: any) => void): void {
+    public setLogger(logger: (level: string, message: string, data?: unknown) => void): void {
         this.logger = logger;
     }
 
@@ -303,7 +302,7 @@ You are an expert system for analyzing and correcting LLM-generated tool paramet
 - Source Model: ${request.sourceModel}
 - Error Type: ${request.error.type || 'unknown'}
 - Error Message: "${request.error.message}"
-- File Path: ${(request.error as any).filePath || 'unknown'}
+- File Path: ${'filePath' in request.error ? (request.error as { filePath: string }).filePath : 'unknown'}
 
 **FAILED PARAMETERS:**
 \`\`\`json

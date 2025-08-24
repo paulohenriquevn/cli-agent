@@ -13,6 +13,7 @@ import {
 
 interface IExitPlanModeParams {
     plan: string;
+    [key: string]: unknown;
 }
 
 export class ExitPlanModeTool extends BaseTool<IExitPlanModeParams> {

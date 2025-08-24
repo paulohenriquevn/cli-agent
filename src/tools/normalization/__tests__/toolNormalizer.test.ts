@@ -5,7 +5,7 @@
 import { ToolNormalizer, normalizeToolSchema, OpenAiFunctionTool, MODEL_FAMILIES } from '../toolNormalizer';
 
 // Test utilities
-function createTestTool(name: string, parameters: any): OpenAiFunctionTool {
+function createTestTool(name: string, parameters: { [key: string]: unknown }): OpenAiFunctionTool {
     return {
         type: 'function',
         function: {
@@ -53,7 +53,7 @@ describe('ToolNormalizer', () => {
                 function: {
                     name: 'test_tool',
                     description: 'Test tool',
-                    parameters: {} as any // Invalid - no type
+                    parameters: {} as { [key: string]: unknown } // Invalid - no type
                 }
             };
 
@@ -114,11 +114,12 @@ describe('ToolNormalizer', () => {
     });
 
     describe('GPT-4 Specific Normalization', () => {
-        const GPT4_UNSUPPORTED_KEYWORDS = [
-            'minLength', 'maxLength', 'pattern', 'default', 'format',
-            'minimum', 'maximum', 'multipleOf', 'patternProperties',
-            'minProperties', 'maxProperties', 'minItems', 'maxItems', 'uniqueItems'
-        ];
+        // GPT4_UNSUPPORTED_KEYWORDS not used in current tests
+        // const GPT4_UNSUPPORTED_KEYWORDS = [
+        //     'minLength', 'maxLength', 'pattern', 'default', 'format',
+        //     'minimum', 'maximum', 'multipleOf', 'patternProperties',
+        //     'minProperties', 'maxProperties', 'minItems', 'maxItems', 'uniqueItems'
+        // ];
 
         test('removes unsupported string validation keywords', () => {
             const tool = createTestTool('gpt4_string_test', {
@@ -273,7 +274,7 @@ describe('ToolNormalizer', () => {
                             { properties: { a: { type: 'string' } } },
                             { properties: { b: { type: 'number' } } }
                         ]
-                    } as any
+                    } as { [key: string]: unknown }
                 }
             };
 
@@ -299,7 +300,7 @@ describe('ToolNormalizer', () => {
                             type: 'object',
                             properties: {},
                             [keyword]: keyword === 'not' ? { type: 'string' } : [{ type: 'string' }]
-                        } as any
+                        } as { [key: string]: unknown }
                     }
                 };
 
@@ -442,7 +443,7 @@ describe('ToolNormalizer', () => {
 
             const arrayProperty = normalized[0].function.parameters.properties?.mixed_array;
             expect(arrayProperty?.items).toHaveProperty('anyOf');
-            expect((arrayProperty?.items as any)?.anyOf).toHaveLength(2);
+            expect((arrayProperty?.items as { anyOf?: unknown[] })?.anyOf).toHaveLength(2);
             expect(fixes).toContain('converted Draft 7 array items to Draft 2020-12 format');
         });
     });
@@ -461,14 +462,10 @@ describe('ToolNormalizer', () => {
             });
 
             // First call (cache miss)
-            const start1 = performance.now();
             const result1 = normalizer.normalizeToolSchema('gpt-4', [tool]);
-            const duration1 = performance.now() - start1;
 
             // Second call (cache hit)
-            const start2 = performance.now();
             const result2 = normalizer.normalizeToolSchema('gpt-4', [tool]);
-            const duration2 = performance.now() - start2;
 
             // Results should be identical
             expect(result1).toEqual(result2);

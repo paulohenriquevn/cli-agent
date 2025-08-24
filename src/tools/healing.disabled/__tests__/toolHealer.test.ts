@@ -2,7 +2,7 @@
  * Tool Healing System Tests
  *--------------------------------------------------------------------------------------------*/
 
-import { ToolHealer, HealingResult, ModelBugPattern } from '../toolHealer';
+import { ToolHealer } from '../toolHealer';
 import { LLMService } from '../llmService';
 import { ToolParameters, NoMatchError } from '../../types/cliTypes';
 
@@ -243,7 +243,7 @@ describe('ToolHealer', () => {
                 setLogger: jest.fn(),
                 performMetacognition: jest.fn()
             };
-            MockLLMService.mockImplementation(() => mockInstance as any);
+            MockLLMService.mockImplementation(() => mockInstance as Partial<LLMService>);
         });
 
         it('should use LLM for intelligent healing', async () => {

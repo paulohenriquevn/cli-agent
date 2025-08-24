@@ -17,6 +17,7 @@ interface IEditFileParams {
     oldText: string;
     newText: string;
     replaceAll?: boolean;
+    [key: string]: unknown;
 }
 
 export class EditFileTool extends BaseTool<IEditFileParams> {

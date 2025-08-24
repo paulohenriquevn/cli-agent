@@ -16,6 +16,7 @@ interface IReadFileParams {
     filePath: string;
     offset?: number;  // Line to start reading from (1-indexed)
     limit?: number;   // Maximum number of lines to read
+    [key: string]: unknown;
 }
 
 export class ReadFileTool extends BaseTool<IReadFileParams> {

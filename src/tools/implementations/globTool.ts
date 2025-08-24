@@ -18,6 +18,7 @@ interface IGlobParams {
     path?: string;
     maxResults?: number;
     includeHidden?: boolean;
+    [key: string]: unknown;
 }
 
 export class GlobTool extends BaseTool<IGlobParams> {

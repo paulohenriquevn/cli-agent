@@ -64,7 +64,7 @@ export class CliToolResult {
 /**
  * Tool invocation options for CLI
  */
-export interface CliToolInvocationOptions<T = any> {
+export interface CliToolInvocationOptions<T = unknown> {
     input: T;
     toolName: string;
     requestId?: string;
@@ -86,7 +86,7 @@ export interface CliPreparedToolInvocation {
 /**
  * Tool preparation options for CLI
  */
-export interface CliToolInvocationPrepareOptions<T = any> {
+export interface CliToolInvocationPrepareOptions<T = unknown> {
     input: T;
     toolName: string;
 }
@@ -97,8 +97,8 @@ export interface CliToolInvocationPrepareOptions<T = any> {
 export interface CliToolInformation {
     name: string;
     description: string;
-    inputSchema: any;
-    outputSchema?: any;
+    inputSchema: unknown;
+    outputSchema?: unknown;
     category?: string;
     tags?: string[];
     complexity?: 'core' | 'advanced' | 'essential';
@@ -118,7 +118,7 @@ export interface CliFileSystem {
  * Tool parameters interface for healing system
  */
 export interface ToolParameters {
-    [key: string]: any;
+    [key: string]: unknown;
     oldString?: string;
     newString?: string;
     filePath?: string;

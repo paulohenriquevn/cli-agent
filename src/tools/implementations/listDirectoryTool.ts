@@ -19,6 +19,7 @@ interface IListDirectoryParams {
     showHidden?: boolean;
     recursive?: boolean;
     maxDepth?: number;
+    [key: string]: unknown;
 }
 
 export class ListDirectoryTool extends BaseTool<IListDirectoryParams> {

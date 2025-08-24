@@ -15,12 +15,12 @@ import {
     ChatResponse,
     ChatFetchResponse,
     ChatFetchResponseType,
-    ThinkingDataItem,
+    // ThinkingDataItem, // Unused import
     Raw
 } from './types';
 
 import { PauseController, DisposableBase } from './pauseController';
-import { StreamFactory, StreamProcessor } from './streamingSystem';
+// import { StreamFactory, StreamProcessor } from './streamingSystem'; // Disabled - streamingSystem has architectural issues
 
 /**
  * Progress tracking for tool calling loop execution
@@ -74,7 +74,7 @@ export abstract class ToolCallingLoop<TOptions extends IToolCallingLoopOptions> 
     ): Promise<IBuildPromptResult>;
 
     protected abstract getAvailableTools(
-        stream: any,
+        stream: unknown,
         token: PauseController
     ): Promise<LanguageModelToolInformation[]>;
 
@@ -200,8 +200,14 @@ export abstract class ToolCallingLoop<TOptions extends IToolCallingLoopOptions> 
             });
 
             return {
-                response: currentResponse!,
-                round: currentRound!,
+                response: currentResponse ?? { type: ChatFetchResponseType.Error, error: new Error('No response') },
+                round: currentRound ?? { 
+                    response: { role: Raw.ChatRole.Assistant, content: '' }, 
+                    toolCalls: [], 
+                    toolInputRetry: 0, 
+                    executionTime: 0, 
+                    timestamp: Date.now() 
+                },
                 toolCallRounds: [...this.toolCallRounds],
                 totalExecutionTime: this.totalExecutionTime,
                 cancelled: this.cancelled,
@@ -349,7 +355,7 @@ export class BasicToolCallingLoop extends ToolCallingLoop<IToolCallingLoopOption
 
     constructor(
         options: IToolCallingLoopOptions,
-        private toolRegistry: Map<string, any> = new Map()
+        private toolRegistry: Map<string, unknown> = new Map()
     ) {
         super(options);
     }
@@ -392,7 +398,7 @@ export class BasicToolCallingLoop extends ToolCallingLoop<IToolCallingLoopOption
     }
 
     protected async getAvailableTools(
-        stream: any,
+        stream: unknown,
         token: PauseController
     ): Promise<LanguageModelToolInformation[]> {
         await token.throwIfCancelledAsync();
@@ -404,11 +410,12 @@ export class BasicToolCallingLoop extends ToolCallingLoop<IToolCallingLoopOption
         // Convert tool registry to tool information
         const tools: LanguageModelToolInformation[] = [];
         for (const [name, tool] of this.toolRegistry) {
+            const toolObj = tool as { description?: string; inputSchema?: unknown; tags?: string[] };
             tools.push({
                 name,
-                description: tool.description || `Execute ${name}`,
-                inputSchema: tool.inputSchema || {},
-                tags: tool.tags || []
+                description: toolObj.description || `Execute ${name}`,
+                inputSchema: toolObj.inputSchema || {},
+                tags: toolObj.tags || []
             });
         }
 
@@ -451,15 +458,16 @@ export class BasicToolCallingLoop extends ToolCallingLoop<IToolCallingLoopOption
             }
 
             // Parse arguments
-            let args: any = {};
+            let args: Record<string, unknown> = {};
             try {
                 args = JSON.parse(toolCall.arguments);
-            } catch (error) {
+            } catch {
                 throw new Error(`Invalid tool arguments: ${toolCall.arguments}`);
             }
 
             // Execute tool
-            const result = await tool.execute(args, token);
+            const toolObj = tool as { execute: (args: Record<string, unknown>, token: PauseController) => Promise<unknown> };
+            const result = await toolObj.execute(args, token);
             
             return {
                 content: typeof result === 'string' ? result : JSON.stringify(result),
@@ -480,7 +488,7 @@ export class BasicToolCallingLoop extends ToolCallingLoop<IToolCallingLoopOption
     /**
      * Adiciona tool ao registry
      */
-    addTool(name: string, tool: any): void {
+    addTool(name: string, tool: unknown): void {
         this.toolRegistry.set(name, tool);
         this.availableToolsCache = undefined; // Clear cache
     }

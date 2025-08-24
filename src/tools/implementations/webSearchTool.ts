@@ -15,6 +15,7 @@ interface IWebSearchParams {
     query: string;
     allowed_domains?: string[];
     blocked_domains?: string[];
+    [key: string]: unknown;
 }
 
 export class WebSearchTool extends BaseTool<IWebSearchParams> {

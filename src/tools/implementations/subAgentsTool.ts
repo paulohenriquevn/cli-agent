@@ -18,6 +18,7 @@ interface ISubAgentsParams {
         temperature?: number;
         tools?: string[];
     };
+    [key: string]: unknown;
 }
 
 export class SubAgentsTool extends BaseTool<ISubAgentsParams> {

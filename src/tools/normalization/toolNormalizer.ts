@@ -3,7 +3,7 @@
  * Transforms tool schemas to work across different AI models with different limitations
  *--------------------------------------------------------------------------------------------*/
 
-import Ajv, { JSONSchemaType } from 'ajv';
+import Ajv, { /* JSONSchemaType */ } from 'ajv';
 import addFormats from 'ajv-formats';
 
 // Types and interfaces
@@ -22,10 +22,10 @@ export interface JSONSchema {
     required?: string[];
     items?: JSONSchema | JSONSchema[];
     description?: string;
-    enum?: any[];
-    const?: any;
-    default?: any;
-    examples?: any[];
+    enum?: unknown[];
+    const?: unknown;
+    default?: unknown;
+    examples?: unknown[];
     
     // String constraints
     minLength?: number;
@@ -68,7 +68,7 @@ export interface JSONSchema {
     unevaluatedProperties?: boolean | JSONSchema;
     unevaluatedItems?: boolean | JSONSchema;
     
-    [key: string]: any;
+    [key: string]: unknown;
 }
 
 export type NormalizationRule = (
@@ -166,14 +166,14 @@ function deepClone<T>(obj: T): T {
         return obj.map(item => deepClone(item)) as unknown as T;
     }
     
-    const cloned: any = {};
+    const cloned: Record<string, unknown> = {};
     for (const key in obj) {
         if (obj.hasOwnProperty(key)) {
-            cloned[key] = deepClone((obj as any)[key]);
+            cloned[key] = deepClone((obj as Record<string, unknown>)[key]);
         }
     }
     
-    return cloned;
+    return cloned as unknown as T;
 }
 
 function forEachSchemaNode(schema: JSONSchema, callback: (node: JSONSchema, path: string) => void, path = ''): void {
@@ -202,13 +202,13 @@ function forEachSchemaNode(schema: JSONSchema, callback: (node: JSONSchema, path
     // Recurse into conditional schemas
     const conditionalKeys = ['oneOf', 'anyOf', 'allOf', 'not', 'if', 'then', 'else'];
     for (const key of conditionalKeys) {
-        const value = (schema as any)[key];
+        const value = (schema as Record<string, unknown>)[key];
         if (Array.isArray(value)) {
             value.forEach((item, index) => {
                 forEachSchemaNode(item, callback, `${path}.${key}[${index}]`);
             });
         } else if (value && typeof value === 'object') {
-            forEachSchemaNode(value, callback, `${path}.${key}`);
+            forEachSchemaNode(value as JSONSchema, callback, `${path}.${key}`);
         }
     }
     
@@ -324,7 +324,7 @@ const jsonSchemaRules: NormalizationRule[] = [
         forEachSchemaNode(jsonSchema, (node) => {
             for (const keyword of unsupportedKeywords) {
                 if (keyword in node) {
-                    delete (node as any)[keyword];
+                    delete (node as Record<string, unknown>)[keyword];
                     onFix?.(`removed unsupported keyword '${keyword}'`);
                 }
             }
@@ -338,7 +338,7 @@ const jsonSchemaRules: NormalizationRule[] = [
         
         for (const keyword of conditionalKeywords) {
             if (jsonSchema.hasOwnProperty(keyword)) {
-                delete (jsonSchema as any)[keyword];
+                delete (jsonSchema as Record<string, unknown>)[keyword];
                 onFix?.(`removed unsupported conditional keyword '${keyword}'`);
             }
         }
@@ -347,7 +347,7 @@ const jsonSchemaRules: NormalizationRule[] = [
         forEachSchemaNode(jsonSchema, (node) => {
             for (const keyword of conditionalKeywords) {
                 if (node.hasOwnProperty(keyword)) {
-                    delete (node as any)[keyword];
+                    delete (node as Record<string, unknown>)[keyword];
                     onFix?.(`removed unsupported conditional keyword '${keyword}' from nested schema`);
                 }
             }

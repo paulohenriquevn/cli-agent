@@ -6,12 +6,12 @@ import { LanguageModelToolInformation, LanguageModelToolResult2 } from '../execu
 import { PauseController } from '../execution/pauseController';
 import { 
     ToolRegistry, 
-    BaseToolCtor, 
+    BaseToolCtor,
     IToolValidationResult
 } from './toolRegistry';
 import { BaseTool, IToolParams } from '../base/baseTool';
-import { CliToolInvocationOptions as ToolInvocationOptions } from '../types/cliTypes';
-import { HealingIntegration } from '../healing';
+import { CliToolInvocationOptions as ToolInvocationOptions, CliExecutionContext } from '../types/cliTypes';
+// import { HealingIntegration } from '../healing'; // Disabled - healing system has issues
 
 /**
  * Interface para requests CLI
@@ -28,7 +28,7 @@ export interface CliRequest {
         verbose?: boolean;
         dryRun?: boolean;
     };
-    metadata?: Record<string, any>;
+    metadata?: Record<string, unknown>;
 }
 
 /**
@@ -48,7 +48,7 @@ export interface IToolsService {
     /**
      * Tools registradas no sistema
      */
-    readonly baseTools: ReadonlyMap<string, BaseTool<any>>;
+    readonly baseTools: ReadonlyMap<string, BaseTool<IToolParams>>;
 
     /**
      * Busca tool por nome
@@ -58,7 +58,7 @@ export interface IToolsService {
     /**
      * Busca tool por nome
      */
-    getBaseTool(name: string): BaseTool<any> | undefined;
+    getBaseTool(name: string): BaseTool<IToolParams> | undefined;
 
     /**
      * Executa tool
@@ -85,7 +85,7 @@ export interface IToolsService {
     /**
      * Instancia tool
      */
-    createToolInstance(name: string, ...args: any[]): BaseTool<any> | undefined;
+    createToolInstance(name: string, ...args: unknown[]): BaseTool<IToolParams> | undefined;
 
     /**
      * Obtém estatísticas do service
@@ -118,11 +118,11 @@ export interface IToolsService {
  * Implementação do ToolsService
  */
 export class ToolsServiceImpl implements IToolsService {
-    private readonly _baseTools = new Map<string, BaseTool<any>>();
+    private readonly _baseTools = new Map<string, BaseTool<IToolParams>>();
     private readonly _toolInstances = new Map<string, BaseToolCtor>();
-    private readonly _healingSystem?: any;
+    private readonly _healingSystem?: unknown;
 
-    constructor(healingSystem?: any) {
+    constructor(healingSystem?: unknown) {
         this._healingSystem = healingSystem;
         this.initializeTools();
     }
@@ -170,7 +170,7 @@ export class ToolsServiceImpl implements IToolsService {
     /**
      * Obtém mapa de tools registradas
      */
-    get baseTools(): ReadonlyMap<string, BaseTool<any>> {
+    get baseTools(): ReadonlyMap<string, BaseTool<IToolParams>> {
         return this._baseTools;
     }
 
@@ -192,7 +192,7 @@ export class ToolsServiceImpl implements IToolsService {
     /**
      * Busca tool por nome
      */
-    getBaseTool(name: string): BaseTool<any> | undefined {
+    getBaseTool(name: string): BaseTool<IToolParams> | undefined {
         return this._baseTools.get(name);
     }
 
@@ -202,7 +202,7 @@ export class ToolsServiceImpl implements IToolsService {
     async invokeTool(
         name: string,
         options: ToolInvocationOptions<unknown>,
-        token?: PauseController
+        _token?: PauseController
     ): Promise<LanguageModelToolResult2> {
         const tool = this.getBaseTool(name);
         if (!tool) {
@@ -212,24 +212,25 @@ export class ToolsServiceImpl implements IToolsService {
         try {
             // Convert ToolInvocationOptions to CliToolInvocationOptions
             const cliOptions = {
-                input: options.input,
+                input: options.input as IToolParams,
                 toolName: name,
                 context: options.context || {
                     workingDirectory: process.cwd(),
-                    environment: process.env,
+                    environment: process.env as Record<string, string>,
                     sessionId: 'default',
-                    user: { id: 'system', name: 'System' }
+                    user: 'system'
                 }
             };
             
             // Create CLI cancellation token if PauseController provided
-            const cliToken = token ? new (require('../types/cliTypes').CliCancellationToken)() : new (require('../types/cliTypes').CliCancellationToken)();
+            const cliTokenModule = await import('../types/cliTypes');
+            const cliToken = new cliTokenModule.CliCancellationToken();
             
             const result = await tool.invoke(cliOptions, cliToken);
             
             // Convert result back to expected format
             return {
-                content: result.content.map(part => part.value).join('\n'),
+                content: result.parts.map(part => (part as { value: string }).value).join('\n'),
                 success: true,
                 executionTime: 0
             };
@@ -244,9 +245,9 @@ export class ToolsServiceImpl implements IToolsService {
      * Tenta healing em caso de falha
      */
     private async attemptHealing(
-        tool: BaseTool<any>,
+        tool: BaseTool<IToolParams>,
         options: ToolInvocationOptions<unknown>,
-        _originalError: any,
+        _originalError: unknown,
         _token?: PauseController
     ): Promise<LanguageModelToolResult2 | undefined> {
         if (!this._healingSystem) {return undefined;}
@@ -254,22 +255,24 @@ export class ToolsServiceImpl implements IToolsService {
         // Determina tipo de healing baseado na tool
         if (tool.name.includes('edit') || tool.name.includes('replace')) {
             // Healing para string replace
-            if (this._healingSystem.isHealingEnabled('string')) {
-                return await this._healingSystem.healString(
-                    options.input.uri,
-                    options.input.oldString,
-                    options.input.newString,
-                    options.input.fileContent,
-                    options.model
+            if ((this._healingSystem as { isHealingEnabled?(type: string): boolean })?.isHealingEnabled?.('string')) {
+                const input = options.input as Record<string, unknown>;
+                return await (this._healingSystem as { healString(uri: unknown, oldString: unknown, newString: unknown, fileContent: unknown, model: string): Promise<LanguageModelToolResult2 | undefined> }).healString(
+                    input.uri,
+                    input.oldString,
+                    input.newString,
+                    input.fileContent,
+                    'gpt-4' // default model since options.model doesn't exist
                 );
             }
         } else if (tool.name.includes('patch') || tool.name.includes('apply')) {
             // Healing para patches
-            if (this._healingSystem.isHealingEnabled('patch')) {
-                return await this._healingSystem.healPatch(
-                    options.input.patch,
-                    options.input.docText,
-                    options.input.explanation || ''
+            if ((this._healingSystem as { isHealingEnabled?(type: string): boolean })?.isHealingEnabled?.('patch')) {
+                const input = options.input as Record<string, unknown>;
+                return await (this._healingSystem as { healPatch(patch: unknown, docText: unknown, explanation: string): Promise<LanguageModelToolResult2 | undefined> }).healPatch(
+                    input.patch,
+                    input.docText,
+                    String(input.explanation || '')
                 );
             }
         }
@@ -295,7 +298,7 @@ export class ToolsServiceImpl implements IToolsService {
 
         try {
             // Tenta parsear como JSON se tool espera objeto
-            let parsedInput: any = input;
+            let parsedInput: unknown = input;
             if (tool.inputSchema && typeof input === 'string') {
                 try {
                     parsedInput = JSON.parse(input);
@@ -350,25 +353,26 @@ export class ToolsServiceImpl implements IToolsService {
     /**
      * Valida input contra schema
      */
-    private validateAgainstSchema(input: any, schema: any): IToolValidationResult['errors'] {
+    private validateAgainstSchema(input: unknown, schema: unknown): IToolValidationResult['errors'] {
         const errors: IToolValidationResult['errors'] = [];
+        const schemaObj = schema as { type?: string; required?: string[] };
         
         // Validação básica de tipos
-        if (schema.type) {
+        if (schemaObj.type) {
             const actualType = typeof input;
-            if (actualType !== schema.type) {
+            if (actualType !== schemaObj.type) {
                 errors.push({
                     field: 'type',
-                    message: `Expected type ${schema.type}, got ${actualType}`,
+                    message: `Expected type ${schemaObj.type}, got ${actualType}`,
                     severity: 'error'
                 });
             }
         }
 
         // Validação de propriedades obrigatórias
-        if (schema.required && Array.isArray(schema.required)) {
-            for (const requiredProp of schema.required) {
-                if (!(requiredProp in input)) {
+        if (schemaObj.required && Array.isArray(schemaObj.required)) {
+            for (const requiredProp of schemaObj.required) {
+                if (!(requiredProp in (input as Record<string, unknown>))) {
                     errors.push({
                         field: requiredProp,
                         message: `Required property '${requiredProp}' is missing`,
@@ -432,12 +436,12 @@ export class ToolsServiceImpl implements IToolsService {
     /**
      * Cria instância de tool
      */
-    createToolInstance(name: string, ...args: any[]): BaseTool<any> | undefined {
+    createToolInstance(name: string, ...args: unknown[]): BaseTool<IToolParams> | undefined {
         const toolCtor = this._toolInstances.get(name);
         if (!toolCtor) {return undefined;}
 
         try {
-            return new toolCtor(...args);
+            return new toolCtor(...args as [CliExecutionContext | undefined]);
         } catch (error) {
             console.error(`Failed to create tool instance ${name}:`, error);
             return undefined;
@@ -526,14 +530,14 @@ export class ToolsServiceFactory {
     /**
      * Cria service com healing
      */
-    static createWithHealing(healingSystem: any): IToolsService {
+    static createWithHealing(healingSystem: unknown): IToolsService {
         return new ToolsServiceImpl(healingSystem);
     }
 
     /**
      * Cria service com tools pré-registradas
      */
-    static createWithTools(tools: BaseToolCtor[], healingSystem?: any): IToolsService {
+    static createWithTools(tools: BaseToolCtor[], healingSystem?: unknown): IToolsService {
         // Registra tools no registry
         for (const tool of tools) {
             ToolRegistry.registerTool(tool);
@@ -556,7 +560,7 @@ export class ToolsServiceSingleton {
         return this.instance;
     }
 
-    static initialize(healingSystem?: any): IToolsService {
+    static initialize(healingSystem?: unknown): IToolsService {
         this.instance = ToolsServiceFactory.createWithHealing(healingSystem);
         return this.instance;
     }

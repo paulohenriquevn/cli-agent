@@ -5,11 +5,14 @@
 export interface HealingEndpoint {
     makeChatRequest(
         requestName: string,
-        messages: any[],
-        tools?: any,
-        token?: any,
-        location?: any
-    ): Promise<{ type: string; value?: any; error?: any }>;
+        messages: Array<{
+            role: string;
+            content: string;
+        }>,
+        tools?: unknown,
+        token?: string,
+        location?: string
+    ): Promise<{ type: string; value?: unknown; error?: unknown }>;
 }
 
 export interface HealingConfig {
@@ -20,7 +23,7 @@ export interface HealingConfig {
     model: string;
 }
 
-export interface HealingResult<T = any> {
+export interface HealingResult<T = unknown> {
     success: boolean;
     healedData?: T;
     originalError: Error;
@@ -73,7 +76,10 @@ export interface StringHealingResult {
 
 export interface ObjectJsonSchema {
     type: string;
-    properties?: Record<string, any>;
+    properties?: Record<string, {
+        type: string;
+        description?: string;
+    }>;
     required?: string[];
     additionalProperties?: boolean;
 }
@@ -139,7 +145,7 @@ export namespace Raw {
     
     export interface ChatMessage {
         role: ChatRole;
-        content: Array<{ type: ChatCompletionContentPartKind; text?: string; image_url?: any }> | string;
+        content: Array<{ type: ChatCompletionContentPartKind; text?: string; image_url?: { url: string } }> | string;
     }
 }
 
@@ -163,5 +169,5 @@ export interface ExperimentationService {
 }
 
 export interface TelemetryService {
-    sendMSFTTelemetryEvent(eventName: string, properties: Record<string, any>): void;
+    sendMSFTTelemetryEvent(eventName: string, properties: Record<string, unknown>): void;
 }

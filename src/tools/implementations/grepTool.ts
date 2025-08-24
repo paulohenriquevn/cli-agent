@@ -23,6 +23,7 @@ interface IGrepParams {
     contextLines?: number;
     filePattern?: string;
     maxResults?: number;
+    [key: string]: unknown;
 }
 
 export class GrepTool extends BaseTool<IGrepParams> {

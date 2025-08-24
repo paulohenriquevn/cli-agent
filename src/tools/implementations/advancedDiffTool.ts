@@ -20,6 +20,7 @@ interface IAdvancedDiffParams {
     ignore_whitespace?: boolean;
     ignore_case?: boolean;
     algorithm?: 'myers' | 'patience' | 'histogram';
+    [key: string]: unknown;
 }
 
 interface IDiffLine {

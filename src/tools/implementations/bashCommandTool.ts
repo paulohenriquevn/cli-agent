@@ -21,6 +21,7 @@ interface IBashCommandParams {
     timeout?: number;
     workingDirectory?: string;
     runInBackground?: boolean;
+    [key: string]: unknown;
 }
 
 export class BashCommandTool extends BaseTool<IBashCommandParams> {

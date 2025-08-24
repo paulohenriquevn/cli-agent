@@ -14,6 +14,7 @@ interface IHooksManagementParams {
     hook_id?: string;
     hook_config?: IHookConfig;
     test_context?: Partial<IHookContext>;
+    [key: string]: unknown;
 }
 
 interface IHookConfig {

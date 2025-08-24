@@ -16,6 +16,7 @@ interface ITestAnalyzerParams {
     failure_pattern?: string;
     include_stack_trace?: boolean;
     max_failures?: number;
+    [key: string]: unknown;
 }
 
 interface ITestFailure {

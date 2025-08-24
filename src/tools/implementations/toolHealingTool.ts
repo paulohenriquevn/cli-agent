@@ -7,14 +7,14 @@ import {
     CliToolInvocationOptions,
     CliCancellationToken,
     CliToolResult,
-    CliTextPart,
-    CliErrorPart
+    // CliTextPart, // Unused import
+    // CliErrorPart // Unused import
 } from '../types/cliTypes';
 import { 
     HealingIntegration, 
     HealingConfig 
 } from '../healing/healingIntegration';
-import { ToolHealer } from '../healing/toolHealer';
+// import { ToolHealer } from '../healing/toolHealer'; // Unused import
 import { LLMService } from '../healing/llmService';
 import { DEFAULT_API_CONFIG, AVAILABLE_MODELS } from '../healing/config/apiConfig';
 
@@ -39,6 +39,7 @@ interface IToolHealingParams {
         site_url?: string;
         site_name?: string;
     };
+    [key: string]: unknown;
 }
 
 export class ToolHealingTool extends BaseTool<IToolHealingParams> {
@@ -178,7 +179,7 @@ Use when: Tool parameters fail to match content, debugging parameter issues, ana
 
     async invoke(
         options: CliToolInvocationOptions<IToolHealingParams>,
-        token: CliCancellationToken
+        _token: CliCancellationToken
     ): Promise<CliToolResult> {
 
         const { action, source_model, file_path, old_string, new_string, error_message, model_family, api_key, config } = options.input;
@@ -258,15 +259,16 @@ Use when: Tool parameters fail to match content, debugging parameter issues, ana
         };
 
         const mockError = new Error(errorMessage);
-        (mockError as any).type = 'NoMatchError';
-        (mockError as any).filePath = filePath;
+        (mockError as { type: string; filePath: string }).type = 'NoMatchError';
+        (mockError as { type: string; filePath: string }).filePath = filePath;
 
         // Read file content if path provided
-        let fileContent = '';
+        // let _fileContent = '';
         if (filePath && this.context?.fileSystem) {
             try {
-                fileContent = await this.context.fileSystem.readFile(filePath);
-            } catch (readError) {
+                // _fileContent = await this.context.fileSystem.readFile(filePath);
+                await this.context.fileSystem.readFile(filePath);
+            } catch {
                 console.warn(`Could not read file: ${filePath}`);
             }
         }
@@ -274,9 +276,9 @@ Use when: Tool parameters fail to match content, debugging parameter issues, ana
         const startTime = performance.now();
         const healingResult = await this.integration.attemptHealing(
             sourceModel,
-            mockTool as any,
+            mockTool as { name: string; invoke: (options: unknown, token: unknown) => Promise<unknown> },
             mockParameters,
-            mockError as any,
+            mockError as { type: string; filePath: string; message: string },
             this.context
         );
         const duration = performance.now() - startTime;
@@ -309,7 +311,7 @@ Use when: Tool parameters fail to match content, debugging parameter issues, ana
 
     private async handleReport(): Promise<CliToolResult> {
         const report = this.integration.generateHealingReport();
-        const metrics = this.integration.getMetrics();
+        // const _metrics = this.integration.getMetrics(); // Available for future reporting
 
         const summary = `📊 **Tool Healing System Report**
 
@@ -498,17 +500,17 @@ Cache has been reset and will rebuild on next healing operation.`;
             };
 
             const mockError = new Error('Test no match error');
-            (mockError as any).type = 'NoMatchError';
+            (mockError as { type: string }).type = 'NoMatchError';
 
             try {
                 const result = await this.integration.attemptHealing(
                     testCase.sourceModel,
-                    mockTool as any,
+                    mockTool as { name: string; invoke: (options: unknown, token: unknown) => Promise<unknown> },
                     {
                         oldString: testCase.oldString,
                         newString: testCase.newString
                     },
-                    mockError as any
+                    mockError as { type: string; message: string }
                 );
 
                 const passed = result.success && result.healingMethod === testCase.expectedMethod;
@@ -561,7 +563,7 @@ ${passedTests < testCases.length ?
         }, message);
     }
 
-    private async handleApiTest(apiKey?: string, config?: any): Promise<CliToolResult> {
+    private async handleApiTest(apiKey?: string, config?: unknown): Promise<CliToolResult> {
         try {
             const apiConfig = {
                 ...DEFAULT_API_CONFIG,

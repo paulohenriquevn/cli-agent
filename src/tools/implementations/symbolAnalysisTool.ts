@@ -16,6 +16,7 @@ interface ISymbolAnalysisParams {
     include_tests?: boolean;
     max_results?: number;
     search_scope?: 'workspace' | 'project' | 'file';
+    [key: string]: unknown;
 }
 
 interface ISymbolLocation {

@@ -18,6 +18,7 @@ interface ITodoItem {
 
 interface ITodoWriteParams {
     todos: ITodoItem[];
+    [key: string]: unknown;
 }
 
 export class TodoWriteTool extends BaseTool<ITodoWriteParams> {

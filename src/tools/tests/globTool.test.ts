@@ -89,7 +89,7 @@ describe('GlobTool', () => {
     });
 
     test('should handle nested directory patterns', async () => {
-        const result = await ToolRegistry.executeTool('glob', {
+        await ToolRegistry.executeTool('glob', {
             pattern: '**/nested.*',
             path: TEST_FILES_DIR
         }, context);

@@ -18,6 +18,7 @@ interface IComputerUseParams {
     scroll_direction?: 'up' | 'down' | 'left' | 'right';
     scroll_amount?: number;
     drag_to?: [number, number];
+    [key: string]: unknown;
 }
 
 export class ComputerUseTool extends BaseTool<IComputerUseParams> {

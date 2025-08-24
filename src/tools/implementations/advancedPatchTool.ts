@@ -14,6 +14,7 @@ interface IAdvancedPatchParams {
     explanation?: string;
     auto_heal?: boolean;
     dry_run?: boolean;
+    [key: string]: unknown;
 }
 
 interface IPatchFile {

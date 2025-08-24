@@ -16,6 +16,7 @@ interface IFetchDocumentationParams {
     include_examples?: boolean;
     max_content_length?: number;
     extract_code_snippets?: boolean;
+    [key: string]: unknown;
 }
 
 interface IDocumentationSection {

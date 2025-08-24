@@ -41,7 +41,7 @@ describe('ListDirectoryTool', () => {
     });
 
     test('should handle recursive listing', async () => {
-        const result = await ToolRegistry.executeTool('ls', {
+        await ToolRegistry.executeTool('ls', {
             path: TEST_FILES_DIR,
             recursive: true
         }, context);

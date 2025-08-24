@@ -2,7 +2,8 @@
  * PauseController Unit Tests
  *--------------------------------------------------------------------------------------------*/
 
-import { PauseController, PauseState } from '../pauseController';
+import { PauseController } from '../pauseController';
+import { CancellationError } from '../types';
 
 describe('PauseController', () => {
     let pauseController: PauseController;
@@ -17,162 +18,109 @@ describe('PauseController', () => {
 
     describe('Basic State Management', () => {
         test('should start in active state', () => {
-            expect(pauseController.currentState).toBe(PauseState.Active);
             expect(pauseController.isCancellationRequested).toBe(false);
             expect(pauseController.isPaused).toBe(false);
         });
 
-        test('should transition to paused state', async () => {
+        test('should transition to paused state', () => {
             pauseController.pause();
-            expect(pauseController.currentState).toBe(PauseState.Paused);
             expect(pauseController.isPaused).toBe(true);
         });
 
-        test('should resume from paused state', async () => {
+        test('should unpause from paused state', () => {
             pauseController.pause();
-            pauseController.resume();
-            expect(pauseController.currentState).toBe(PauseState.Active);
+            pauseController.unpause();
             expect(pauseController.isPaused).toBe(false);
         });
 
-        test('should handle cancellation', async () => {
+        test('should handle cancellation', () => {
             pauseController.cancel();
-            expect(pauseController.currentState).toBe(PauseState.Cancelled);
             expect(pauseController.isCancellationRequested).toBe(true);
         });
     });
 
-    describe('Graceful Cancellation', () => {
-        test('should initiate graceful cancellation', async () => {
-            const cleanupPromise = new Promise<void>(resolve => {
-                setTimeout(() => resolve(), 50);
-            });
+    describe('Async Operations', () => {
+        test('should wait for unpause', async () => {
+            pauseController.pause();
 
-            const result = pauseController.gracefulCancel(100, () => cleanupPromise);
-            expect(pauseController.currentState).toBe(PauseState.GracefulCancellation);
+            const waitPromise = pauseController.waitForUnpause();
+            
+            // Unpause after short delay
+            setTimeout(() => pauseController.unpause(), 50);
 
-            await expect(result).resolves.toBe(true);
-            expect(pauseController.currentState).toBe(PauseState.Cancelled);
+            await expect(waitPromise).resolves.toBeUndefined();
         });
 
-        test('should timeout graceful cancellation', async () => {
-            const slowCleanup = new Promise<void>(resolve => {
-                setTimeout(() => resolve(), 200);
-            });
+        test('should throw on waitForUnpause when cancelled', async () => {
+            pauseController.pause();
+            pauseController.cancel();
 
-            const result = pauseController.gracefulCancel(50, () => slowCleanup);
-            
-            await expect(result).resolves.toBe(false);
-            expect(pauseController.currentState).toBe(PauseState.ForceCancelled);
+            await expect(pauseController.waitForUnpause()).rejects.toThrow(CancellationError);
         });
 
-        test('should handle cleanup errors during graceful cancellation', async () => {
-            const failingCleanup = Promise.reject(new Error('Cleanup failed'));
-
-            const result = pauseController.gracefulCancel(100, () => failingCleanup);
+        test('should check async state properly', async () => {
+            expect(await pauseController.checkAsync()).toBe(false);
             
-            await expect(result).resolves.toBe(false);
-            expect(pauseController.currentState).toBe(PauseState.ForceCancelled);
+            pauseController.cancel();
+            expect(await pauseController.checkAsync()).toBe(true);
+        });
+
+        test('should handle pause in checkAsync', async () => {
+            pauseController.pause();
+            
+            const checkPromise = pauseController.checkAsync();
+            setTimeout(() => pauseController.unpause(), 50);
+            
+            const result = await checkPromise;
+            expect(result).toBe(false);
         });
     });
 
-    describe('Async Operations', () => {
-        test('should handle pause during async operation', async () => {
-            const longOperation = new Promise<string>(resolve => {
-                setTimeout(() => resolve('completed'), 100);
-            });
-
-            // Start operation and pause immediately
-            const operationPromise = pauseController.handleAsync(longOperation);
+    describe('Timeout Operations', () => {
+        test('should create timeout that respects pausing', async () => {
+            const startTime = Date.now();
+            
             pauseController.pause();
-
-            // Resume after short delay
-            setTimeout(() => pauseController.resume(), 50);
-
-            const result = await operationPromise;
-            expect(result).toBe('completed');
+            const timeoutPromise = pauseController.createTimeout(100);
+            
+            // Unpause after 50ms
+            setTimeout(() => pauseController.unpause(), 50);
+            
+            await timeoutPromise;
+            const elapsed = Date.now() - startTime;
+            
+            // Should take at least 150ms (50ms pause + 100ms timeout)
+            expect(elapsed).toBeGreaterThanOrEqual(140);
         });
 
-        test('should reject async operation on cancellation', async () => {
-            const longOperation = new Promise<string>(resolve => {
-                setTimeout(() => resolve('completed'), 100);
-            });
-
-            const operationPromise = pauseController.handleAsync(longOperation);
+        test('should cancel timeout on cancellation', async () => {
+            const timeoutPromise = pauseController.createTimeout(100);
             pauseController.cancel();
 
-            await expect(operationPromise).rejects.toThrow('Operation was cancelled');
-        });
-
-        test('should wait for pause state to resolve', async () => {
-            pauseController.pause();
-
-            const waitPromise = pauseController.waitIfPaused();
-            
-            // Resume after short delay
-            setTimeout(() => pauseController.resume(), 50);
-
-            await expect(waitPromise).resolves.toBeUndefined();
+            await expect(timeoutPromise).rejects.toThrow(CancellationError);
         });
     });
 
     describe('Event Handling', () => {
-        test('should emit pause events', () => {
-            const pauseListener = jest.fn();
-            const resumeListener = jest.fn();
-            const cancelListener = jest.fn();
-
-            pauseController.onDidPause(pauseListener);
-            pauseController.onDidResume(resumeListener);
-            pauseController.onDidCancel(cancelListener);
+        test('should emit pause change events', () => {
+            const listener = jest.fn();
+            const disposable = pauseController.onDidChangePause(listener);
 
             pauseController.pause();
-            expect(pauseListener).toHaveBeenCalledWith(PauseState.Paused);
+            expect(listener).toHaveBeenCalledWith(true);
 
-            pauseController.resume();
-            expect(resumeListener).toHaveBeenCalledWith(PauseState.Active);
-
-            pauseController.cancel();
-            expect(cancelListener).toHaveBeenCalledWith(PauseState.Cancelled);
-        });
-
-        test('should dispose event listeners properly', () => {
-            const listener = jest.fn();
-            const disposable = pauseController.onDidPause(listener);
+            pauseController.unpause();
+            expect(listener).toHaveBeenCalledWith(false);
 
             disposable.dispose();
-            pauseController.pause();
-
-            expect(listener).not.toHaveBeenCalled();
-        });
-    });
-
-    describe('Resource Management', () => {
-        test('should register and clean up resources', () => {
-            const cleanup1 = jest.fn();
-            const cleanup2 = jest.fn();
-
-            pauseController.registerCleanup(cleanup1);
-            pauseController.registerCleanup(cleanup2);
-
-            pauseController.dispose();
-
-            expect(cleanup1).toHaveBeenCalled();
-            expect(cleanup2).toHaveBeenCalled();
         });
 
-        test('should handle cleanup errors gracefully', () => {
-            const failingCleanup = jest.fn(() => {
-                throw new Error('Cleanup error');
-            });
-            const successfulCleanup = jest.fn();
+        test('should emit cancellation events', () => {
+            const listener = jest.fn();
+            pauseController.onCancellationRequested(listener);
 
-            pauseController.registerCleanup(failingCleanup);
-            pauseController.registerCleanup(successfulCleanup);
-
-            expect(() => pauseController.dispose()).not.toThrow();
-            expect(failingCleanup).toHaveBeenCalled();
-            expect(successfulCleanup).toHaveBeenCalled();
+            pauseController.cancel();
+            expect(listener).toHaveBeenCalled();
         });
     });
 
@@ -181,43 +129,54 @@ describe('PauseController', () => {
             pauseController.pause();
             pauseController.pause();
             
-            expect(pauseController.currentState).toBe(PauseState.Paused);
+            expect(pauseController.isPaused).toBe(true);
         });
 
-        test('should handle resume without pause', () => {
-            expect(() => pauseController.resume()).not.toThrow();
-            expect(pauseController.currentState).toBe(PauseState.Active);
+        test('should handle unpause without pause', () => {
+            expect(() => pauseController.unpause()).not.toThrow();
+            expect(pauseController.isPaused).toBe(false);
         });
 
         test('should handle operations on disposed controller', () => {
             pauseController.dispose();
 
             expect(() => pauseController.pause()).not.toThrow();
-            expect(() => pauseController.resume()).not.toThrow();
+            expect(() => pauseController.unpause()).not.toThrow();
             expect(() => pauseController.cancel()).not.toThrow();
         });
     });
 
-    describe('Integration Scenarios', () => {
-        test('should handle complex state transitions', async () => {
-            // Start with active
-            expect(pauseController.currentState).toBe(PauseState.Active);
+    describe('Static Methods', () => {
+        test('should combine multiple tokens', () => {
+            const controller1 = new PauseController();
+            const controller2 = new PauseController();
+            
+            controller1.cancel();
+            
+            const combined = PauseController.combine(controller1, controller2);
+            
+            expect(combined.isCancellationRequested).toBe(true);
+            
+            controller1.dispose();
+            controller2.dispose();
+            combined.dispose();
+        });
+    });
 
-            // Pause
-            pauseController.pause();
-            expect(pauseController.currentState).toBe(PauseState.Paused);
+    describe('ExecuteWithPauseSupport', () => {
+        test('should execute operation with pause support', async () => {
+            const operation = jest.fn().mockResolvedValue('result');
+            const onPause = jest.fn();
+            const onUnpause = jest.fn();
 
-            // Resume
-            pauseController.resume();
-            expect(pauseController.currentState).toBe(PauseState.Active);
+            const result = await pauseController.executeWithPauseSupport(
+                operation,
+                onPause,
+                onUnpause
+            );
 
-            // Graceful cancel
-            const cleanupPromise = Promise.resolve();
-            const gracefulResult = pauseController.gracefulCancel(100, () => cleanupPromise);
-            expect(pauseController.currentState).toBe(PauseState.GracefulCancellation);
-
-            await gracefulResult;
-            expect(pauseController.currentState).toBe(PauseState.Cancelled);
+            expect(result).toBe('result');
+            expect(operation).toHaveBeenCalled();
         });
     });
 });

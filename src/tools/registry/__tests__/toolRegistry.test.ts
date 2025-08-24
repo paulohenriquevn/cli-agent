@@ -4,9 +4,8 @@
 
 import { 
     ToolRegistry, 
-    BaseToolCtor,
     ToolRegistryUtils,
-    IToolValidationResult
+    BaseToolCtor
 } from '../toolRegistry';
 import { BaseTool, IToolParams } from '../../base/baseTool';
 import { CliToolResult, CliToolInvocationOptions, CliCancellationToken } from '../../types/cliTypes';
@@ -42,7 +41,7 @@ class MockBasicTool extends BaseTool<MockBasicParams> {
 }
 
 interface MockAdvancedParams extends IToolParams {
-    data: any;
+    data: unknown;
 }
 
 class MockAdvancedTool extends BaseTool<MockAdvancedParams> {
@@ -221,7 +220,7 @@ describe('ToolRegistry', () => {
         });
 
         test('should detect missing required properties', () => {
-            const validation = ToolRegistry.validateTool(InvalidTool as any);
+            const validation = ToolRegistry.validateTool(InvalidTool as unknown as BaseToolCtor);
             
             expect(validation.valid).toBe(false);
             expect(validation.errors.length).toBeGreaterThan(0);
@@ -351,7 +350,7 @@ describe('ToolRegistryUtils', () => {
         });
 
         test('should reject invalid tool with validation', () => {
-            const result = ToolRegistryUtils.registerWithValidation(InvalidTool as any);
+            const result = ToolRegistryUtils.registerWithValidation(InvalidTool as unknown as BaseToolCtor);
             
             expect(result).toBe(false);
             expect(ToolRegistry.getTools()).toHaveLength(0);

@@ -16,6 +16,7 @@ interface IEnhancedWebSearchParams {
     safe_search?: boolean;
     include_snippets?: boolean;
     rank_by_relevance?: boolean;
+    [key: string]: unknown;
 }
 
 interface ISearchResult {

@@ -21,6 +21,7 @@ interface IExecuteCommandParams {
     workingDirectory?: string;
     environment?: Record<string, string>;
     timeout?: number;
+    [key: string]: unknown;
 }
 
 export class ExecuteCommandTool extends BaseTool<IExecuteCommandParams> {

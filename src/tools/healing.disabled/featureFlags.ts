@@ -68,12 +68,12 @@ const DEFAULT_HEALING_FLAGS: HealingFeatureFlags = {
  * Implementação de ExperimentationService com feature flags
  */
 export class HealingExperimentationService implements ExperimentationService {
-    private readonly flags: Map<string, any> = new Map();
-    private readonly overrides: Map<string, any> = new Map();
+    private readonly flags: Map<string, unknown> = new Map();
+    private readonly overrides: Map<string, unknown> = new Map();
 
     constructor(
         initialFlags?: Partial<HealingFeatureFlags>,
-        private readonly remoteConfigProvider?: () => Promise<Record<string, any>>
+        private readonly remoteConfigProvider?: () => Promise<Record<string, unknown>>
     ) {
         // Carrega flags padrão
         this.loadDefaultFlags();
@@ -222,8 +222,8 @@ export class HealingExperimentationService implements ExperimentationService {
     /**
      * Obtém todas as flags atuais
      */
-    getAllFlags(): Record<string, any> {
-        const result: Record<string, any> = {};
+    getAllFlags(): Record<string, unknown> {
+        const result: Record<string, unknown> = {};
         
         for (const [key, value] of this.flags) {
             result[key] = value;
@@ -272,7 +272,7 @@ export class HealingExperimentationService implements ExperimentationService {
     /**
      * Merge flags remotas com as locais
      */
-    private mergeRemoteFlags(remoteFlags: Record<string, any>): void {
+    private mergeRemoteFlags(remoteFlags: Record<string, unknown>): void {
         for (const [key, value] of Object.entries(remoteFlags)) {
             if (key in DEFAULT_HEALING_FLAGS) {
                 this.flags.set(key, value);
@@ -302,7 +302,7 @@ export class HealingFeatureFlagManager {
      */
     static initialize(
         flags?: Partial<HealingFeatureFlags>,
-        remoteProvider?: () => Promise<Record<string, any>>
+        remoteProvider?: () => Promise<Record<string, unknown>>
     ): HealingExperimentationService {
         this.instance = new HealingExperimentationService(flags, remoteProvider);
         return this.instance;
@@ -378,10 +378,10 @@ export class HealingFeatureFlagManager {
  * Decorator para métodos que dependem de feature flags
  */
 export function requiresHealingFlag(flagName: keyof HealingFeatureFlags, defaultValue: boolean = false) {
-    return function (target: any, propertyName: string, descriptor: PropertyDescriptor) {
+    return function (target: object, propertyName: string, descriptor: PropertyDescriptor) {
         const method = descriptor.value;
 
-        descriptor.value = function (...args: any[]) {
+        descriptor.value = function (...args: unknown[]) {
             const experimentationService = HealingFeatureFlagManager.getInstance();
             const isEnabled = experimentationService.getTreatmentVariable(flagName, defaultValue);
 

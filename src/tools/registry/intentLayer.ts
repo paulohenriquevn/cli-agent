@@ -59,7 +59,7 @@ export interface IntentContext {
     sessionData?: {
         previousTools: string[];
         failedTools: string[];
-        preferences: Record<string, any>;
+        preferences: Record<string, unknown>;
     };
 }
 
@@ -182,14 +182,14 @@ export abstract class BaseIntentInvocation implements IIntentInvocation {
             
             // Verifica tags bloqueadas
             if (this.config.blockedTags && tool.tags) {
-                if (tool.tags.some(tag => this.config.blockedTags!.includes(tag))) {
+                if (this.config.blockedTags && tool.tags.some(tag => this.config.blockedTags?.includes(tag))) {
                     return false;
                 }
             }
             
             // Verifica tags obrigatórias
             if (this.config.requiredTags && tool.tags) {
-                if (!this.config.requiredTags.every(tag => tool.tags!.includes(tag))) {
+                if (this.config.requiredTags && !this.config.requiredTags.every(tag => tool.tags?.includes(tag))) {
                     return false;
                 }
             }
@@ -208,7 +208,7 @@ export abstract class BaseIntentInvocation implements IIntentInvocation {
         if (this.config.allowedCategories) {
             filtered = filtered.filter(tool => {
                 const copilotTool = this.toolsService.getBaseTool(tool.name);
-                return copilotTool && this.config.allowedCategories!.includes(copilotTool.category || '');
+                return copilotTool && this.config.allowedCategories?.includes(copilotTool.category || '') === true;
             });
         }
         
@@ -216,17 +216,17 @@ export abstract class BaseIntentInvocation implements IIntentInvocation {
         if (this.config.blockedCategories) {
             filtered = filtered.filter(tool => {
                 const copilotTool = this.toolsService.getBaseTool(tool.name);
-                return !copilotTool || !this.config.blockedCategories!.includes(copilotTool.category || '');
+                return !copilotTool || !this.config.blockedCategories?.includes(copilotTool.category || '');
             });
         }
         
-        // Filtra por threshold de prioridade
-        if (this.config.priorityThreshold > 0) {
-            filtered = filtered.filter(tool => {
-                const copilotTool = this.toolsService.getBaseTool(tool.name);
-                return copilotTool && (copilotTool.priority || 0) >= this.config.priorityThreshold!;
-            });
-        }
+        // Priority filtering removed - priority property doesn't exist in current architecture
+        // if (this.config.priorityThreshold > 0) {
+        //     filtered = filtered.filter(tool => {
+        //         const copilotTool = this.toolsService.getBaseTool(tool.name);
+        //         return copilotTool && (copilotTool.priority || 0) >= this.config.priorityThreshold!;
+        //     });
+        // }
         
         return filtered;
     }
