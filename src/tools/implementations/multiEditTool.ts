@@ -272,4 +272,4 @@ Examples: Update imports + function names, fix multiple bugs in one file, batch 
 }
 
 // Auto-register the tool
-ToolRegistry.getInstance().registerTool(MultiEditTool);
+ToolRegistry.registerTool(MultiEditTool);

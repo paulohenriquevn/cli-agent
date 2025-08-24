@@ -6,7 +6,7 @@ import { ToolRegistry } from '../registry/toolRegistry';
 import { createTestContext } from './setup';
 
 describe('ExitPlanModeTool', () => {
-    const registry = ToolRegistry.getInstance();
+    // const registry = ToolRegistry;
     const context = createTestContext();
 
     test('should create exit plan mode request', async () => {
@@ -17,7 +17,7 @@ describe('ExitPlanModeTool', () => {
 4. Add testing framework
 5. Deploy and test`;
 
-        const result = await registry.executeTool('exit_plan_mode', {
+        const result = await ToolRegistry.executeTool('exit_plan_mode', {
             plan
         }, context);
 
@@ -30,7 +30,7 @@ describe('ExitPlanModeTool', () => {
     test('should handle simple plans', async () => {
         const simplePlan = 'Simple task: Update the configuration file';
 
-        const result = await registry.executeTool('exit_plan_mode', {
+        const result = await ToolRegistry.executeTool('exit_plan_mode', {
             plan: simplePlan
         }, context);
 
@@ -65,7 +65,7 @@ Phase 4: Testing & Validation
 - Performance testing
 - Documentation updates`;
 
-        const result = await registry.executeTool('exit_plan_mode', {
+        const result = await ToolRegistry.executeTool('exit_plan_mode', {
             plan: complexPlan
         }, context);
 
@@ -99,7 +99,7 @@ Phase 4: Testing & Validation
 ## Expected Outcome
 Fully functional CLI tool system`;
 
-        const result = await registry.executeTool('exit_plan_mode', {
+        const result = await ToolRegistry.executeTool('exit_plan_mode', {
             plan: markdownPlan
         }, context);
 
@@ -126,7 +126,7 @@ export abstract class BaseTool implements CliTool {
 }
 \`\`\``;
 
-        const result = await registry.executeTool('exit_plan_mode', {
+        const result = await ToolRegistry.executeTool('exit_plan_mode', {
             plan: planWithCode
         }, context);
 
@@ -135,7 +135,7 @@ export abstract class BaseTool implements CliTool {
     });
 
     test('should handle empty plans', async () => {
-        const result = await registry.executeTool('exit_plan_mode', {
+        const result = await ToolRegistry.executeTool('exit_plan_mode', {
             plan: ''
         }, context);
 
@@ -145,7 +145,7 @@ export abstract class BaseTool implements CliTool {
     test('should show plan approval request', async () => {
         const plan = 'Test plan for approval';
 
-        const result = await registry.executeTool('exit_plan_mode', {
+        const result = await ToolRegistry.executeTool('exit_plan_mode', {
             plan
         }, context);
 
@@ -156,7 +156,7 @@ export abstract class BaseTool implements CliTool {
     test('should handle special characters in plans', async () => {
         const specialPlan = 'Plan with special chars: @#$%^&*()[]{}|\\:";\'<>?/.,~` and émojis 🚀';
 
-        const result = await registry.executeTool('exit_plan_mode', {
+        const result = await ToolRegistry.executeTool('exit_plan_mode', {
             plan: specialPlan
         }, context);
 
@@ -167,7 +167,7 @@ export abstract class BaseTool implements CliTool {
     test('should format plan output properly', async () => {
         const plan = 'Simple test plan';
 
-        const result = await registry.executeTool('exit_plan_mode', {
+        const result = await ToolRegistry.executeTool('exit_plan_mode', {
             plan
         }, context);
 
@@ -179,7 +179,7 @@ export abstract class BaseTool implements CliTool {
     test('should handle long plans', async () => {
         const longPlan = 'Step '.repeat(100) + 'Final step';
 
-        const result = await registry.executeTool('exit_plan_mode', {
+        const result = await ToolRegistry.executeTool('exit_plan_mode', {
             plan: longPlan
         }, context);
 

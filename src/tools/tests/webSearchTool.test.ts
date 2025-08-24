@@ -6,11 +6,11 @@ import { ToolRegistry } from '../registry/toolRegistry';
 import { createTestContext } from './setup';
 
 describe('WebSearchTool', () => {
-    const registry = ToolRegistry.getInstance();
+    // const registry = ToolRegistry;
     const context = createTestContext();
 
     test('should perform web search', async () => {
-        const result = await registry.executeTool('web_search', {
+        const result = await ToolRegistry.executeTool('web_search', {
             query: 'TypeScript CLI development'
         }, context);
 
@@ -21,7 +21,7 @@ describe('WebSearchTool', () => {
     });
 
     test('should handle domain filtering', async () => {
-        const result = await registry.executeTool('web_search', {
+        const result = await ToolRegistry.executeTool('web_search', {
             query: 'JavaScript tutorials',
             allowed_domains: ['github.com', 'stackoverflow.com']
         }, context);
@@ -32,7 +32,7 @@ describe('WebSearchTool', () => {
     });
 
     test('should handle blocked domains', async () => {
-        const result = await registry.executeTool('web_search', {
+        const result = await ToolRegistry.executeTool('web_search', {
             query: 'Node.js examples',
             blocked_domains: ['spam-site.com', 'bad-example.com']
         }, context);
@@ -43,7 +43,7 @@ describe('WebSearchTool', () => {
     });
 
     test('should show search metadata', async () => {
-        const result = await registry.executeTool('web_search', {
+        const result = await ToolRegistry.executeTool('web_search', {
             query: 'API development'
         }, context);
 
@@ -56,7 +56,7 @@ describe('WebSearchTool', () => {
     test('should handle complex queries', async () => {
         const complexQuery = 'Node.js TypeScript CLI tools development best practices 2024';
 
-        const result = await registry.executeTool('web_search', {
+        const result = await ToolRegistry.executeTool('web_search', {
             query: complexQuery
         }, context);
 
@@ -66,7 +66,7 @@ describe('WebSearchTool', () => {
     });
 
     test('should show relevance scores', async () => {
-        const result = await registry.executeTool('web_search', {
+        const result = await ToolRegistry.executeTool('web_search', {
             query: 'React components'
         }, context);
 
@@ -75,7 +75,7 @@ describe('WebSearchTool', () => {
     });
 
     test('should handle empty queries', async () => {
-        const result = await registry.executeTool('web_search', {
+        const result = await ToolRegistry.executeTool('web_search', {
             query: ''
         }, context);
 
@@ -83,7 +83,7 @@ describe('WebSearchTool', () => {
     });
 
     test('should handle short queries', async () => {
-        const result = await registry.executeTool('web_search', {
+        const result = await ToolRegistry.executeTool('web_search', {
             query: 'JS'
         }, context);
 
@@ -92,7 +92,7 @@ describe('WebSearchTool', () => {
     });
 
     test('should show search result structure', async () => {
-        const result = await registry.executeTool('web_search', {
+        const result = await ToolRegistry.executeTool('web_search', {
             query: 'Python tutorials'
         }, context);
 
@@ -105,7 +105,7 @@ describe('WebSearchTool', () => {
     test('should handle special characters in queries', async () => {
         const specialQuery = 'C++ "STL containers" & algorithms';
 
-        const result = await registry.executeTool('web_search', {
+        const result = await ToolRegistry.executeTool('web_search', {
             query: specialQuery
         }, context);
 
@@ -115,7 +115,7 @@ describe('WebSearchTool', () => {
     });
 
     test('should provide web_fetch suggestion', async () => {
-        const result = await registry.executeTool('web_search', {
+        const result = await ToolRegistry.executeTool('web_search', {
             query: 'Documentation analysis'
         }, context);
 
@@ -123,7 +123,7 @@ describe('WebSearchTool', () => {
     });
 
     test('should handle domain combinations', async () => {
-        const result = await registry.executeTool('web_search', {
+        const result = await ToolRegistry.executeTool('web_search', {
             query: 'Testing frameworks',
             allowed_domains: ['github.com'],
             blocked_domains: ['spam.com']
@@ -135,7 +135,7 @@ describe('WebSearchTool', () => {
     });
 
     test('should show execution timing', async () => {
-        const result = await registry.executeTool('web_search', {
+        const result = await ToolRegistry.executeTool('web_search', {
             query: 'Performance testing'
         }, context);
 

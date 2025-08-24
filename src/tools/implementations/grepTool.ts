@@ -266,4 +266,4 @@ ${formattedOutput}`;
 }
 
 // Auto-register the tool
-ToolRegistry.getInstance().registerTool(GrepTool);
+ToolRegistry.registerTool(GrepTool);

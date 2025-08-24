@@ -193,4 +193,4 @@ export class NotebookReadTool extends BaseTool<INotebookReadParams> {
 }
 
 // Register the tool
-ToolRegistry.getInstance().registerTool(NotebookReadTool);
+ToolRegistry.registerTool(NotebookReadTool);

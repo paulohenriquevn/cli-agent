@@ -5,7 +5,7 @@
 import { ToolRegistry } from '../registry/toolRegistry';
 
 describe('Non-Refactored Tools', () => {
-    const registry = ToolRegistry.getInstance();
+    // const registry = ToolRegistry;
 
     // List of tools that still need refactoring
     const nonRefactoredTools = [
@@ -35,7 +35,7 @@ describe('Non-Refactored Tools', () => {
         const toolsNeedingRefactoring = nonRefactoredTools.filter(toolName => {
             try {
                 // Try to get tool from registry (will likely fail for non-refactored tools)
-                const tool = registry.getTool(toolName);
+                const tool = ToolRegistry.getTool(toolName);
                 return !tool;
             } catch {
                 return true; // Tool not found or has errors

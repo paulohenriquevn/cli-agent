@@ -143,7 +143,7 @@ export class NestedContextManager extends DisposableBase {
      */
     updateSharedData(callId: string, data: Record<string, any>): void {
         const context = this.contexts.get(callId);
-        if (!context || !this.config.enableCrossLevelCommunication) return;
+        if (!context || !this.config.enableCrossLevelCommunication) {return;}
 
         // Atualiza contexto atual
         context.sharedData = { ...context.sharedData, ...data };
@@ -170,7 +170,7 @@ export class NestedContextManager extends DisposableBase {
         siblings: NestedExecutionContext[];
     } | undefined {
         const current = this.contexts.get(callId);
-        if (!current) return undefined;
+        if (!current) {return undefined;}
 
         const parent = this.contexts.get(current.parentCallId);
         
@@ -179,7 +179,7 @@ export class NestedContextManager extends DisposableBase {
         if (childIds) {
             for (const childId of childIds) {
                 const child = this.contexts.get(childId);
-                if (child) children.push(child);
+                if (child) {children.push(child);}
             }
         }
 
@@ -190,7 +190,7 @@ export class NestedContextManager extends DisposableBase {
                 for (const siblingId of siblingIds) {
                     if (siblingId !== callId) {
                         const sibling = this.contexts.get(siblingId);
-                        if (sibling) siblings.push(sibling);
+                        if (sibling) {siblings.push(sibling);}
                     }
                 }
             }

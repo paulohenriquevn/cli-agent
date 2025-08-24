@@ -403,4 +403,4 @@ Examples: Adding performance monitoring hooks, implementing custom validation fo
 }
 
 // Register the tool
-ToolRegistry.getInstance().registerTool(HooksManagementTool);
+ToolRegistry.registerTool(HooksManagementTool);

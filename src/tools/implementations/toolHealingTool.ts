@@ -512,7 +512,7 @@ Cache has been reset and will rebuild on next healing operation.`;
                 );
 
                 const passed = result.success && result.healingMethod === testCase.expectedMethod;
-                if (passed) passedTests++;
+                if (passed) {passedTests++;}
 
                 results.push({
                     name: testCase.name,

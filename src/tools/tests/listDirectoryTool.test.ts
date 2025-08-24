@@ -7,11 +7,11 @@ import { createTestContext, TEST_FILES_DIR } from './setup';
 import { promises as fs } from 'fs';
 
 describe('ListDirectoryTool', () => {
-    const registry = ToolRegistry.getInstance();
+    // const registry = ToolRegistry;
     const context = createTestContext();
 
     test('should list directory contents', async () => {
-        const result = await registry.executeTool('ls', {
+        const result = await ToolRegistry.executeTool('ls', {
             path: TEST_FILES_DIR
         }, context);
 
@@ -22,7 +22,7 @@ describe('ListDirectoryTool', () => {
     });
 
     test('should show file sizes', async () => {
-        const result = await registry.executeTool('ls', {
+        const result = await ToolRegistry.executeTool('ls', {
             path: TEST_FILES_DIR
         }, context);
 
@@ -30,7 +30,7 @@ describe('ListDirectoryTool', () => {
     });
 
     test('should filter with ignore patterns', async () => {
-        const result = await registry.executeTool('ls', {
+        const result = await ToolRegistry.executeTool('ls', {
             path: TEST_FILES_DIR,
             ignore: ['*.js']
         }, context);
@@ -41,7 +41,7 @@ describe('ListDirectoryTool', () => {
     });
 
     test('should handle recursive listing', async () => {
-        const result = await registry.executeTool('ls', {
+        const result = await ToolRegistry.executeTool('ls', {
             path: TEST_FILES_DIR,
             recursive: true
         }, context);
@@ -50,7 +50,7 @@ describe('ListDirectoryTool', () => {
     });
 
     test('should handle non-existent directory', async () => {
-        const result = await registry.executeTool('ls', {
+        const result = await ToolRegistry.executeTool('ls', {
             path: '/nonexistent-directory'
         }, context);
 
@@ -58,7 +58,7 @@ describe('ListDirectoryTool', () => {
     });
 
     test('should show directory indicators', async () => {
-        const result = await registry.executeTool('ls', {
+        const result = await ToolRegistry.executeTool('ls', {
             path: TEST_FILES_DIR
         }, context);
 
@@ -70,7 +70,7 @@ describe('ListDirectoryTool', () => {
         const emptyDir = TEST_FILES_DIR + '/empty';
         await fs.mkdir(emptyDir, { recursive: true });
 
-        const result = await registry.executeTool('ls', {
+        const result = await ToolRegistry.executeTool('ls', {
             path: emptyDir
         }, context);
 
@@ -78,7 +78,7 @@ describe('ListDirectoryTool', () => {
     });
 
     test('should sort files alphabetically', async () => {
-        const result = await registry.executeTool('ls', {
+        const result = await ToolRegistry.executeTool('ls', {
             path: TEST_FILES_DIR
         }, context);
 

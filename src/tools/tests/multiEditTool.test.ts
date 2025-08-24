@@ -8,7 +8,7 @@ import { promises as fs } from 'fs';
 import * as path from 'path';
 
 describe('MultiEditTool', () => {
-    const registry = ToolRegistry.getInstance();
+    // const registry = ToolRegistry;
     const context = createTestContext();
 
     beforeEach(async () => {
@@ -22,7 +22,7 @@ describe('MultiEditTool', () => {
     test('should apply multiple edits to same file', async () => {
         const testFile = path.join(TEST_FILES_DIR, 'multi-edit-test.txt');
 
-        const result = await registry.executeTool('multi_edit', {
+        const result = await ToolRegistry.executeTool('multi_edit', {
             filePath: testFile,
             edits: [
                 {
@@ -51,7 +51,7 @@ describe('MultiEditTool', () => {
     test('should handle sequential edits', async () => {
         const testFile = path.join(TEST_FILES_DIR, 'multi-edit-test.txt');
 
-        const result = await registry.executeTool('multi_edit', {
+        const result = await ToolRegistry.executeTool('multi_edit', {
             filePath: testFile,
             edits: [
                 {
@@ -76,7 +76,7 @@ describe('MultiEditTool', () => {
         const testFile = path.join(TEST_FILES_DIR, 'multi-edit-test.txt');
         await fs.writeFile(testFile, 'line\ntest line\nanother line\nfinal line');
 
-        const result = await registry.executeTool('multi_edit', {
+        const result = await ToolRegistry.executeTool('multi_edit', {
             filePath: testFile,
             edits: [
                 {
@@ -97,7 +97,7 @@ describe('MultiEditTool', () => {
     test('should handle multiline edits', async () => {
         const testFile = path.join(TEST_FILES_DIR, 'multi-edit-test.txt');
 
-        const result = await registry.executeTool('multi_edit', {
+        const result = await ToolRegistry.executeTool('multi_edit', {
             filePath: testFile,
             edits: [
                 {
@@ -117,7 +117,7 @@ describe('MultiEditTool', () => {
     test('should handle edit failures gracefully', async () => {
         const testFile = path.join(TEST_FILES_DIR, 'multi-edit-test.txt');
 
-        const result = await registry.executeTool('multi_edit', {
+        const result = await ToolRegistry.executeTool('multi_edit', {
             filePath: testFile,
             edits: [
                 {
@@ -136,7 +136,7 @@ describe('MultiEditTool', () => {
     });
 
     test('should handle non-existent file', async () => {
-        const result = await registry.executeTool('multi_edit', {
+        const result = await ToolRegistry.executeTool('multi_edit', {
             filePath: path.join(TEST_FILES_DIR, 'nonexistent.txt'),
             edits: [
                 {
@@ -152,7 +152,7 @@ describe('MultiEditTool', () => {
     test('should handle empty edits array', async () => {
         const testFile = path.join(TEST_FILES_DIR, 'multi-edit-test.txt');
 
-        const result = await registry.executeTool('multi_edit', {
+        const result = await ToolRegistry.executeTool('multi_edit', {
             filePath: testFile,
             edits: []
         }, context);
@@ -165,7 +165,7 @@ describe('MultiEditTool', () => {
         const originalContent = await fs.readFile(testFile, 'utf-8');
         const originalLines = originalContent.split('\n').length;
 
-        await registry.executeTool('multi_edit', {
+        await ToolRegistry.executeTool('multi_edit', {
             filePath: testFile,
             edits: [
                 {

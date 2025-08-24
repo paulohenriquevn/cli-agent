@@ -181,7 +181,7 @@ Examples: Normalize all tools for GPT-4, validate tool schemas, generate perform
             name: modelName || modelFamily
         };
 
-        const registry = ToolRegistry.getInstance();
+        const registry = ToolRegistry;
         let toolsToNormalize = registry.getAllTools(this.context);
 
         // Filter specific tools if requested
@@ -223,7 +223,7 @@ Examples: Normalize all tools for GPT-4, validate tool schemas, generate perform
     }
 
     private async handleValidate(toolNames?: string[]): Promise<CliToolResult> {
-        const registry = ToolRegistry.getInstance();
+        const registry = ToolRegistry;
         let toolsToValidate = registry.getAllTools(this.context);
 
         // Filter specific tools if requested

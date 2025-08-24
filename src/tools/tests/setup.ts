@@ -81,8 +81,8 @@ export const cleanupTestWorkspace = async (): Promise<void> => {
 // Global setup
 beforeAll(async () => {
     await setupTestWorkspace();
-    const registry = ToolRegistry.getInstance();
-    registry.setDefaultContext(createTestContext());
+    // ToolRegistry é um singleton direto, não precisa de getInstance()
+    // registry.setDefaultContext(createTestContext());
 });
 
 // Global cleanup

@@ -284,4 +284,4 @@ Examples: List "src/" directory, show all files recursively, ignore node_modules
 }
 
 // Auto-register the tool
-ToolRegistry.getInstance().registerTool(ListDirectoryTool);
+ToolRegistry.registerTool(ListDirectoryTool);

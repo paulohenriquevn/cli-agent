@@ -135,4 +135,4 @@ Examples: Create project milestones, track feature development, organize refacto
 }
 
 // Auto-register the tool
-ToolRegistry.getInstance().registerTool(TodoWriteTool);
+ToolRegistry.registerTool(TodoWriteTool);

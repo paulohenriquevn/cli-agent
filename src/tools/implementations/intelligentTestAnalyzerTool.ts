@@ -655,4 +655,4 @@ export class IntelligentTestAnalyzerTool extends BaseTool<ITestAnalyzerParams> {
 }
 
 // Register the tool
-ToolRegistry.getInstance().registerTool(IntelligentTestAnalyzerTool);
+ToolRegistry.registerTool(IntelligentTestAnalyzerTool);

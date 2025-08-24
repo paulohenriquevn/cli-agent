@@ -177,7 +177,7 @@ function deepClone<T>(obj: T): T {
 }
 
 function forEachSchemaNode(schema: JSONSchema, callback: (node: JSONSchema, path: string) => void, path = ''): void {
-    if (!schema || typeof schema !== 'object') return;
+    if (!schema || typeof schema !== 'object') {return;}
     
     callback(schema, path);
     
@@ -245,7 +245,7 @@ const functionRules: NormalizationRule[] = [
     
     // Rule 3: DeepSeek function name constraints
     (family, functionSchema, didFix) => {
-        if (!MODEL_FAMILIES.DEEPSEEK(family)) return;
+        if (!MODEL_FAMILIES.DEEPSEEK(family)) {return;}
         
         const func = functionSchema as OpenAiFunctionTool['function'];
         
@@ -295,7 +295,7 @@ const jsonSchemaRules: NormalizationRule[] = [
     
     // Rule 3: GPT-4 description length limitation
     (family, schema, onFix) => {
-        if (!isGpt4ish(family)) return;
+        if (!isGpt4ish(family)) {return;}
         
         const jsonSchema = schema as JSONSchema;
         const maxLength = 1024;
@@ -310,7 +310,7 @@ const jsonSchemaRules: NormalizationRule[] = [
     
     // Rule 4: GPT-4 unsupported keywords
     (family, schema, onFix) => {
-        if (!isGpt4ish(family)) return;
+        if (!isGpt4ish(family)) {return;}
         
         const jsonSchema = schema as JSONSchema;
         const unsupportedKeywords = [
@@ -356,7 +356,7 @@ const jsonSchemaRules: NormalizationRule[] = [
     
     // Rule 6: DeepSeek specific constraints
     (family, schema, onFix) => {
-        if (!MODEL_FAMILIES.DEEPSEEK(family)) return;
+        if (!MODEL_FAMILIES.DEEPSEEK(family)) {return;}
         
         const jsonSchema = schema as JSONSchema;
         
@@ -385,7 +385,7 @@ const jsonSchemaRules: NormalizationRule[] = [
     
     // Rule 7: Convert Draft 7 array items to Draft 2020-12 format
     (family, schema, onFix) => {
-        if (!isDraft2020_12Schema(family)) return;
+        if (!isDraft2020_12Schema(family)) {return;}
         
         const jsonSchema = schema as JSONSchema;
         forEachSchemaNode(jsonSchema, (node) => {

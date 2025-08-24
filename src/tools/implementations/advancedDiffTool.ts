@@ -864,4 +864,4 @@ Examples: Compare file versions, analyze config changes, generate patches, asses
 }
 
 // Register the tool
-ToolRegistry.getInstance().registerTool(AdvancedDiffTool);
+ToolRegistry.registerTool(AdvancedDiffTool);

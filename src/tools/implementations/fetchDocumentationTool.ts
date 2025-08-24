@@ -492,4 +492,4 @@ export class FetchDocumentationTool extends BaseTool<IFetchDocumentationParams> 
 }
 
 // Register the tool
-ToolRegistry.getInstance().registerTool(FetchDocumentationTool);
+ToolRegistry.registerTool(FetchDocumentationTool);

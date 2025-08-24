@@ -514,11 +514,11 @@ Be systematic, precise, and helpful. Your corrections directly impact tool execu
      */
     private categorizeError(error: string): string {
         const errorLower = error.toLowerCase();
-        if (errorLower.includes('timeout')) return 'timeout';
-        if (errorLower.includes('rate limit')) return 'rate_limit';
-        if (errorLower.includes('auth')) return 'authentication';
-        if (errorLower.includes('quota')) return 'quota_exceeded';
-        if (errorLower.includes('network') || errorLower.includes('connection')) return 'network';
+        if (errorLower.includes('timeout')) {return 'timeout';}
+        if (errorLower.includes('rate limit')) {return 'rate_limit';}
+        if (errorLower.includes('auth')) {return 'authentication';}
+        if (errorLower.includes('quota')) {return 'quota_exceeded';}
+        if (errorLower.includes('network') || errorLower.includes('connection')) {return 'network';}
         return 'other';
     }
 

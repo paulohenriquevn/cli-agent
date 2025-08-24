@@ -6,11 +6,11 @@ import { ToolRegistry } from '../registry/toolRegistry';
 import { createTestContext } from './setup';
 
 describe('TaskTool', () => {
-    const registry = ToolRegistry.getInstance();
+    // const registry = ToolRegistry;
     const context = createTestContext();
 
     test('should create and delegate task', async () => {
-        const result = await registry.executeTool('task', {
+        const result = await ToolRegistry.executeTool('task', {
             description: 'Test task delegation',
             prompt: 'This is a test task for the CLI system. Please confirm receipt.',
             subagentType: 'general-purpose'
@@ -31,7 +31,7 @@ describe('TaskTool', () => {
         ];
 
         for (const subagentType of subagentTypes) {
-            const result = await registry.executeTool('task', {
+            const result = await ToolRegistry.executeTool('task', {
                 description: `Test ${subagentType} task`,
                 prompt: `Task for ${subagentType} agent`,
                 subagentType
@@ -43,7 +43,7 @@ describe('TaskTool', () => {
     });
 
     test('should validate required parameters', async () => {
-        const result = await registry.executeTool('task', {
+        const result = await ToolRegistry.executeTool('task', {
             description: 'Test task',
             prompt: 'Test prompt'
             // Missing subagentType
@@ -63,7 +63,7 @@ describe('TaskTool', () => {
 
 Please handle this systematically and provide detailed feedback on each step.`;
 
-        const result = await registry.executeTool('task', {
+        const result = await ToolRegistry.executeTool('task', {
             description: complexDescription,
             prompt: complexPrompt,
             subagentType: 'general-purpose'
@@ -75,7 +75,7 @@ Please handle this systematically and provide detailed feedback on each step.`;
     });
 
     test('should format task output properly', async () => {
-        const result = await registry.executeTool('task', {
+        const result = await ToolRegistry.executeTool('task', {
             description: 'Format test',
             prompt: 'Test formatting',
             subagentType: 'general-purpose'
@@ -91,7 +91,7 @@ Please handle this systematically and provide detailed feedback on each step.`;
     test('should handle special characters in prompts', async () => {
         const specialPrompt = 'Task with special chars: @#$%^&*()[]{}|\\:";\'<>?/.,~`';
 
-        const result = await registry.executeTool('task', {
+        const result = await ToolRegistry.executeTool('task', {
             description: 'Special chars test',
             prompt: specialPrompt,
             subagentType: 'general-purpose'
@@ -107,7 +107,7 @@ Line 3: Third instruction
 
 Additional context and requirements here.`;
 
-        const result = await registry.executeTool('task', {
+        const result = await ToolRegistry.executeTool('task', {
             description: 'Multiline test',
             prompt: multilinePrompt,
             subagentType: 'general-purpose'
@@ -119,7 +119,7 @@ Additional context and requirements here.`;
     });
 
     test('should handle empty descriptions', async () => {
-        const result = await registry.executeTool('task', {
+        const result = await ToolRegistry.executeTool('task', {
             description: '',
             prompt: 'Test with empty description',
             subagentType: 'general-purpose'
@@ -130,7 +130,7 @@ Additional context and requirements here.`;
     });
 
     test('should show session context', async () => {
-        const result = await registry.executeTool('task', {
+        const result = await ToolRegistry.executeTool('task', {
             description: 'Context test',
             prompt: 'Test session context',
             subagentType: 'general-purpose'

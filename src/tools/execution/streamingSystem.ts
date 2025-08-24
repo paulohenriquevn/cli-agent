@@ -75,7 +75,7 @@ class StreamBuffer {
     }
 
     pop(): ChatResponseDelta | undefined {
-        if (this.size === 0) return undefined;
+        if (this.size === 0) {return undefined;}
         
         const item = this.buffer[this.head];
         this.head = (this.head + 1) % this.maxSize;
@@ -142,7 +142,7 @@ export class FetchStreamSourceImpl extends DisposableBase implements FetchStream
     }
 
     unpause(): void {
-        if (!this.isPaused) return;
+        if (!this.isPaused) {return;}
         
         this.isPaused = false;
 
@@ -151,7 +151,7 @@ export class FetchStreamSourceImpl extends DisposableBase implements FetchStream
     }
 
     complete(): void {
-        if (this.isCompleted || this.isDisposed) return;
+        if (this.isCompleted || this.isDisposed) {return;}
 
         this.isCompleted = true;
         
@@ -164,7 +164,7 @@ export class FetchStreamSourceImpl extends DisposableBase implements FetchStream
     }
 
     error(error: Error): void {
-        if (this.error || this.isDisposed) return;
+        if (this.error || this.isDisposed) {return;}
 
         this.error = error;
         this.onErrorEmitter.fire(error);
@@ -245,7 +245,7 @@ export class ResponsiveChatResponseStream extends DisposableBase implements Chat
     }
 
     unpause(): void {
-        if (!this.isPaused) return;
+        if (!this.isPaused) {return;}
         
         this.isPaused = false;
         
@@ -254,7 +254,7 @@ export class ResponsiveChatResponseStream extends DisposableBase implements Chat
     }
 
     destroy(): void {
-        if (this.isDisposed) return;
+        if (this.isDisposed) {return;}
 
         this.dataCallbacks.length = 0;
         this.endCallbacks.length = 0;
@@ -285,7 +285,7 @@ export class ResponsiveChatResponseStream extends DisposableBase implements Chat
      * Método interno para sinalizar fim do stream
      */
     _end(): void {
-        if (this.isDisposed || this.isEnded) return;
+        if (this.isDisposed || this.isEnded) {return;}
 
         this.isEnded = true;
         
@@ -307,7 +307,7 @@ export class ResponsiveChatResponseStream extends DisposableBase implements Chat
      * Método interno para sinalizar erro
      */
     _error(error: Error): void {
-        if (this.isDisposed || this.error) return;
+        if (this.isDisposed || this.error) {return;}
 
         this.error = error;
         

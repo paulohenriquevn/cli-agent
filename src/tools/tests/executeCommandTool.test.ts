@@ -6,11 +6,11 @@ import { ToolRegistry } from '../registry/toolRegistry';
 import { createTestContext } from './setup';
 
 describe('ExecuteCommandTool', () => {
-    const registry = ToolRegistry.getInstance();
+    // const registry = ToolRegistry;
     const context = createTestContext();
 
     test('should execute simple command', async () => {
-        const result = await registry.executeTool('execute_command', {
+        const result = await ToolRegistry.executeTool('execute_command', {
             command: 'echo',
             args: ['Hello from execute_command']
         }, context);
@@ -21,7 +21,7 @@ describe('ExecuteCommandTool', () => {
     });
 
     test('should execute node command with args', async () => {
-        const result = await registry.executeTool('execute_command', {
+        const result = await ToolRegistry.executeTool('execute_command', {
             command: 'node',
             args: ['-e', 'console.log("Node.js execution test")']
         }, context);
@@ -31,7 +31,7 @@ describe('ExecuteCommandTool', () => {
     });
 
     test('should handle working directory', async () => {
-        const result = await registry.executeTool('execute_command', {
+        const result = await ToolRegistry.executeTool('execute_command', {
             command: 'pwd'
         }, context);
 
@@ -40,7 +40,7 @@ describe('ExecuteCommandTool', () => {
     });
 
     test('should handle environment variables', async () => {
-        const result = await registry.executeTool('execute_command', {
+        const result = await ToolRegistry.executeTool('execute_command', {
             command: 'node',
             args: ['-e', 'console.log(process.env.TEST_VAR)'],
             environment: {
@@ -53,7 +53,7 @@ describe('ExecuteCommandTool', () => {
     });
 
     test('should handle command timeout', async () => {
-        const result = await registry.executeTool('execute_command', {
+        const result = await ToolRegistry.executeTool('execute_command', {
             command: 'sleep',
             args: ['0.1'],
             timeout: 5000
@@ -64,7 +64,7 @@ describe('ExecuteCommandTool', () => {
     });
 
     test('should handle command errors', async () => {
-        const result = await registry.executeTool('execute_command', {
+        const result = await ToolRegistry.executeTool('execute_command', {
             command: 'ls',
             args: ['/nonexistent-directory']
         }, context);
@@ -73,7 +73,7 @@ describe('ExecuteCommandTool', () => {
     });
 
     test('should show execution time', async () => {
-        const result = await registry.executeTool('execute_command', {
+        const result = await ToolRegistry.executeTool('execute_command', {
             command: 'echo',
             args: ['timing test']
         }, context);
@@ -83,7 +83,7 @@ describe('ExecuteCommandTool', () => {
     });
 
     test('should handle multiple arguments', async () => {
-        const result = await registry.executeTool('execute_command', {
+        const result = await ToolRegistry.executeTool('execute_command', {
             command: 'echo',
             args: ['arg1', 'arg2', 'arg3']
         }, context);
@@ -93,7 +93,7 @@ describe('ExecuteCommandTool', () => {
     });
 
     test('should handle custom working directory', async () => {
-        const result = await registry.executeTool('execute_command', {
+        const result = await ToolRegistry.executeTool('execute_command', {
             command: 'pwd',
             workingDirectory: '/tmp'
         }, context);
@@ -102,7 +102,7 @@ describe('ExecuteCommandTool', () => {
     });
 
     test('should handle multiple environment variables', async () => {
-        const result = await registry.executeTool('execute_command', {
+        const result = await ToolRegistry.executeTool('execute_command', {
             command: 'node',
             args: ['-e', 'console.log(process.env.VAR1, process.env.VAR2)'],
             environment: {
@@ -116,7 +116,7 @@ describe('ExecuteCommandTool', () => {
     });
 
     test('should handle commands with no output', async () => {
-        const result = await registry.executeTool('execute_command', {
+        const result = await ToolRegistry.executeTool('execute_command', {
             command: 'true'
         }, context);
 
@@ -125,7 +125,7 @@ describe('ExecuteCommandTool', () => {
     });
 
     test('should handle stderr output', async () => {
-        const result = await registry.executeTool('execute_command', {
+        const result = await ToolRegistry.executeTool('execute_command', {
             command: 'node',
             args: ['-e', 'console.error("Error message")']
         }, context);
@@ -135,7 +135,7 @@ describe('ExecuteCommandTool', () => {
     });
 
     test('should validate timeout limits', async () => {
-        const result = await registry.executeTool('execute_command', {
+        const result = await ToolRegistry.executeTool('execute_command', {
             command: 'echo',
             args: ['timeout test'],
             timeout: 1000
@@ -146,7 +146,7 @@ describe('ExecuteCommandTool', () => {
     });
 
     test('should handle command with spaces in arguments', async () => {
-        const result = await registry.executeTool('execute_command', {
+        const result = await ToolRegistry.executeTool('execute_command', {
             command: 'echo',
             args: ['argument with spaces', 'another arg']
         }, context);
@@ -155,7 +155,7 @@ describe('ExecuteCommandTool', () => {
     });
 
     test('should show exit code for failed commands', async () => {
-        const result = await registry.executeTool('execute_command', {
+        const result = await ToolRegistry.executeTool('execute_command', {
             command: 'false'
         }, context);
 

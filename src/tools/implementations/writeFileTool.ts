@@ -144,4 +144,4 @@ Examples: Create "src/components/Button.tsx" with React component, write package
 }
 
 // Auto-register the tool
-ToolRegistry.getInstance().registerTool(WriteFileTool);
+ToolRegistry.registerTool(WriteFileTool);

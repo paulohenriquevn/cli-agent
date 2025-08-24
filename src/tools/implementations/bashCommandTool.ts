@@ -266,4 +266,4 @@ Examples: "npm run build", "git status", "npm test", "mkdir src/components". SEC
 }
 
 // Auto-register the tool
-ToolRegistry.getInstance().registerTool(BashCommandTool);
+ToolRegistry.registerTool(BashCommandTool);

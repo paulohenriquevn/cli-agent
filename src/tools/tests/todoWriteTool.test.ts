@@ -6,7 +6,7 @@ import { ToolRegistry } from '../registry/toolRegistry';
 import { createTestContext } from './setup';
 
 describe('TodoWriteTool', () => {
-    const registry = ToolRegistry.getInstance();
+    // const registry = ToolRegistry;
     const context = createTestContext();
 
     test('should create new todo list', async () => {
@@ -16,7 +16,7 @@ describe('TodoWriteTool', () => {
             { content: 'Third task', status: 'completed' as const }
         ];
 
-        const result = await registry.executeTool('todo_write', {
+        const result = await ToolRegistry.executeTool('todo_write', {
             todos
         }, context);
 
@@ -38,7 +38,7 @@ describe('TodoWriteTool', () => {
             { content: 'Task 5', status: 'pending' as const }
         ];
 
-        const result = await registry.executeTool('todo_write', {
+        const result = await ToolRegistry.executeTool('todo_write', {
             todos
         }, context);
 
@@ -49,7 +49,7 @@ describe('TodoWriteTool', () => {
     });
 
     test('should handle empty todo list', async () => {
-        const result = await registry.executeTool('todo_write', {
+        const result = await ToolRegistry.executeTool('todo_write', {
             todos: []
         }, context);
 
@@ -62,7 +62,7 @@ describe('TodoWriteTool', () => {
             { content: 'Second task', status: 'in_progress' as const }
         ];
 
-        const result = await registry.executeTool('todo_write', {
+        const result = await ToolRegistry.executeTool('todo_write', {
             todos
         }, context);
 
@@ -78,7 +78,7 @@ describe('TodoWriteTool', () => {
             }
         ];
 
-        const result = await registry.executeTool('todo_write', {
+        const result = await ToolRegistry.executeTool('todo_write', {
             todos
         }, context);
 
@@ -92,7 +92,7 @@ describe('TodoWriteTool', () => {
             { content: 'Task with "quotes" and symbols @#$%', status: 'completed' as const }
         ];
 
-        const result = await registry.executeTool('todo_write', {
+        const result = await ToolRegistry.executeTool('todo_write', {
             todos
         }, context);
 
@@ -108,7 +108,7 @@ describe('TodoWriteTool', () => {
             { content: 'Task 4', status: 'pending' as const }
         ];
 
-        const result = await registry.executeTool('todo_write', {
+        const result = await ToolRegistry.executeTool('todo_write', {
             todos
         }, context);
 
@@ -121,7 +121,7 @@ describe('TodoWriteTool', () => {
             { content: 'Task 2', status: 'completed' as const }
         ];
 
-        const result = await registry.executeTool('todo_write', {
+        const result = await ToolRegistry.executeTool('todo_write', {
             todos
         }, context);
 
@@ -134,7 +134,7 @@ describe('TodoWriteTool', () => {
             { content: 'Valid task', status: 'pending' as const }
         ];
 
-        const result = await registry.executeTool('todo_write', {
+        const result = await ToolRegistry.executeTool('todo_write', {
             todos
         }, context);
 

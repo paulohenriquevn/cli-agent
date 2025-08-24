@@ -220,4 +220,4 @@ _token?: CliCancellationToken
 }
 
 // Auto-register the tool
-ToolRegistry.getInstance().registerTool(ExecuteCommandTool);
+ToolRegistry.registerTool(ExecuteCommandTool);

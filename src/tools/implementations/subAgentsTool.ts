@@ -386,4 +386,4 @@ Examples: Running security analysis on authentication code, getting performance 
 }
 
 // Register the tool
-ToolRegistry.getInstance().registerTool(SubAgentsTool);
+ToolRegistry.registerTool(SubAgentsTool);

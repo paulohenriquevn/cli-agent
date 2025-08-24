@@ -7,11 +7,11 @@ import { createTestContext, TEST_FILES_DIR } from './setup';
 import * as path from 'path';
 
 describe('ReadFileTool', () => {
-    const registry = ToolRegistry.getInstance();
+    // const registry = ToolRegistry;
     const context = createTestContext();
 
     test('should read entire file', async () => {
-        const result = await registry.executeTool('read_file', {
+        const result = await ToolRegistry.executeTool('read_file', {
             filePath: path.join(TEST_FILES_DIR, 'test.txt')
         }, context);
 
@@ -22,7 +22,7 @@ describe('ReadFileTool', () => {
     });
 
     test('should read file with limit', async () => {
-        const result = await registry.executeTool('read_file', {
+        const result = await ToolRegistry.executeTool('read_file', {
             filePath: path.join(TEST_FILES_DIR, 'test.txt'),
             limit: 2
         }, context);
@@ -34,7 +34,7 @@ describe('ReadFileTool', () => {
     });
 
     test('should read file with offset', async () => {
-        const result = await registry.executeTool('read_file', {
+        const result = await ToolRegistry.executeTool('read_file', {
             filePath: path.join(TEST_FILES_DIR, 'test.txt'),
             offset: 2,
             limit: 2
@@ -47,7 +47,7 @@ describe('ReadFileTool', () => {
     });
 
     test('should handle non-existent file', async () => {
-        const result = await registry.executeTool('read_file', {
+        const result = await ToolRegistry.executeTool('read_file', {
             filePath: path.join(TEST_FILES_DIR, 'nonexistent.txt')
         }, context);
 
@@ -55,7 +55,7 @@ describe('ReadFileTool', () => {
     });
 
     test('should read JSON file', async () => {
-        const result = await registry.executeTool('read_file', {
+        const result = await ToolRegistry.executeTool('read_file', {
             filePath: path.join(TEST_FILES_DIR, 'package.json')
         }, context);
 

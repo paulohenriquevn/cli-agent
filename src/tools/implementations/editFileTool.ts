@@ -192,4 +192,4 @@ ${diffPreview}`;
 }
 
 // Auto-register the tool
-ToolRegistry.getInstance().registerTool(EditFileTool);
+ToolRegistry.registerTool(EditFileTool);

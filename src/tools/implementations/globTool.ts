@@ -279,4 +279,4 @@ Examples: Find "**/*.test.js" for tests, "src/**/*.tsx" for React components, "*
 }
 
 // Auto-register the tool
-ToolRegistry.getInstance().registerTool(GlobTool);
+ToolRegistry.registerTool(GlobTool);

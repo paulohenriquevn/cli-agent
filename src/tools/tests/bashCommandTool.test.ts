@@ -6,11 +6,11 @@ import { ToolRegistry } from '../registry/toolRegistry';
 import { createTestContext, TEST_FILES_DIR } from './setup';
 
 describe('BashCommandTool', () => {
-    const registry = ToolRegistry.getInstance();
+    // const registry = ToolRegistry;
     const context = createTestContext();
 
     test('should execute simple command', async () => {
-        const result = await registry.executeTool('bash', {
+        const result = await ToolRegistry.executeTool('bash', {
             command: 'echo "Hello from bash"',
             description: 'Test echo command'
         }, context);
@@ -20,7 +20,7 @@ describe('BashCommandTool', () => {
     });
 
     test('should execute ls command', async () => {
-        const result = await registry.executeTool('bash', {
+        const result = await ToolRegistry.executeTool('bash', {
             command: `ls ${TEST_FILES_DIR}`,
             description: 'List test files'
         }, context);
@@ -31,7 +31,7 @@ describe('BashCommandTool', () => {
     });
 
     test('should handle command with timeout', async () => {
-        const result = await registry.executeTool('bash', {
+        const result = await ToolRegistry.executeTool('bash', {
             command: 'sleep 0.1 && echo "timeout test"',
             description: 'Test timeout handling',
             timeout: 5000
@@ -41,7 +41,7 @@ describe('BashCommandTool', () => {
     });
 
     test('should block dangerous commands', async () => {
-        const result = await registry.executeTool('bash', {
+        const result = await ToolRegistry.executeTool('bash', {
             command: 'rm -rf /',
             description: 'Dangerous command test'
         }, context);
@@ -51,7 +51,7 @@ describe('BashCommandTool', () => {
     });
 
     test('should handle command errors', async () => {
-        const result = await registry.executeTool('bash', {
+        const result = await ToolRegistry.executeTool('bash', {
             command: 'ls /nonexistent-directory',
             description: 'Test error handling'
         }, context);
@@ -60,7 +60,7 @@ describe('BashCommandTool', () => {
     });
 
     test('should handle working directory', async () => {
-        const result = await registry.executeTool('bash', {
+        const result = await ToolRegistry.executeTool('bash', {
             command: 'pwd',
             description: 'Check working directory'
         }, context);
@@ -69,7 +69,7 @@ describe('BashCommandTool', () => {
     });
 
     test('should execute node command', async () => {
-        const result = await registry.executeTool('bash', {
+        const result = await ToolRegistry.executeTool('bash', {
             command: 'node -e "console.log(\\"Node.js test\\")"',
             description: 'Test Node.js execution'
         }, context);
@@ -78,7 +78,7 @@ describe('BashCommandTool', () => {
     });
 
     test('should handle multiline output', async () => {
-        const result = await registry.executeTool('bash', {
+        const result = await ToolRegistry.executeTool('bash', {
             command: 'echo -e "Line 1\\nLine 2\\nLine 3"',
             description: 'Test multiline output'
         }, context);

@@ -75,4 +75,4 @@ Examples: Complete task planning, finalize implementation strategy, move to codi
 }
 
 // Auto-register the tool
-ToolRegistry.getInstance().registerTool(ExitPlanModeTool);
+ToolRegistry.registerTool(ExitPlanModeTool);

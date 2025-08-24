@@ -204,13 +204,13 @@ export class NormalizationIntegration {
         // Check performance
         if (metrics.averageNormalizationTime > 100) { // 100ms
             issues.push(`Slow normalization: ${metrics.averageNormalizationTime.toFixed(1)}ms average`);
-            if (status === 'healthy') status = 'warning';
+            if (status === 'healthy') {status = 'warning';}
         }
         
         // Check cache efficiency
         if (this.config.enableCache && metrics.cacheHitRate < 0.5 && totalOperations > 10) {
             issues.push(`Low cache hit rate: ${(metrics.cacheHitRate * 100).toFixed(1)}%`);
-            if (status === 'healthy') status = 'warning';
+            if (status === 'healthy') {status = 'warning';}
         }
         
         return {
@@ -297,7 +297,7 @@ export class NormalizationIntegration {
     }
     
     private sendTelemetry(eventName: string, data: any): void {
-        if (!this.config.telemetryEnabled) return;
+        if (!this.config.telemetryEnabled) {return;}
         
         // In a real implementation, this would send to your telemetry service
         this.logger?.('info', `Telemetry: ${eventName}`, data);

@@ -188,4 +188,4 @@ Examples: Breaking down "implement user authentication" into login/register/vali
 }
 
 // Register the tool
-ToolRegistry.getInstance().registerTool(CreateExecutionPlanTool);
+ToolRegistry.registerTool(CreateExecutionPlanTool);

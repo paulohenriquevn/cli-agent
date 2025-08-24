@@ -169,4 +169,4 @@ Summary: The web content has been successfully fetched and analyzed according to
 }
 
 // Auto-register the tool
-ToolRegistry.getInstance().registerTool(WebFetchTool);
+ToolRegistry.registerTool(WebFetchTool);

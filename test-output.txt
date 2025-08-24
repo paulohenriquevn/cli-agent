@@ -1,6 +1,0 @@
-CLI Tools Test - EDITED!
-Generated at: 2025-08-22T20:47:54.859Z
-Working directory: /home/paulo/Projetos/nocode/cli-agent
-Session ID: test-session
-
-This file was created by the CLI tools system to test functionality.

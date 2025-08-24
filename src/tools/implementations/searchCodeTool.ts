@@ -453,4 +453,4 @@ Examples: Find "processData" function, search "UserService" class, locate "apiKe
 }
 
 // Register the tool
-ToolRegistry.getInstance().registerTool(SearchCodeTool);
+ToolRegistry.registerTool(SearchCodeTool);

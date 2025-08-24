@@ -5,9 +5,7 @@
 import {
     IToolCall,
     IToolCallRound,
-    IToolCallingLoopOptions,
     LanguageModelToolResult2,
-    ChatFetchResponseType,
     TelemetryService
 } from './types';
 import { DisposableBase, EventEmitter } from './pauseController';
@@ -224,7 +222,7 @@ export class MetricsCollector extends DisposableBase {
      * Coleta métrica específica
      */
     collectMetric(metric: string, value: any): void {
-        if (!this.config.enabledMetrics.has(metric)) return;
+        if (!this.config.enabledMetrics.has(metric)) {return;}
 
         const timestamp = Date.now();
         
@@ -264,12 +262,12 @@ export class MetricsCollector extends DisposableBase {
         p99: number;
     } | undefined {
         const points = this.dataPoints.get(metric);
-        if (!points || points.length === 0) return undefined;
+        if (!points || points.length === 0) {return undefined;}
 
         const cutoff = Date.now() - windowMs;
         const recentPoints = points.filter(p => p.timestamp >= cutoff);
         
-        if (recentPoints.length === 0) return undefined;
+        if (recentPoints.length === 0) {return undefined;}
 
         const values = recentPoints.map(p => typeof p.value === 'number' ? p.value : 0);
         values.sort((a, b) => a - b);
@@ -320,8 +318,8 @@ export class MetricsCollector extends DisposableBase {
      */
     private calculatePerformanceMetrics(rounds: IToolCallRound[], totalTime: number): PerformanceMetrics {
         const allToolExecutions: number[] = [];
-        let successCount = 0;
-        let errorCount = 0;
+        const successCount = 0;
+        const errorCount = 0;
         let totalToolCalls = 0;
 
         for (const round of rounds) {
@@ -359,7 +357,7 @@ export class MetricsCollector extends DisposableBase {
      */
     private startRealTimeCollection(): void {
         const collectSystemMetrics = () => {
-            if (this.isDisposed) return;
+            if (this.isDisposed) {return;}
 
             const memUsage = process.memoryUsage();
             const cpuUsage = process.cpuUsage();
@@ -423,7 +421,7 @@ export class AlertSystem extends DisposableBase {
      * Verifica métricas contra thresholds
      */
     checkMetrics(metrics: PerformanceMetrics, executionId?: string): void {
-        if (!this.config.enabled) return;
+        if (!this.config.enabled) {return;}
 
         // Check execution time
         if (metrics.totalExecutionTime > this.config.thresholds.maxExecutionTime) {
@@ -514,7 +512,7 @@ export class AlertSystem extends DisposableBase {
      */
     resolveAlert(alertId: string): void {
         const alert = this.activeAlerts.get(alertId);
-        if (!alert) return;
+        if (!alert) {return;}
 
         alert.resolved = true;
         alert.resolvedAt = Date.now();
@@ -528,7 +526,7 @@ export class AlertSystem extends DisposableBase {
      */
     private sendAlertToChannels(alert: Alert): void {
         for (const channel of this.config.channels) {
-            if (!channel.enabled) continue;
+            if (!channel.enabled) {continue;}
 
             try {
                 switch (channel.type) {
@@ -556,7 +554,7 @@ export class AlertSystem extends DisposableBase {
      * Envia alerta via webhook
      */
     private async sendWebhookAlert(alert: Alert, config: any): Promise<void> {
-        if (!config.url) return;
+        if (!config.url) {return;}
 
         const payload = {
             alert: {

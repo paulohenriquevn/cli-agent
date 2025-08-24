@@ -239,13 +239,13 @@ export class HealingIntegration {
         // Check performance
         if (metrics.averageHealingTime > 10000) { // More than 10 seconds
             issues.push(`Slow healing performance: ${(metrics.averageHealingTime / 1000).toFixed(1)}s average`);
-            if (status === 'healthy') status = 'warning';
+            if (status === 'healthy') {status = 'warning';}
         }
 
         // Check metacognition usage
         if (this.config.enableMetacognition && metrics.metacognitionUsageRate < 0.5 && totalAttempts > 5) {
             issues.push(`Low metacognition usage: ${(metrics.metacognitionUsageRate * 100).toFixed(1)}%`);
-            if (status === 'healthy') status = 'warning';
+            if (status === 'healthy') {status = 'warning';}
         }
 
         return {

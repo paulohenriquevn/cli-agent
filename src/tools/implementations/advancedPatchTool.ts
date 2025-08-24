@@ -477,4 +477,4 @@ Examples: Apply refactoring patches, handle whitespace variations, migrate code 
 }
 
 // Register the tool
-ToolRegistry.getInstance().registerTool(AdvancedPatchTool);
+ToolRegistry.registerTool(AdvancedPatchTool);

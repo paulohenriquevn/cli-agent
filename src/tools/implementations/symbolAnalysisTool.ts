@@ -632,4 +632,4 @@ Examples: Finding all usages of "calculateTotal" before renaming, analyzing "Use
 }
 
 // Register the tool
-ToolRegistry.getInstance().registerTool(SymbolAnalysisTool);
+ToolRegistry.registerTool(SymbolAnalysisTool);

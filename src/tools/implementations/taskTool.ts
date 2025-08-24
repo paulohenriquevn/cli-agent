@@ -174,4 +174,4 @@ Examples: Run code analysis, perform security audit, execute testing suite, hand
 }
 
 // Auto-register the tool
-ToolRegistry.getInstance().registerTool(TaskTool);
+ToolRegistry.registerTool(TaskTool);

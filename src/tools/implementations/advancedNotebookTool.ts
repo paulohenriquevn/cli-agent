@@ -677,4 +677,4 @@ export class AdvancedNotebookTool extends BaseTool<IAdvancedNotebookParams> {
 }
 
 // Register the tool
-ToolRegistry.getInstance().registerTool(AdvancedNotebookTool);
+ToolRegistry.registerTool(AdvancedNotebookTool);

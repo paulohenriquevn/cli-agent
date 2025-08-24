@@ -6,11 +6,11 @@ import { ToolRegistry } from '../registry/toolRegistry';
 import { createTestContext, TEST_FILES_DIR } from './setup';
 
 describe('GlobTool', () => {
-    const registry = ToolRegistry.getInstance();
+    // const registry = ToolRegistry;
     const context = createTestContext();
 
     test('should find files with extension pattern', async () => {
-        const result = await registry.executeTool('glob', {
+        const result = await ToolRegistry.executeTool('glob', {
             pattern: '*.txt',
             path: TEST_FILES_DIR
         }, context);
@@ -21,7 +21,7 @@ describe('GlobTool', () => {
     });
 
     test('should find JavaScript files', async () => {
-        const result = await registry.executeTool('glob', {
+        const result = await ToolRegistry.executeTool('glob', {
             pattern: '*.js',
             path: TEST_FILES_DIR
         }, context);
@@ -31,7 +31,7 @@ describe('GlobTool', () => {
     });
 
     test('should find JSON files', async () => {
-        const result = await registry.executeTool('glob', {
+        const result = await ToolRegistry.executeTool('glob', {
             pattern: '*.json',
             path: TEST_FILES_DIR
         }, context);
@@ -40,7 +40,7 @@ describe('GlobTool', () => {
     });
 
     test('should handle recursive patterns', async () => {
-        const result = await registry.executeTool('glob', {
+        const result = await ToolRegistry.executeTool('glob', {
             pattern: '**/*.txt',
             path: TEST_FILES_DIR
         }, context);
@@ -50,7 +50,7 @@ describe('GlobTool', () => {
     });
 
     test('should handle wildcard patterns', async () => {
-        const result = await registry.executeTool('glob', {
+        const result = await ToolRegistry.executeTool('glob', {
             pattern: 'test.*',
             path: TEST_FILES_DIR
         }, context);
@@ -61,7 +61,7 @@ describe('GlobTool', () => {
     });
 
     test('should handle no matches', async () => {
-        const result = await registry.executeTool('glob', {
+        const result = await ToolRegistry.executeTool('glob', {
             pattern: '*.xyz',
             path: TEST_FILES_DIR
         }, context);
@@ -70,7 +70,7 @@ describe('GlobTool', () => {
     });
 
     test('should handle character class patterns', async () => {
-        const result = await registry.executeTool('glob', {
+        const result = await ToolRegistry.executeTool('glob', {
             pattern: 'test.[jt]*',
             path: TEST_FILES_DIR
         }, context);
@@ -80,7 +80,7 @@ describe('GlobTool', () => {
     });
 
     test('should show file modification times', async () => {
-        const result = await registry.executeTool('glob', {
+        const result = await ToolRegistry.executeTool('glob', {
             pattern: '*.txt',
             path: TEST_FILES_DIR
         }, context);
@@ -89,7 +89,7 @@ describe('GlobTool', () => {
     });
 
     test('should handle nested directory patterns', async () => {
-        const result = await registry.executeTool('glob', {
+        const result = await ToolRegistry.executeTool('glob', {
             pattern: '**/nested.*',
             path: TEST_FILES_DIR
         }, context);
@@ -98,7 +98,7 @@ describe('GlobTool', () => {
     });
 
     test('should handle multiple extension patterns', async () => {
-        const result = await registry.executeTool('glob', {
+        const result = await ToolRegistry.executeTool('glob', {
             pattern: '*.{txt,js,json}',
             path: TEST_FILES_DIR
         }, context);

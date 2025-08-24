@@ -503,4 +503,4 @@ Examples: Connecting to GitHub API for repository management, integrating with d
 }
 
 // Register the tool
-ToolRegistry.getInstance().registerTool(MCPIntegrationTool);
+ToolRegistry.registerTool(MCPIntegrationTool);

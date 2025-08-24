@@ -146,7 +146,7 @@ export class ToolCallingValidator extends DisposableBase {
         
         const errors: ValidationError[] = [];
         const warnings: ValidationWarning[] = [];
-        let sanitized = false;
+        const sanitized = false;
         
         // Validação de limites
         if (options.toolCallLimit <= 0 || options.toolCallLimit > 1000) {
@@ -210,7 +210,7 @@ export class ToolCallingValidator extends DisposableBase {
         
         const errors: ValidationError[] = [];
         const warnings: ValidationWarning[] = [];
-        let sanitizedCall = { ...toolCall };
+        const sanitizedCall = { ...toolCall };
         let sanitized = false;
 
         // Validação básica de campos obrigatórios
@@ -463,7 +463,7 @@ export class ToolCallingValidator extends DisposableBase {
         
         const errors: ValidationError[] = [];
         const warnings: ValidationWarning[] = [];
-        let sanitizedResult = { ...result };
+        const sanitizedResult = { ...result };
         let sanitized = false;
 
         // Validação de campos obrigatórios
@@ -594,7 +594,7 @@ export class ToolCallingValidator extends DisposableBase {
      * Sanitiza string removendo conteúdo perigoso
      */
     private sanitizeString(input: string): string {
-        if (!this.config.enableSanitization) return input;
+        if (!this.config.enableSanitization) {return input;}
 
         let sanitized = input;
 
@@ -780,7 +780,7 @@ export class ToolCallingValidator extends DisposableBase {
         errors: ValidationError[],
         warnings: ValidationWarning[]
     ): void {
-        if (!schema.properties) return;
+        if (!schema.properties) {return;}
 
         // Valida campos obrigatórios
         if (schema.required) {

@@ -200,7 +200,7 @@ export class ToolCallIdManager extends DisposableBase {
      */
     getChildren(parentId: string): ToolCallRecord[] {
         const parent = this.registry.get(parentId);
-        if (!parent) return [];
+        if (!parent) {return [];}
 
         return parent.children
             .map(childId => this.registry.get(childId))
@@ -216,7 +216,7 @@ export class ToolCallIdManager extends DisposableBase {
         descendants: ToolCallRecord[];
     } | undefined {
         const record = this.registry.get(id);
-        if (!record) return undefined;
+        if (!record) {return undefined;}
 
         const children = this.getChildren(id);
         const descendants: ToolCallRecord[] = [];
@@ -285,7 +285,7 @@ export class ToolCallIdManager extends DisposableBase {
      * Limpa registry mantendo apenas registros recentes
      */
     private cleanupOldRecords(): void {
-        if (this.registry.size <= this.config.maxHistorySize) return;
+        if (this.registry.size <= this.config.maxHistorySize) {return;}
 
         // Ordena por timestamp e remove os mais antigos
         const sortedRecords = Array.from(this.registry.entries())
@@ -515,7 +515,7 @@ export class ToolCallIdUtils {
      * Valida formato de ID
      */
     static validateId(id: string, expectedPrefix?: string): boolean {
-        if (!id || typeof id !== 'string') return false;
+        if (!id || typeof id !== 'string') {return false;}
         
         const parsed = this.parseId(id);
         

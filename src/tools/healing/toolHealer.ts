@@ -642,10 +642,10 @@ export class ToolHealer {
      */
     private normalizeModelName(modelName: string): string {
         const lower = modelName.toLowerCase();
-        if (lower.includes('gemini')) return 'gemini';
-        if (lower.includes('claude')) return 'claude';
-        if (lower.includes('deepseek')) return 'deepseek';
-        if (lower.includes('gpt')) return 'gpt';
+        if (lower.includes('gemini')) {return 'gemini';}
+        if (lower.includes('claude')) {return 'claude';}
+        if (lower.includes('deepseek')) {return 'deepseek';}
+        if (lower.includes('gpt')) {return 'gpt';}
         return 'unknown';
     }
 

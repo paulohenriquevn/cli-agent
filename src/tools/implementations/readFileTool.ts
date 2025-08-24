@@ -131,4 +131,4 @@ Examples: Read "src/main.js" entirely, read lines 10-30 from large file, inspect
 }
 
 // Auto-register the tool
-ToolRegistry.getInstance().registerTool(ReadFileTool);
+ToolRegistry.registerTool(ReadFileTool);

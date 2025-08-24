@@ -227,4 +227,4 @@ export class NotebookEditTool extends BaseTool<INotebookEditParams> {
 }
 
 // Register the tool
-ToolRegistry.getInstance().registerTool(NotebookEditTool);
+ToolRegistry.registerTool(NotebookEditTool);

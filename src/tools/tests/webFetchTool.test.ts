@@ -6,11 +6,11 @@ import { ToolRegistry } from '../registry/toolRegistry';
 import { createTestContext } from './setup';
 
 describe('WebFetchTool', () => {
-    const registry = ToolRegistry.getInstance();
+    // const registry = ToolRegistry;
     const context = createTestContext();
 
     test('should fetch and analyze web content', async () => {
-        const result = await registry.executeTool('web_fetch', {
+        const result = await ToolRegistry.executeTool('web_fetch', {
             url: 'https://example.com',
             prompt: 'Analyze the content of this webpage'
         }, context);
@@ -21,7 +21,7 @@ describe('WebFetchTool', () => {
     });
 
     test('should validate URL format', async () => {
-        const result = await registry.executeTool('web_fetch', {
+        const result = await ToolRegistry.executeTool('web_fetch', {
             url: 'invalid-url',
             prompt: 'Test invalid URL'
         }, context);
@@ -37,7 +37,7 @@ describe('WebFetchTool', () => {
         ];
 
         for (const url of urls) {
-            const result = await registry.executeTool('web_fetch', {
+            const result = await ToolRegistry.executeTool('web_fetch', {
                 url,
                 prompt: 'Test URL scheme'
             }, context);
@@ -55,7 +55,7 @@ describe('WebFetchTool', () => {
 4. Key information for developers
 5. Any API documentation or endpoints mentioned`;
 
-        const result = await registry.executeTool('web_fetch', {
+        const result = await ToolRegistry.executeTool('web_fetch', {
             url: 'https://api.example.com/docs',
             prompt: complexPrompt
         }, context);
@@ -66,7 +66,7 @@ describe('WebFetchTool', () => {
     });
 
     test('should show fetch metadata', async () => {
-        const result = await registry.executeTool('web_fetch', {
+        const result = await ToolRegistry.executeTool('web_fetch', {
             url: 'https://example.com',
             prompt: 'Get page info'
         }, context);
@@ -77,7 +77,7 @@ describe('WebFetchTool', () => {
     });
 
     test('should handle missing prompt', async () => {
-        const result = await registry.executeTool('web_fetch', {
+        const result = await ToolRegistry.executeTool('web_fetch', {
             url: 'https://example.com'
             // Missing prompt
         }, context);
@@ -86,7 +86,7 @@ describe('WebFetchTool', () => {
     });
 
     test('should handle HTTPS upgrade', async () => {
-        const result = await registry.executeTool('web_fetch', {
+        const result = await ToolRegistry.executeTool('web_fetch', {
             url: 'http://example.com',
             prompt: 'Test HTTPS upgrade'
         }, context);
@@ -95,7 +95,7 @@ describe('WebFetchTool', () => {
     });
 
     test('should simulate fetch timeout', async () => {
-        const result = await registry.executeTool('web_fetch', {
+        const result = await ToolRegistry.executeTool('web_fetch', {
             url: 'https://very-slow-website.example',
             prompt: 'Test timeout handling'
         }, context);
@@ -106,7 +106,7 @@ describe('WebFetchTool', () => {
     test('should handle special characters in prompts', async () => {
         const specialPrompt = 'Analyze: "quotes", & symbols, émojis 🚀, and other chars @#$%';
 
-        const result = await registry.executeTool('web_fetch', {
+        const result = await ToolRegistry.executeTool('web_fetch', {
             url: 'https://example.com',
             prompt: specialPrompt
         }, context);
@@ -116,7 +116,7 @@ describe('WebFetchTool', () => {
     });
 
     test('should show execution time', async () => {
-        const result = await registry.executeTool('web_fetch', {
+        const result = await ToolRegistry.executeTool('web_fetch', {
             url: 'https://example.com',
             prompt: 'Time test'
         }, context);
@@ -126,7 +126,7 @@ describe('WebFetchTool', () => {
     });
 
     test('should handle domain redirects info', async () => {
-        const result = await registry.executeTool('web_fetch', {
+        const result = await ToolRegistry.executeTool('web_fetch', {
             url: 'https://redirect.example.com',
             prompt: 'Test redirect handling'
         }, context);

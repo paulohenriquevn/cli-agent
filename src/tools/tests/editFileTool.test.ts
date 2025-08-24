@@ -8,7 +8,7 @@ import { promises as fs } from 'fs';
 import * as path from 'path';
 
 describe('EditFileTool', () => {
-    const registry = ToolRegistry.getInstance();
+    // const registry = ToolRegistry;
     const context = createTestContext();
 
     beforeEach(async () => {
@@ -22,7 +22,7 @@ describe('EditFileTool', () => {
     test('should edit single occurrence', async () => {
         const testFile = path.join(TEST_FILES_DIR, 'edit-test.txt');
 
-        const result = await registry.executeTool('edit_file', {
+        const result = await ToolRegistry.executeTool('edit_file', {
             filePath: testFile,
             oldText: 'Hello World',
             newText: 'Hello Universe'
@@ -40,7 +40,7 @@ describe('EditFileTool', () => {
         const testFile = path.join(TEST_FILES_DIR, 'edit-test.txt');
         await fs.writeFile(testFile, 'test\nAnother test\nFinal test line');
 
-        const result = await registry.executeTool('edit_file', {
+        const result = await ToolRegistry.executeTool('edit_file', {
             filePath: testFile,
             oldText: 'test',
             newText: 'example',
@@ -57,7 +57,7 @@ describe('EditFileTool', () => {
     test('should handle multiline replacement', async () => {
         const testFile = path.join(TEST_FILES_DIR, 'edit-test.txt');
 
-        const result = await registry.executeTool('edit_file', {
+        const result = await ToolRegistry.executeTool('edit_file', {
             filePath: testFile,
             oldText: 'This is a test file\nLine 3',
             newText: 'This is an edited file\nModified line 3'
@@ -73,7 +73,7 @@ describe('EditFileTool', () => {
     test('should handle text not found', async () => {
         const testFile = path.join(TEST_FILES_DIR, 'edit-test.txt');
 
-        const result = await registry.executeTool('edit_file', {
+        const result = await ToolRegistry.executeTool('edit_file', {
             filePath: testFile,
             oldText: 'Non-existent text',
             newText: 'Replacement'
@@ -83,7 +83,7 @@ describe('EditFileTool', () => {
     });
 
     test('should handle non-existent file', async () => {
-        const result = await registry.executeTool('edit_file', {
+        const result = await ToolRegistry.executeTool('edit_file', {
             filePath: path.join(TEST_FILES_DIR, 'nonexistent.txt'),
             oldText: 'anything',
             newText: 'replacement'
@@ -97,7 +97,7 @@ describe('EditFileTool', () => {
         const content = 'Ação com acentos e çedilhas';
         await fs.writeFile(testFile, content, 'utf-8');
 
-        const result = await registry.executeTool('edit_file', {
+        const result = await ToolRegistry.executeTool('edit_file', {
             filePath: testFile,
             oldText: 'Ação',
             newText: 'Operação'

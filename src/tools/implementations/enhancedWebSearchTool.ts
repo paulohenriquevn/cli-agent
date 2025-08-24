@@ -514,4 +514,4 @@ export class EnhancedWebSearchTool extends BaseTool<IEnhancedWebSearchParams> {
 }
 
 // Register the tool
-ToolRegistry.getInstance().registerTool(EnhancedWebSearchTool);
+ToolRegistry.registerTool(EnhancedWebSearchTool);

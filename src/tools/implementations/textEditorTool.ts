@@ -364,4 +364,4 @@ Examples: Safely replacing function names across files, creating new configurati
 }
 
 // Register the tool
-ToolRegistry.getInstance().registerTool(TextEditorTool);
+ToolRegistry.registerTool(TextEditorTool);

@@ -201,4 +201,4 @@ Examples: Find latest software versions, check recent API changes, research curr
 }
 
 // Auto-register the tool
-ToolRegistry.getInstance().registerTool(WebSearchTool);
+ToolRegistry.registerTool(WebSearchTool);

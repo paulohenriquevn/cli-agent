@@ -8,14 +8,14 @@ import { promises as fs } from 'fs';
 import * as path from 'path';
 
 describe('WriteFileTool', () => {
-    const registry = ToolRegistry.getInstance();
+    // const registry = ToolRegistry;
     const context = createTestContext();
 
     test('should write new file', async () => {
         const testFile = path.join(TEST_FILES_DIR, 'new-file.txt');
         const content = 'This is new content\nWith multiple lines';
 
-        const result = await registry.executeTool('write_file', {
+        const result = await ToolRegistry.executeTool('write_file', {
             filePath: testFile,
             content
         }, context);
@@ -33,7 +33,7 @@ describe('WriteFileTool', () => {
 
         const newContent = 'New content that replaces old';
 
-        const result = await registry.executeTool('write_file', {
+        const result = await ToolRegistry.executeTool('write_file', {
             filePath: testFile,
             content: newContent
         }, context);
@@ -49,7 +49,7 @@ describe('WriteFileTool', () => {
         const testFile = path.join(TEST_FILES_DIR, 'deep', 'nested', 'file.txt');
         const content = 'Deep nested content';
 
-        const result = await registry.executeTool('write_file', {
+        const result = await ToolRegistry.executeTool('write_file', {
             filePath: testFile,
             content
         }, context);
@@ -66,7 +66,7 @@ describe('WriteFileTool', () => {
     test('should handle empty content', async () => {
         const testFile = path.join(TEST_FILES_DIR, 'empty.txt');
 
-        const result = await registry.executeTool('write_file', {
+        const result = await ToolRegistry.executeTool('write_file', {
             filePath: testFile,
             content: ''
         }, context);
@@ -81,7 +81,7 @@ describe('WriteFileTool', () => {
         const testFile = path.join(TEST_FILES_DIR, 'large.txt');
         const content = 'Large content\n'.repeat(1000);
 
-        const result = await registry.executeTool('write_file', {
+        const result = await ToolRegistry.executeTool('write_file', {
             filePath: testFile,
             content
         }, context);

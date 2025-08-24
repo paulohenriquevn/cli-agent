@@ -680,4 +680,4 @@ export class ComputerUseTool extends BaseTool<IComputerUseParams> {
 }
 
 // Register the tool
-ToolRegistry.getInstance().registerTool(ComputerUseTool);
+ToolRegistry.registerTool(ComputerUseTool);
