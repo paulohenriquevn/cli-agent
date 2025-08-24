@@ -16,28 +16,13 @@
   "exclude": [
     "node_modules",
     "dist",
+    "src/tools/healing/**/*",
     "src/tools/healing.disabled/**/*",
     "src/tools/execution/*.disabled",
     "src/tools/registry/__tests__/*.disabled",
     "src/tools/execution/__tests__/*.disabled",
     "src/tools/implementations/toolHealingTool.ts",
     "src/agent/cliAgent.ts",
-    "src/cli.ts",
-    "src/tools/implementations/advancedDiffTool.ts",
-    "src/tools/implementations/advancedNotebookTool.ts",
-    "src/tools/implementations/advancedPatchTool.ts",
-    "src/tools/implementations/computerUseTool.ts",
-    "src/tools/implementations/createExecutionPlanTool.ts",
-    "src/tools/implementations/enhancedWebSearchTool.ts",
-    "src/tools/implementations/fetchDocumentationTool.ts",
-    "src/tools/implementations/hooksManagementTool.ts",
-    "src/tools/implementations/intelligentTestAnalyzerTool.ts",
-    "src/tools/implementations/mcpIntegrationTool.ts",
-    "src/tools/implementations/notebookEditTool.ts",
-    "src/tools/implementations/notebookReadTool.ts",
-    "src/tools/implementations/searchCodeTool.ts",
-    "src/tools/implementations/subAgentsTool.ts",
-    "src/tools/implementations/symbolAnalysisTool.ts",
-    "src/tools/implementations/textEditorTool.ts"
+    "src/cli.ts"
   ]
 }

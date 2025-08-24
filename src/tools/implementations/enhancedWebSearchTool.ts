@@ -3,9 +3,13 @@
  * Enhanced version with multiple search engines, result ranking, and content analysis
  *--------------------------------------------------------------------------------------------*/
 
-import * as vscode from 'vscode';
 import { BaseTool } from '../base/baseTool';
 import { ToolRegistry } from '../registry/toolRegistry';
+import {
+    CliCancellationToken,
+    CliToolResult,
+    CliToolInvocationOptions
+} from '../types/cliTypes';
 
 interface IEnhancedWebSearchParams {
     query: string;
@@ -118,9 +122,9 @@ export class EnhancedWebSearchTool extends BaseTool<IEnhancedWebSearchParams> {
     };
 
     async invoke(
-        options: vscode.LanguageModelToolInvocationOptions<IEnhancedWebSearchParams>,
-        _token: vscode.CancellationToken
-    ): Promise<vscode.LanguageModelToolResult> {
+        options: CliToolInvocationOptions<IEnhancedWebSearchParams>,
+        _token: CliCancellationToken
+    ): Promise<CliToolResult> {
         const params = options.input;
         const startTime = Date.now();
 
@@ -206,7 +210,7 @@ export class EnhancedWebSearchTool extends BaseTool<IEnhancedWebSearchParams> {
         }
 
         // Remove duplicates and return
-        return [...new Set(domains)];
+        return Array.from(new Set(domains));
     }
 
     private generateTitle(query: string, domain: string): string {

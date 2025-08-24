@@ -3,10 +3,14 @@
  * Replicates Claude Code's sub agents functionality
  *--------------------------------------------------------------------------------------------*/
 
-import * as vscode from 'vscode';
 import { BaseTool } from '../base/baseTool';
 import { ToolRegistry } from '../registry/toolRegistry';
 import { SubAgentsSystem, ISubAgentRequest, SubAgentType } from '../../systems/subAgentsSystem';
+import {
+    CliCancellationToken,
+    CliToolResult,
+    CliToolInvocationOptions
+} from '../types/cliTypes';
 
 interface ISubAgentsParams {
     action: 'list' | 'invoke' | 'find' | 'enable' | 'disable' | 'get_info';
@@ -71,10 +75,20 @@ Examples: Running security analysis on authentication code, getting performance 
     };
 
     async invoke(
-        options: vscode.LanguageModelToolInvocationOptions<ISubAgentsParams>,
-        _token: vscode.CancellationToken
-    ): Promise<vscode.LanguageModelToolResult> {
+        options: CliToolInvocationOptions<ISubAgentsParams>,
+        _token: CliCancellationToken
+    ): Promise<CliToolResult> {
         const params = options.input;
+
+        // Validate required parameters
+        if (!params.action || typeof params.action !== 'string') {
+            return this.createErrorResult('action is required and must be a string');
+        }
+
+        const validActions = ['list', 'invoke', 'find', 'enable', 'disable', 'get_info'];
+        if (!validActions.includes(params.action)) {
+            return this.createErrorResult(`Invalid action: ${params.action}. Must be one of: ${validActions.join(', ')}`);
+        }
 
         try {
             const subAgentsSystem = SubAgentsSystem.getInstance();
@@ -100,7 +114,7 @@ Examples: Running security analysis on authentication code, getting performance 
         }
     }
 
-    private async handleList(subAgentsSystem: SubAgentsSystem): Promise<vscode.LanguageModelToolResult> {
+    private async handleList(subAgentsSystem: SubAgentsSystem): Promise<CliToolResult> {
         const agents = subAgentsSystem.listAgents();
 
         if (agents.length === 0) {
@@ -135,7 +149,7 @@ Examples: Running security analysis on authentication code, getting performance 
         return this.createSuccessResult(null, lines.join('\n'));
     }
 
-    private async handleInvoke(subAgentsSystem: SubAgentsSystem, params: ISubAgentsParams): Promise<vscode.LanguageModelToolResult> {
+    private async handleInvoke(subAgentsSystem: SubAgentsSystem, params: ISubAgentsParams): Promise<CliToolResult> {
         if (!params.agent_type || !params.task) {
             return this.createErrorResult('agent_type and task are required for invoke action');
         }
@@ -183,7 +197,7 @@ Examples: Running security analysis on authentication code, getting performance 
         }
     }
 
-    private async handleFind(subAgentsSystem: SubAgentsSystem, params: ISubAgentsParams): Promise<vscode.LanguageModelToolResult> {
+    private async handleFind(subAgentsSystem: SubAgentsSystem, params: ISubAgentsParams): Promise<CliToolResult> {
         if (!params.task) {
             return this.createErrorResult('task is required for find action');
         }
@@ -237,7 +251,7 @@ Examples: Running security analysis on authentication code, getting performance 
         return this.createSuccessResult(null, lines.join('\n'));
     }
 
-    private async handleEnable(subAgentsSystem: SubAgentsSystem, params: ISubAgentsParams): Promise<vscode.LanguageModelToolResult> {
+    private async handleEnable(subAgentsSystem: SubAgentsSystem, params: ISubAgentsParams): Promise<CliToolResult> {
         if (!params.agent_type) {
             return this.createErrorResult('agent_type is required for enable action');
         }
@@ -256,7 +270,7 @@ Examples: Running security analysis on authentication code, getting performance 
         ].join('\n'));
     }
 
-    private async handleDisable(subAgentsSystem: SubAgentsSystem, params: ISubAgentsParams): Promise<vscode.LanguageModelToolResult> {
+    private async handleDisable(subAgentsSystem: SubAgentsSystem, params: ISubAgentsParams): Promise<CliToolResult> {
         if (!params.agent_type) {
             return this.createErrorResult('agent_type is required for disable action');
         }
@@ -275,7 +289,7 @@ Examples: Running security analysis on authentication code, getting performance 
         ].join('\n'));
     }
 
-    private async handleGetInfo(subAgentsSystem: SubAgentsSystem, params: ISubAgentsParams): Promise<vscode.LanguageModelToolResult> {
+    private async handleGetInfo(subAgentsSystem: SubAgentsSystem, params: ISubAgentsParams): Promise<CliToolResult> {
         if (!params.agent_type) {
             return this.createErrorResult('agent_type is required for get_info action');
         }

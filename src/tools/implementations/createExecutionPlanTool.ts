@@ -3,9 +3,13 @@
  * Strategic planning and task management for AI agents
  *--------------------------------------------------------------------------------------------*/
 
-import * as vscode from 'vscode';
 import { BaseTool } from '../base/baseTool';
 import { ToolRegistry } from '../registry/toolRegistry';
+import {
+    CliCancellationToken,
+    CliToolResult,
+    CliToolInvocationOptions
+} from '../types/cliTypes';
 
 export interface Task {
     content: string;
@@ -83,9 +87,9 @@ Examples: Breaking down "implement user authentication" into login/register/vali
     };
 
     async invoke(
-        options: vscode.LanguageModelToolInvocationOptions<ICreateExecutionPlanParams>,
-        _token: vscode.CancellationToken
-    ): Promise<vscode.LanguageModelToolResult> {
+        options: CliToolInvocationOptions<ICreateExecutionPlanParams>,
+        _token: CliCancellationToken
+    ): Promise<CliToolResult> {
         const { tasks, projectContext } = options.input;
 
         try {

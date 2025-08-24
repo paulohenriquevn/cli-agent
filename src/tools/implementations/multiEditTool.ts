@@ -79,6 +79,28 @@ Examples: Update imports + function names, fix multiple bugs in one file, batch 
     ): Promise<CliToolResult> {
         const { file_path, edits } = options.input;
 
+        // Validate required parameters
+        if (!file_path || typeof file_path !== 'string') {
+            return this.createErrorResult('file_path is required and must be a string');
+        }
+        if (!edits || !Array.isArray(edits) || edits.length === 0) {
+            return this.createErrorResult('edits is required and must be a non-empty array');
+        }
+
+        // Validate each edit operation
+        for (let i = 0; i < edits.length; i++) {
+            const edit = edits[i];
+            if (!edit || typeof edit !== 'object') {
+                return this.createErrorResult(`Edit ${i + 1} must be an object`);
+            }
+            if (!edit.old_string || typeof edit.old_string !== 'string') {
+                return this.createErrorResult(`Edit ${i + 1}: old_string is required and must be a string`);
+            }
+            if (edit.new_string === undefined || typeof edit.new_string !== 'string') {
+                return this.createErrorResult(`Edit ${i + 1}: new_string is required and must be a string`);
+            }
+        }
+
         try {
             return await this.executeMultiEdit(file_path, edits);
         } catch (error) {

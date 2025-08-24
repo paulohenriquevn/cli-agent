@@ -3,10 +3,14 @@
  * Replicates Claude Code's hooks management functionality
  *--------------------------------------------------------------------------------------------*/
 
-import * as vscode from 'vscode';
 import { BaseTool } from '../base/baseTool';
 import { ToolRegistry } from '../registry/toolRegistry';
 import { HooksSystem, IHookHandler, HookType, IHookContext, IHookResult } from '../../systems/hooksSystem';
+import {
+    CliCancellationToken,
+    CliToolResult,
+    CliToolInvocationOptions
+} from '../types/cliTypes';
 
 interface IHooksManagementParams {
     action: 'list' | 'register' | 'unregister' | 'enable' | 'disable' | 'clear' | 'execute';
@@ -81,9 +85,9 @@ Examples: Adding performance monitoring hooks, implementing custom validation fo
     };
 
     async invoke(
-        options: vscode.LanguageModelToolInvocationOptions<IHooksManagementParams>,
-        _token: vscode.CancellationToken
-    ): Promise<vscode.LanguageModelToolResult> {
+        options: CliToolInvocationOptions<IHooksManagementParams>,
+        _token: CliCancellationToken
+    ): Promise<CliToolResult> {
         const params = options.input;
 
         try {
@@ -112,7 +116,7 @@ Examples: Adding performance monitoring hooks, implementing custom validation fo
         }
     }
 
-    private async handleList(hooksSystem: HooksSystem, params: IHooksManagementParams): Promise<vscode.LanguageModelToolResult> {
+    private async handleList(hooksSystem: HooksSystem, params: IHooksManagementParams): Promise<CliToolResult> {
         const hooks = hooksSystem.listHooks(params.hook_type);
 
         if (hooks.length === 0) {
@@ -165,7 +169,7 @@ Examples: Adding performance monitoring hooks, implementing custom validation fo
         return this.createSuccessResult(null, lines.join('\n'));
     }
 
-    private async handleRegister(hooksSystem: HooksSystem, params: IHooksManagementParams): Promise<vscode.LanguageModelToolResult> {
+    private async handleRegister(hooksSystem: HooksSystem, params: IHooksManagementParams): Promise<CliToolResult> {
         if (!params.hook_config) {
             return this.createErrorResult('hook_config is required for register action');
         }
@@ -209,7 +213,7 @@ Examples: Adding performance monitoring hooks, implementing custom validation fo
         }
     }
 
-    private async handleUnregister(hooksSystem: HooksSystem, params: IHooksManagementParams): Promise<vscode.LanguageModelToolResult> {
+    private async handleUnregister(hooksSystem: HooksSystem, params: IHooksManagementParams): Promise<CliToolResult> {
         if (!params.hook_id) {
             return this.createErrorResult('hook_id is required for unregister action');
         }
@@ -228,7 +232,7 @@ Examples: Adding performance monitoring hooks, implementing custom validation fo
         ].join('\n'));
     }
 
-    private async handleEnable(hooksSystem: HooksSystem, params: IHooksManagementParams): Promise<vscode.LanguageModelToolResult> {
+    private async handleEnable(hooksSystem: HooksSystem, params: IHooksManagementParams): Promise<CliToolResult> {
         if (!params.hook_id) {
             return this.createErrorResult('hook_id is required for enable action');
         }
@@ -247,7 +251,7 @@ Examples: Adding performance monitoring hooks, implementing custom validation fo
         ].join('\n'));
     }
 
-    private async handleDisable(hooksSystem: HooksSystem, params: IHooksManagementParams): Promise<vscode.LanguageModelToolResult> {
+    private async handleDisable(hooksSystem: HooksSystem, params: IHooksManagementParams): Promise<CliToolResult> {
         if (!params.hook_id) {
             return this.createErrorResult('hook_id is required for disable action');
         }
@@ -266,7 +270,7 @@ Examples: Adding performance monitoring hooks, implementing custom validation fo
         ].join('\n'));
     }
 
-    private async handleClear(hooksSystem: HooksSystem, params: IHooksManagementParams): Promise<vscode.LanguageModelToolResult> {
+    private async handleClear(hooksSystem: HooksSystem, params: IHooksManagementParams): Promise<CliToolResult> {
         hooksSystem.clearHooks(params.hook_type);
 
         return this.createSuccessResult(null, [
@@ -277,7 +281,7 @@ Examples: Adding performance monitoring hooks, implementing custom validation fo
         ].join('\n'));
     }
 
-    private async handleExecute(hooksSystem: HooksSystem, params: IHooksManagementParams): Promise<vscode.LanguageModelToolResult> {
+    private async handleExecute(hooksSystem: HooksSystem, params: IHooksManagementParams): Promise<CliToolResult> {
         if (!params.hook_type) {
             return this.createErrorResult('hook_type is required for execute action');
         }
@@ -322,7 +326,7 @@ Examples: Adding performance monitoring hooks, implementing custom validation fo
     private createHandlerFromCode(handlerCode: string): (context: IHookContext) => Promise<IHookResult> {
         try {
             // Create a safe execution environment
-            const handlerFunction = new Function('context', 'vscode', 'console', `
+            const handlerFunction = new Function('context', 'console', `
                 return (async function() {
                     ${handlerCode}
                 })();
@@ -330,7 +334,7 @@ Examples: Adding performance monitoring hooks, implementing custom validation fo
 
             return async(context: IHookContext): Promise<IHookResult> => {
                 try {
-                    const result = await handlerFunction.call(null, context, vscode, console);
+                    const result = await handlerFunction.call(null, context, console);
 
                     // Ensure result has proper structure
                     if (typeof result === 'object' && result !== null) {

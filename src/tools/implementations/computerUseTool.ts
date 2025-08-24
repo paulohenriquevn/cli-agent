@@ -3,11 +3,15 @@
  * Replicates Claude Code's Computer Use Tool functionality
  *--------------------------------------------------------------------------------------------*/
 
-import * as vscode from 'vscode';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { BaseTool } from '../base/baseTool';
 import { ToolRegistry } from '../registry/toolRegistry';
+import {
+    CliCancellationToken,
+    CliToolResult,
+    CliToolInvocationOptions
+} from '../types/cliTypes';
 
 interface IComputerUseParams {
     action: 'screenshot' | 'left_click' | 'right_click' | 'middle_click' | 'double_click' | 'triple_click' |
@@ -73,15 +77,31 @@ export class ComputerUseTool extends BaseTool<IComputerUseParams> {
     };
 
     async invoke(
-        options: vscode.LanguageModelToolInvocationOptions<IComputerUseParams>,
-        _token: vscode.CancellationToken
-    ): Promise<vscode.LanguageModelToolResult> {
+        options: CliToolInvocationOptions<IComputerUseParams>,
+        _token: CliCancellationToken
+    ): Promise<CliToolResult> {
         const params = options.input;
+
+        // Validate required parameters
+        if (!params.action || typeof params.action !== 'string') {
+            return this.createErrorResult('action is required and must be a string');
+        }
+
+        const validActions = ['screenshot', 'left_click', 'right_click', 'middle_click', 'double_click', 'triple_click',
+                              'type', 'key', 'scroll', 'mouse_move', 'left_click_drag'];
+        if (!validActions.includes(params.action)) {
+            return this.createErrorResult(`Invalid action: ${params.action}. Must be one of: ${validActions.join(', ')}`);
+        }
 
         try {
             // Check if running in a supported environment
             if (typeof process === 'undefined' || !process.platform) {
                 return this.createErrorResult('Computer use actions are not supported in browser environment');
+            }
+
+            // Check for headless environment (no display)
+            if (this.isHeadlessEnvironment()) {
+                return this.createErrorResult('Computer use actions are not supported in headless environment (no display available)');
             }
 
             switch (params.action) {
@@ -111,7 +131,7 @@ export class ComputerUseTool extends BaseTool<IComputerUseParams> {
         }
     }
 
-    private async handleScreenshot(): Promise<vscode.LanguageModelToolResult> {
+    private async handleScreenshot(): Promise<CliToolResult> {
         try {
             // Create a platform-specific screenshot command
             let screenshotCommand: string = '';
@@ -187,16 +207,14 @@ export class ComputerUseTool extends BaseTool<IComputerUseParams> {
                 await fs.mkdir(path.dirname(workspaceScreenshotPath), { recursive: true });
                 await fs.copyFile(outputPath, workspaceScreenshotPath);
 
-                // Show screenshot in VS Code
-                const uri = vscode.Uri.file(workspaceScreenshotPath);
-                await vscode.commands.executeCommand('vscode.open', uri);
+                // Screenshot saved successfully
 
                 return this.createSuccessResult(null, [
                     `**📸 Screenshot Captured**`,
                     `**Saved to:** \`${path.relative(workspaceRoot, workspaceScreenshotPath)}\``,
                     `**Temp file:** \`${outputPath}\``,
                     '',
-                    '✅ Screenshot opened in VS Code'
+                    '✅ Screenshot saved successfully'
                 ].join('\n'));
             } catch {
                 // Fallback: just return temp path
@@ -213,7 +231,7 @@ export class ComputerUseTool extends BaseTool<IComputerUseParams> {
         }
     }
 
-    private async handleClick(params: IComputerUseParams): Promise<vscode.LanguageModelToolResult> {
+    private async handleClick(params: IComputerUseParams): Promise<CliToolResult> {
         if (!params.coordinate || params.coordinate.length !== 2) {
             return this.createErrorResult('coordinate [x, y] is required for click actions');
         }
@@ -268,7 +286,7 @@ export class ComputerUseTool extends BaseTool<IComputerUseParams> {
         }
     }
 
-    private async handleType(params: IComputerUseParams): Promise<vscode.LanguageModelToolResult> {
+    private async handleType(params: IComputerUseParams): Promise<CliToolResult> {
         if (!params.text) {
             return this.createErrorResult('text is required for type action');
         }
@@ -319,7 +337,7 @@ export class ComputerUseTool extends BaseTool<IComputerUseParams> {
         }
     }
 
-    private async handleKey(params: IComputerUseParams): Promise<vscode.LanguageModelToolResult> {
+    private async handleKey(params: IComputerUseParams): Promise<CliToolResult> {
         if (!params.key) {
             return this.createErrorResult('key is required for key action');
         }
@@ -372,7 +390,7 @@ export class ComputerUseTool extends BaseTool<IComputerUseParams> {
         }
     }
 
-    private async handleScroll(params: IComputerUseParams): Promise<vscode.LanguageModelToolResult> {
+    private async handleScroll(params: IComputerUseParams): Promise<CliToolResult> {
         if (!params.scroll_direction) {
             return this.createErrorResult('scroll_direction is required for scroll action');
         }
@@ -432,7 +450,7 @@ export class ComputerUseTool extends BaseTool<IComputerUseParams> {
         }
     }
 
-    private async handleMouseMove(params: IComputerUseParams): Promise<vscode.LanguageModelToolResult> {
+    private async handleMouseMove(params: IComputerUseParams): Promise<CliToolResult> {
         if (!params.coordinate || params.coordinate.length !== 2) {
             return this.createErrorResult('coordinate [x, y] is required for mouse_move action');
         }
@@ -481,7 +499,7 @@ export class ComputerUseTool extends BaseTool<IComputerUseParams> {
         }
     }
 
-    private async handleDrag(params: IComputerUseParams): Promise<vscode.LanguageModelToolResult> {
+    private async handleDrag(params: IComputerUseParams): Promise<CliToolResult> {
         if (!params.coordinate || params.coordinate.length !== 2) {
             return this.createErrorResult('coordinate [x, y] is required for drag start position');
         }
@@ -537,6 +555,33 @@ export class ComputerUseTool extends BaseTool<IComputerUseParams> {
     }
 
     // Helper methods for platform-specific implementations
+    
+    private isHeadlessEnvironment(): boolean {
+        try {
+            // Check common environment variables that indicate headless operation
+            if (process.env.DISPLAY === '' || process.env.DISPLAY === ':0' && !process.env.SSH_CLIENT) {
+                // On Linux, check if DISPLAY is empty or if running in CI
+                if (process.env.CI || process.env.GITHUB_ACTIONS || process.env.JENKINS_URL) {
+                    return true;
+                }
+            }
+
+            // Check if we're in a known headless environment
+            if (process.env.HEADLESS === 'true' || 
+                process.env.CI === 'true' || 
+                process.env.GITHUB_ACTIONS === 'true' ||
+                process.env.CONTINUOUS_INTEGRATION === 'true' ||
+                !process.env.DISPLAY && process.platform === 'linux') {
+                return true;
+            }
+
+            return false;
+        } catch {
+            // If there's any error checking the environment, assume headless for safety
+            return true;
+        }
+    }
+
     private async executeCommand(command: string): Promise<void> {
         const { exec } = require('child_process');
         return new Promise((resolve, reject) => {

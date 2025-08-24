@@ -17,7 +17,10 @@
     "typecheck:watch": "npx tsc --noEmit --watch",
     "check": "npm run lint:check && npm run typecheck",
     "fix": "npm run lint && npm run typecheck",
-    "validate": "npm run check && npm run test:summary"
+    "validate": "npm run check && npm run test:summary",
+    "test:complete": "cd samples && npm run test:complete",
+    "demo:complete": "cd samples && npm run demo:complete",
+    "help": "cd samples && npm run help"
   },
   "dependencies": {
     "@xenova/transformers": "^2.17.2",
@@ -40,6 +43,7 @@
   "devDependencies": {
     "@types/bcryptjs": "^2.4.2",
     "@types/express": "^4.17.17",
+    "@types/fs-extra": "^11.0.0",
     "@types/jest": "^30.0.0",
     "@types/jsonwebtoken": "^9.0.2",
     "@types/node": "^20.0.0",

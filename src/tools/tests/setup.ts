@@ -23,6 +23,24 @@ import '../implementations/exitPlanModeTool';
 import '../implementations/webSearchTool';
 import '../implementations/executeCommandTool';
 
+// Import all the non-refactored tools that have been fixed
+import '../implementations/advancedDiffTool';
+import '../implementations/advancedNotebookTool';
+import '../implementations/advancedPatchTool';
+import '../implementations/computerUseTool';
+import '../implementations/createExecutionPlanTool';
+import '../implementations/enhancedWebSearchTool';
+import '../implementations/fetchDocumentationTool';
+import '../implementations/hooksManagementTool';
+import '../implementations/intelligentTestAnalyzerTool';
+import '../implementations/mcpIntegrationTool';
+import '../implementations/notebookEditTool';
+import '../implementations/notebookReadTool';
+import '../implementations/searchCodeTool';
+import '../implementations/subAgentsTool';
+import '../implementations/symbolAnalysisTool';
+import '../implementations/textEditorTool';
+
 // Test directories
 export const TEST_DIR = path.join(__dirname, 'test-workspace');
 export const TEST_FILES_DIR = path.join(TEST_DIR, 'files');

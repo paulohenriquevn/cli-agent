@@ -3,9 +3,13 @@
  * Advanced tool for fetching, parsing, and analyzing technical documentation
  *--------------------------------------------------------------------------------------------*/
 
-import * as vscode from 'vscode';
 import { BaseTool } from '../base/baseTool';
 import { ToolRegistry } from '../registry/toolRegistry';
+import {
+    CliCancellationToken,
+    CliToolResult,
+    CliToolInvocationOptions
+} from '../types/cliTypes';
 
 interface IFetchDocumentationParams {
     url?: string;
@@ -110,9 +114,9 @@ export class FetchDocumentationTool extends BaseTool<IFetchDocumentationParams> 
     };
 
     async invoke(
-        options: vscode.LanguageModelToolInvocationOptions<IFetchDocumentationParams>,
-        _token: vscode.CancellationToken
-    ): Promise<vscode.LanguageModelToolResult> {
+        options: CliToolInvocationOptions<IFetchDocumentationParams>,
+        _token: CliCancellationToken
+    ): Promise<CliToolResult> {
         const params = options.input;
         const startTime = Date.now();
 

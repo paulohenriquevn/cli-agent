@@ -3,11 +3,15 @@
  * Enhanced version with semantic search and context-aware results
  *--------------------------------------------------------------------------------------------*/
 
-import * as vscode from 'vscode';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { BaseTool } from '../base/baseTool';
 import { ToolRegistry } from '../registry/toolRegistry';
+import {
+    CliCancellationToken,
+    CliToolResult,
+    CliToolInvocationOptions
+} from '../types/cliTypes';
 
 interface ISearchCodeParams {
     query: string;
@@ -110,9 +114,9 @@ Examples: Find "processData" function, search "UserService" class, locate "apiKe
     };
 
     async invoke(
-        options: vscode.LanguageModelToolInvocationOptions<ISearchCodeParams>,
-        _token: vscode.CancellationToken
-    ): Promise<vscode.LanguageModelToolResult> {
+        options: CliToolInvocationOptions<ISearchCodeParams>,
+        _token: CliCancellationToken
+    ): Promise<CliToolResult> {
         const params = options.input;
         const startTime = Date.now();
 
@@ -246,7 +250,7 @@ Examples: Find "processData" function, search "UserService" class, locate "apiKe
 
                 for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
                     const line = lines[lineIndex];
-                    const matches = [...line.matchAll(pattern)];
+                    const matches = this.getMatches(line, pattern);
 
                     for (const match of matches) {
                         if (results.length >= maxResults) {break;}
@@ -450,6 +454,24 @@ Examples: Find "processData" function, search "UserService" class, locate "apiKe
             groups[result.file].push(result);
             return groups;
         }, {} as { [file: string]: ISearchResult[] });
+    }
+
+    private getMatches(text: string, pattern: RegExp): RegExpExecArray[] {
+        const matches: RegExpExecArray[] = [];
+        let match: RegExpExecArray | null;
+        
+        // Reset pattern lastIndex to ensure consistent behavior
+        pattern.lastIndex = 0;
+        
+        while ((match = pattern.exec(text)) !== null) {
+            matches.push(match);
+            // Break on non-global patterns to avoid infinite loop
+            if (!pattern.global) {
+                break;
+            }
+        }
+        
+        return matches;
     }
 }
 

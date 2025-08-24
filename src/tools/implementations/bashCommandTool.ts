@@ -96,6 +96,11 @@ Examples: "npm run build", "git status", "npm test", "mkdir src/components". SEC
             runInBackground = false 
         } = options.input;
 
+        // Validate required parameters
+        if (!command || typeof command !== 'string') {
+            return this.createErrorResult('command is required and must be a string');
+        }
+
         try {
             // Security check
             const securityIssue = this.checkCommandSecurity(command);

@@ -66,6 +66,17 @@ Examples: Fix "let x = 1" to "const x = 1", update imports, rename functions, re
     ): Promise<CliToolResult> {
         const { filePath, oldText, newText, replaceAll = false } = options.input;
 
+        // Validate required parameters
+        if (!filePath || typeof filePath !== 'string') {
+            return this.createErrorResult('filePath is required and must be a string');
+        }
+        if (!oldText || typeof oldText !== 'string') {
+            return this.createErrorResult('oldText is required and must be a string');
+        }
+        if (newText === undefined || typeof newText !== 'string') {
+            return this.createErrorResult('newText is required and must be a string');
+        }
+
         try {
             return await this.executeEdit(filePath, oldText, newText, replaceAll);
         } catch (error) {

@@ -3,11 +3,15 @@
  * Based on VSCode Copilot's UsagesTool with enhanced analysis capabilities
  *--------------------------------------------------------------------------------------------*/
 
-import * as vscode from 'vscode';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { BaseTool } from '../base/baseTool';
 import { ToolRegistry } from '../registry/toolRegistry';
+import {
+    CliCancellationToken,
+    CliToolResult,
+    CliToolInvocationOptions
+} from '../types/cliTypes';
 
 interface ISymbolAnalysisParams {
     action: 'find_usages' | 'find_definitions' | 'find_implementations' | 'analyze_symbol' | 'find_references';
@@ -97,10 +101,23 @@ Examples: Finding all usages of "calculateTotal" before renaming, analyzing "Use
     };
 
     async invoke(
-        options: vscode.LanguageModelToolInvocationOptions<ISymbolAnalysisParams>,
-        _token: vscode.CancellationToken
-    ): Promise<vscode.LanguageModelToolResult> {
+        options: CliToolInvocationOptions<ISymbolAnalysisParams>,
+        _token: CliCancellationToken
+    ): Promise<CliToolResult> {
         const params = options.input;
+
+        // Validate required parameters
+        if (!params.action || typeof params.action !== 'string') {
+            return this.createErrorResult('action is required and must be a string');
+        }
+        if (!params.symbol_name || typeof params.symbol_name !== 'string') {
+            return this.createErrorResult('symbol_name is required and must be a string');
+        }
+
+        const validActions = ['find_usages', 'find_definitions', 'find_implementations', 'analyze_symbol', 'find_references'];
+        if (!validActions.includes(params.action)) {
+            return this.createErrorResult(`Invalid action: ${params.action}. Must be one of: ${validActions.join(', ')}`);
+        }
 
         try {
             switch (params.action) {
@@ -121,7 +138,7 @@ Examples: Finding all usages of "calculateTotal" before renaming, analyzing "Use
         }
     }
 
-    private async handleFindUsages(params: ISymbolAnalysisParams): Promise<vscode.LanguageModelToolResult> {
+    private async handleFindUsages(params: ISymbolAnalysisParams): Promise<CliToolResult> {
         const usages = await this.findSymbolUsages(params.symbol_name, {
             includePaths: params.file_paths,
             includeTests: params.include_tests !== false,
@@ -133,7 +150,7 @@ Examples: Finding all usages of "calculateTotal" before renaming, analyzing "Use
         return this.createSuccessResult(null, response);
     }
 
-    private async handleFindDefinitions(params: ISymbolAnalysisParams): Promise<vscode.LanguageModelToolResult> {
+    private async handleFindDefinitions(params: ISymbolAnalysisParams): Promise<CliToolResult> {
         const definitions = await this.findSymbolDefinitions(params.symbol_name, {
             includePaths: params.file_paths,
             includeTests: params.include_tests !== false,
@@ -145,7 +162,7 @@ Examples: Finding all usages of "calculateTotal" before renaming, analyzing "Use
         return this.createSuccessResult(null, response);
     }
 
-    private async handleFindImplementations(params: ISymbolAnalysisParams): Promise<vscode.LanguageModelToolResult> {
+    private async handleFindImplementations(params: ISymbolAnalysisParams): Promise<CliToolResult> {
         const implementations = await this.findSymbolImplementations(params.symbol_name, {
             includePaths: params.file_paths,
             includeTests: params.include_tests !== false,
@@ -157,7 +174,7 @@ Examples: Finding all usages of "calculateTotal" before renaming, analyzing "Use
         return this.createSuccessResult(null, response);
     }
 
-    private async handleAnalyzeSymbol(params: ISymbolAnalysisParams): Promise<vscode.LanguageModelToolResult> {
+    private async handleAnalyzeSymbol(params: ISymbolAnalysisParams): Promise<CliToolResult> {
         const analysis = await this.performCompleteSymbolAnalysis(params.symbol_name, {
             includePaths: params.file_paths,
             includeTests: params.include_tests !== false,

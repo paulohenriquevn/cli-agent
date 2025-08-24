@@ -3,11 +3,15 @@
  * Replicates Claude Code's NotebookEdit tool functionality
  *--------------------------------------------------------------------------------------------*/
 
-import * as vscode from 'vscode';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { BaseTool } from '../base/baseTool';
 import { ToolRegistry } from '../registry/toolRegistry';
+import {
+    CliCancellationToken,
+    CliToolResult,
+    CliToolInvocationOptions
+} from '../types/cliTypes';
 
 interface INotebookEditParams {
     notebook_path: string;
@@ -55,9 +59,9 @@ export class NotebookEditTool extends BaseTool<INotebookEditParams> {
     };
 
     async invoke(
-        options: vscode.LanguageModelToolInvocationOptions<INotebookEditParams>,
-        _token: vscode.CancellationToken
-    ): Promise<vscode.LanguageModelToolResult> {
+        options: CliToolInvocationOptions<INotebookEditParams>,
+        _token: CliCancellationToken
+    ): Promise<CliToolResult> {
         const params = options.input;
 
         try {
@@ -178,11 +182,8 @@ export class NotebookEditTool extends BaseTool<INotebookEditParams> {
         // Write notebook back
         await fs.writeFile(params.notebook_path, JSON.stringify(notebook, null, 2), 'utf8');
 
-        // Notify VS Code about the change
-        const uri = vscode.Uri.file(params.notebook_path);
-        const workspaceEdit = new vscode.WorkspaceEdit();
-        workspaceEdit.createFile(uri, { overwrite: true });
-        await vscode.workspace.applyEdit(workspaceEdit);
+        // Write notebook file
+        // (VSCode workspace notification removed)
 
         return {
             operation,

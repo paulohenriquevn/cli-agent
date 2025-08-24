@@ -59,7 +59,9 @@ describe('GrepTool', () => {
             path: TEST_FILES_DIR
         }, context);
 
-        expect(result.hasErrors()).toBe(true);
+        // Should return success with 0 matches, not an error
+        expect(result.hasErrors()).toBe(false);
+        expect(result.getText()).toContain('No matches found');
     });
 
     test('should search recursively', async () => {
@@ -80,7 +82,10 @@ describe('GrepTool', () => {
             maxResults: 2
         }, context);
 
-        const lines = result.getText().split('\n').filter((line: string) => line.includes(':'));
+        // Count actual match lines (those that start with line numbers after file paths)
+        const lines = result.getText().split('\n').filter((line: string) => 
+            line.trim().match(/^\d+:/) // Line numbers followed by colon
+        );
         expect(lines.length).toBeLessThanOrEqual(2);
     });
 

@@ -3,11 +3,15 @@
  * Based on VSCode Copilot's notebook tools with significant improvements
  *--------------------------------------------------------------------------------------------*/
 
-import * as vscode from 'vscode';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { BaseTool } from '../base/baseTool';
 import { ToolRegistry } from '../registry/toolRegistry';
+import {
+    CliCancellationToken,
+    CliToolResult,
+    CliToolInvocationOptions
+} from '../types/cliTypes';
 
 interface IAdvancedNotebookParams {
     action: 'analyze' | 'edit_cell' | 'insert_cell' | 'delete_cell' | 'move_cell' | 'get_outline' | 'find_errors' | 'optimize';
@@ -86,10 +90,23 @@ export class AdvancedNotebookTool extends BaseTool<IAdvancedNotebookParams> {
     };
 
     async invoke(
-        options: vscode.LanguageModelToolInvocationOptions<IAdvancedNotebookParams>,
-        _token: vscode.CancellationToken
-    ): Promise<vscode.LanguageModelToolResult> {
+        options: CliToolInvocationOptions<IAdvancedNotebookParams>,
+        _token: CliCancellationToken
+    ): Promise<CliToolResult> {
         const params = options.input;
+
+        // Validate required parameters
+        if (!params.action || typeof params.action !== 'string') {
+            return this.createErrorResult('action is required and must be a string');
+        }
+        if (!params.notebook_path || typeof params.notebook_path !== 'string') {
+            return this.createErrorResult('notebook_path is required and must be a string');
+        }
+
+        const validActions = ['analyze', 'edit_cell', 'insert_cell', 'delete_cell', 'move_cell', 'get_outline', 'find_errors', 'optimize'];
+        if (!validActions.includes(params.action)) {
+            return this.createErrorResult(`Invalid action: ${params.action}. Must be one of: ${validActions.join(', ')}`);
+        }
 
         try {
             // Validate notebook path
@@ -122,7 +139,7 @@ export class AdvancedNotebookTool extends BaseTool<IAdvancedNotebookParams> {
         }
     }
 
-    private async handleAnalyze(notebookPath: string): Promise<vscode.LanguageModelToolResult> {
+    private async handleAnalyze(notebookPath: string): Promise<CliToolResult> {
         const notebook = await this.loadNotebook(notebookPath);
         const analysis = await this.analyzeNotebook(notebook);
 
@@ -130,7 +147,7 @@ export class AdvancedNotebookTool extends BaseTool<IAdvancedNotebookParams> {
         return this.createSuccessResult(null, response);
     }
 
-    private async handleEditCell(notebookPath: string, params: IAdvancedNotebookParams): Promise<vscode.LanguageModelToolResult> {
+    private async handleEditCell(notebookPath: string, params: IAdvancedNotebookParams): Promise<CliToolResult> {
         if (!params.new_source) {
             return this.createErrorResult('new_source is required for edit_cell action');
         }
@@ -164,7 +181,7 @@ export class AdvancedNotebookTool extends BaseTool<IAdvancedNotebookParams> {
         return this.createSuccessResult(null, response);
     }
 
-    private async handleInsertCell(notebookPath: string, params: IAdvancedNotebookParams): Promise<vscode.LanguageModelToolResult> {
+    private async handleInsertCell(notebookPath: string, params: IAdvancedNotebookParams): Promise<CliToolResult> {
         if (!params.new_source || !params.cell_type) {
             return this.createErrorResult('new_source and cell_type are required for insert_cell action');
         }
@@ -215,7 +232,7 @@ export class AdvancedNotebookTool extends BaseTool<IAdvancedNotebookParams> {
         return this.createSuccessResult(null, response);
     }
 
-    private async handleDeleteCell(notebookPath: string, params: IAdvancedNotebookParams): Promise<vscode.LanguageModelToolResult> {
+    private async handleDeleteCell(notebookPath: string, params: IAdvancedNotebookParams): Promise<CliToolResult> {
         const notebook = await this.loadNotebook(notebookPath);
         const cellIndex = await this.findCellIndex(notebook, params);
 
@@ -243,7 +260,7 @@ export class AdvancedNotebookTool extends BaseTool<IAdvancedNotebookParams> {
         return this.createSuccessResult(null, response);
     }
 
-    private async handleMoveCell(notebookPath: string, params: IAdvancedNotebookParams): Promise<vscode.LanguageModelToolResult> {
+    private async handleMoveCell(notebookPath: string, params: IAdvancedNotebookParams): Promise<CliToolResult> {
         if (params.target_index === undefined) {
             return this.createErrorResult('target_index is required for move_cell action');
         }
@@ -278,7 +295,7 @@ export class AdvancedNotebookTool extends BaseTool<IAdvancedNotebookParams> {
         return this.createSuccessResult(null, response);
     }
 
-    private async handleGetOutline(notebookPath: string): Promise<vscode.LanguageModelToolResult> {
+    private async handleGetOutline(notebookPath: string): Promise<CliToolResult> {
         const notebook = await this.loadNotebook(notebookPath);
         const outline = this.createNotebookOutline(notebook);
 
@@ -286,7 +303,7 @@ export class AdvancedNotebookTool extends BaseTool<IAdvancedNotebookParams> {
         return this.createSuccessResult(null, response);
     }
 
-    private async handleFindErrors(notebookPath: string): Promise<vscode.LanguageModelToolResult> {
+    private async handleFindErrors(notebookPath: string): Promise<CliToolResult> {
         const notebook = await this.loadNotebook(notebookPath);
         const errors = this.findNotebookErrors(notebook);
 
@@ -294,7 +311,7 @@ export class AdvancedNotebookTool extends BaseTool<IAdvancedNotebookParams> {
         return this.createSuccessResult(null, response);
     }
 
-    private async handleOptimize(notebookPath: string): Promise<vscode.LanguageModelToolResult> {
+    private async handleOptimize(notebookPath: string): Promise<CliToolResult> {
         const notebook = await this.loadNotebook(notebookPath);
         const optimizations = await this.optimizeNotebook(notebook);
 
@@ -338,15 +355,8 @@ export class AdvancedNotebookTool extends BaseTool<IAdvancedNotebookParams> {
         }
     }
 
-    private async notifyVSCode(notebookPath: string, notebook: any): Promise<void> {
-        try {
-            // Notify VS Code that the file has changed
-            const uri = vscode.Uri.file(notebookPath);
-            const content = JSON.stringify(notebook, null, 2);
-            await vscode.workspace.fs.writeFile(uri, Buffer.from(content, 'utf8'));
-        } catch {
-            // Ignore VS Code notification errors
-        }
+    private async notifyVSCode(_notebookPath: string, _notebook: any): Promise<void> {
+        // VSCode notification removed for CLI compatibility
     }
 
     private async findCellIndex(notebook: any, params: IAdvancedNotebookParams): Promise<number> {
@@ -399,7 +409,7 @@ export class AdvancedNotebookTool extends BaseTool<IAdvancedNotebookParams> {
                 }
             }
         });
-        return [...new Set(imports)];
+        return Array.from(new Set(imports));
     }
 
     private extractFunctions(cells: any[]): string[] {
@@ -413,7 +423,7 @@ export class AdvancedNotebookTool extends BaseTool<IAdvancedNotebookParams> {
                 }
             }
         });
-        return [...new Set(functions)].filter(f => f);
+        return Array.from(new Set(functions)).filter(f => f);
     }
 
     private extractVariables(cells: any[]): string[] {
@@ -427,7 +437,7 @@ export class AdvancedNotebookTool extends BaseTool<IAdvancedNotebookParams> {
                 }
             }
         });
-        return [...new Set(variables)];
+        return Array.from(new Set(variables));
     }
 
     private createNotebookOutline(notebook: any): any {

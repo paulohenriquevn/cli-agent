@@ -3,9 +3,13 @@
  * Replicates Claude Code's MCP functionality
  *--------------------------------------------------------------------------------------------*/
 
-import * as vscode from 'vscode';
 import { BaseTool } from '../base/baseTool';
 import { ToolRegistry } from '../registry/toolRegistry';
+import {
+    CliCancellationToken,
+    CliToolResult,
+    CliToolInvocationOptions
+} from '../types/cliTypes';
 
 interface IMCPParams {
     action: 'list_servers' | 'connect' | 'disconnect' | 'call_tool' | 'list_tools' | 'get_server_info';
@@ -112,10 +116,20 @@ Examples: Connecting to GitHub API for repository management, integrating with d
     private static readonly DEFAULT_TIMEOUT = 30000;
 
     async invoke(
-        options: vscode.LanguageModelToolInvocationOptions<IMCPParams>,
-        _token: vscode.CancellationToken
-    ): Promise<vscode.LanguageModelToolResult> {
+        options: CliToolInvocationOptions<IMCPParams>,
+        _token: CliCancellationToken
+    ): Promise<CliToolResult> {
         const params = options.input;
+
+        // Validate required parameters
+        if (!params.action || typeof params.action !== 'string') {
+            return this.createErrorResult('action is required and must be a string');
+        }
+
+        const validActions = ['list_servers', 'connect', 'disconnect', 'call_tool', 'list_tools', 'get_server_info'];
+        if (!validActions.includes(params.action)) {
+            return this.createErrorResult(`Invalid action: ${params.action}. Must be one of: ${validActions.join(', ')}`);
+        }
 
         try {
             switch (params.action) {
@@ -139,7 +153,7 @@ Examples: Connecting to GitHub API for repository management, integrating with d
         }
     }
 
-    private async handleListServers(): Promise<vscode.LanguageModelToolResult> {
+    private async handleListServers(): Promise<CliToolResult> {
         const servers = Array.from(MCPIntegrationTool.servers.values());
 
         if (servers.length === 0) {
@@ -181,7 +195,7 @@ Examples: Connecting to GitHub API for repository management, integrating with d
         return this.createSuccessResult(null, lines.join('\n'));
     }
 
-    private async handleConnect(params: IMCPParams): Promise<vscode.LanguageModelToolResult> {
+    private async handleConnect(params: IMCPParams): Promise<CliToolResult> {
         if (!params.server_name || !params.server_uri) {
             return this.createErrorResult('server_name and server_uri are required for connect action');
         }
@@ -204,7 +218,7 @@ Examples: Connecting to GitHub API for repository management, integrating with d
             MCPIntegrationTool.servers.set(params.server_name, server);
 
             // Show success notification
-            vscode.window.showInformationMessage(`✅ Connected to MCP server: ${params.server_name}`);
+            console.log(`✅ Connected to MCP server: ${params.server_name}`);
 
             return this.createSuccessResult(null, [
                 `**🔌 MCP Server Connected**`,
@@ -235,7 +249,7 @@ Examples: Connecting to GitHub API for repository management, integrating with d
         }
     }
 
-    private async handleDisconnect(params: IMCPParams): Promise<vscode.LanguageModelToolResult> {
+    private async handleDisconnect(params: IMCPParams): Promise<CliToolResult> {
         if (!params.server_name) {
             return this.createErrorResult('server_name is required for disconnect action');
         }
@@ -251,7 +265,7 @@ Examples: Connecting to GitHub API for repository management, integrating with d
 
             MCPIntegrationTool.servers.delete(params.server_name);
 
-            vscode.window.showInformationMessage(`Disconnected from MCP server: ${params.server_name}`);
+            console.log(`Disconnected from MCP server: ${params.server_name}`);
 
             return this.createSuccessResult(null, [
                 `**🔌 MCP Server Disconnected**`,
@@ -266,7 +280,7 @@ Examples: Connecting to GitHub API for repository management, integrating with d
         }
     }
 
-    private async handleCallTool(params: IMCPParams): Promise<vscode.LanguageModelToolResult> {
+    private async handleCallTool(params: IMCPParams): Promise<CliToolResult> {
         if (!params.server_name || !params.tool_name) {
             return this.createErrorResult('server_name and tool_name are required for call_tool action');
         }
@@ -305,7 +319,7 @@ Examples: Connecting to GitHub API for repository management, integrating with d
         }
     }
 
-    private async handleListTools(params?: IMCPParams): Promise<vscode.LanguageModelToolResult> {
+    private async handleListTools(params?: IMCPParams): Promise<CliToolResult> {
         let servers: IMCPServer[];
 
         if (params?.server_name) {
@@ -355,7 +369,7 @@ Examples: Connecting to GitHub API for repository management, integrating with d
         return this.createSuccessResult(null, lines.join('\n'));
     }
 
-    private async handleGetServerInfo(params: IMCPParams): Promise<vscode.LanguageModelToolResult> {
+    private async handleGetServerInfo(params: IMCPParams): Promise<CliToolResult> {
         if (!params.server_name) {
             return this.createErrorResult('server_name is required for get_server_info action');
         }

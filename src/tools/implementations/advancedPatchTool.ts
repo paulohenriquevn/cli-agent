@@ -3,11 +3,15 @@
  * Based on VSCode Copilot's advanced patch system with improvements
  *--------------------------------------------------------------------------------------------*/
 
-import * as vscode from 'vscode';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { BaseTool } from '../base/baseTool';
 import { ToolRegistry } from '../registry/toolRegistry';
+import {
+    CliCancellationToken,
+    CliToolResult,
+    CliToolInvocationOptions
+} from '../types/cliTypes';
 
 interface IAdvancedPatchParams {
     patch: string;
@@ -74,10 +78,15 @@ Examples: Apply refactoring patches, handle whitespace variations, migrate code 
     };
 
     async invoke(
-        options: vscode.LanguageModelToolInvocationOptions<IAdvancedPatchParams>,
-        _token: vscode.CancellationToken
-    ): Promise<vscode.LanguageModelToolResult> {
+        options: CliToolInvocationOptions<IAdvancedPatchParams>,
+        _token: CliCancellationToken
+    ): Promise<CliToolResult> {
         const params = options.input;
+
+        // Validate required parameters
+        if (!params.patch || typeof params.patch !== 'string') {
+            return this.createErrorResult('patch is required and must be a string');
+        }
 
         try {
             // Parse the patch
@@ -364,8 +373,7 @@ Examples: Apply refactoring patches, handle whitespace variations, migrate code 
                         await fs.writeFile(fullPath, file.newContent || '', 'utf8');
 
                         // Notify VS Code
-                        const uri = vscode.Uri.file(fullPath);
-                        await vscode.workspace.fs.writeFile(uri, Buffer.from(file.newContent || '', 'utf8'));
+                        // File updated successfully (VSCode notification removed)
                     }
                     result.filesModified.push(file.path);
                 }
@@ -381,8 +389,7 @@ Examples: Apply refactoring patches, handle whitespace variations, migrate code 
                             result.filesModified.push(`${file.path} -> ${file.movePath}`);
                         } else {
                             // Notify VS Code
-                            const uri = vscode.Uri.file(fullPath);
-                            await vscode.workspace.fs.writeFile(uri, Buffer.from(file.newContent || '', 'utf8'));
+                            // File updated successfully (VSCode notification removed)
                             result.filesModified.push(file.path);
                         }
                     } else {

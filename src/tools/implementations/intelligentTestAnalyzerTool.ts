@@ -3,11 +3,15 @@
  * Based on VSCode Copilot's TestFailureTool with enhanced intelligence
  *--------------------------------------------------------------------------------------------*/
 
-import * as vscode from 'vscode';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { BaseTool } from '../base/baseTool';
 import { ToolRegistry } from '../registry/toolRegistry';
+import {
+    CliCancellationToken,
+    CliToolResult,
+    CliToolInvocationOptions
+} from '../types/cliTypes';
 
 interface ITestAnalyzerParams {
     action: 'analyze_failures' | 'find_failures' | 'suggest_fixes' | 'run_and_analyze';
@@ -98,10 +102,20 @@ export class IntelligentTestAnalyzerTool extends BaseTool<ITestAnalyzerParams> {
     ];
 
     async invoke(
-        options: vscode.LanguageModelToolInvocationOptions<ITestAnalyzerParams>,
-        _token: vscode.CancellationToken
-    ): Promise<vscode.LanguageModelToolResult> {
+        options: CliToolInvocationOptions<ITestAnalyzerParams>,
+        _token: CliCancellationToken
+    ): Promise<CliToolResult> {
         const params = options.input;
+
+        // Validate required parameters
+        if (!params.action || typeof params.action !== 'string') {
+            return this.createErrorResult('action is required and must be a string');
+        }
+
+        const validActions = ['analyze_failures', 'find_failures', 'suggest_fixes', 'run_and_analyze'];
+        if (!validActions.includes(params.action)) {
+            return this.createErrorResult(`Invalid action: ${params.action}. Must be one of: ${validActions.join(', ')}`);
+        }
 
         try {
             switch (params.action) {
@@ -121,7 +135,7 @@ export class IntelligentTestAnalyzerTool extends BaseTool<ITestAnalyzerParams> {
         }
     }
 
-    private async handleAnalyzeFailures(params: ITestAnalyzerParams): Promise<vscode.LanguageModelToolResult> {
+    private async handleAnalyzeFailures(params: ITestAnalyzerParams): Promise<CliToolResult> {
         if (!params.test_output) {
             return this.createErrorResult('test_output is required for analyze_failures action');
         }
@@ -132,7 +146,7 @@ export class IntelligentTestAnalyzerTool extends BaseTool<ITestAnalyzerParams> {
         return this.createSuccessResult(null, response);
     }
 
-    private async handleFindFailures(params: ITestAnalyzerParams): Promise<vscode.LanguageModelToolResult> {
+    private async handleFindFailures(params: ITestAnalyzerParams): Promise<CliToolResult> {
         if (!params.test_file) {
             return this.createErrorResult('test_file is required for find_failures action');
         }
@@ -154,7 +168,7 @@ export class IntelligentTestAnalyzerTool extends BaseTool<ITestAnalyzerParams> {
         }
     }
 
-    private async handleSuggestFixes(params: ITestAnalyzerParams): Promise<vscode.LanguageModelToolResult> {
+    private async handleSuggestFixes(params: ITestAnalyzerParams): Promise<CliToolResult> {
         if (!params.test_output) {
             return this.createErrorResult('test_output is required for suggest_fixes action');
         }
@@ -166,13 +180,13 @@ export class IntelligentTestAnalyzerTool extends BaseTool<ITestAnalyzerParams> {
         return this.createSuccessResult(null, response);
     }
 
-    private async handleRunAndAnalyze(params: ITestAnalyzerParams): Promise<vscode.LanguageModelToolResult> {
+    private async handleRunAndAnalyze(params: ITestAnalyzerParams): Promise<CliToolResult> {
         try {
             // Detect test framework
             const framework = await this.detectTestFramework();
 
             // Run tests
-            vscode.window.showInformationMessage(`Running tests with ${framework.name}...`);
+            console.log(`Running tests with ${framework.name}...`);
             const testOutput = await this.runTests(framework.runCommand);
 
             // Analyze results

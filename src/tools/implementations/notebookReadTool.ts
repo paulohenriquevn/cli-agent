@@ -3,11 +3,15 @@
  * Replicates Claude Code's NotebookRead tool functionality
  *--------------------------------------------------------------------------------------------*/
 
-import * as vscode from 'vscode';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { BaseTool } from '../base/baseTool';
 import { ToolRegistry } from '../registry/toolRegistry';
+import {
+    CliCancellationToken,
+    CliToolResult,
+    CliToolInvocationOptions
+} from '../types/cliTypes';
 
 interface INotebookReadParams {
     notebook_path: string;
@@ -46,9 +50,9 @@ export class NotebookReadTool extends BaseTool<INotebookReadParams> {
     };
 
     async invoke(
-        options: vscode.LanguageModelToolInvocationOptions<INotebookReadParams>,
-        _token: vscode.CancellationToken
-    ): Promise<vscode.LanguageModelToolResult> {
+        options: CliToolInvocationOptions<INotebookReadParams>,
+        _token: CliCancellationToken
+    ): Promise<CliToolResult> {
         const params = options.input;
 
         try {

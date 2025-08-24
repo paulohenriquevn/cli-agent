@@ -3,11 +3,15 @@
  * Replicates Claude Code's Text Editor Tool functionality
  *--------------------------------------------------------------------------------------------*/
 
-import * as vscode from 'vscode';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { BaseTool } from '../base/baseTool';
 import { ToolRegistry } from '../registry/toolRegistry';
+import {
+    CliCancellationToken,
+    CliToolResult,
+    CliToolInvocationOptions
+} from '../types/cliTypes';
 
 interface ITextEditorParams {
     command: 'view' | 'str_replace' | 'create' | 'insert' | 'undo_edit';
@@ -86,10 +90,20 @@ Examples: Safely replacing function names across files, creating new configurati
     private static readonly MAX_HISTORY = 50;
 
     async invoke(
-        options: vscode.LanguageModelToolInvocationOptions<ITextEditorParams>,
-        _token: vscode.CancellationToken
-    ): Promise<vscode.LanguageModelToolResult> {
+        options: CliToolInvocationOptions<ITextEditorParams>,
+        _token: CliCancellationToken
+    ): Promise<CliToolResult> {
         const params = options.input;
+
+        // Validate required parameters
+        if (!params.command || typeof params.command !== 'string') {
+            return this.createErrorResult('command is required and must be a string');
+        }
+
+        const validCommands = ['view', 'str_replace', 'create', 'insert', 'undo_edit'];
+        if (!validCommands.includes(params.command)) {
+            return this.createErrorResult(`Invalid command: ${params.command}. Must be one of: ${validCommands.join(', ')}`);
+        }
 
         try {
             switch (params.command) {
@@ -111,7 +125,7 @@ Examples: Safely replacing function names across files, creating new configurati
         }
     }
 
-    private async handleView(params: ITextEditorParams): Promise<vscode.LanguageModelToolResult> {
+    private async handleView(params: ITextEditorParams): Promise<CliToolResult> {
         if (!params.path) {
             return this.createErrorResult('path is required for view command');
         }
@@ -169,7 +183,7 @@ Examples: Safely replacing function names across files, creating new configurati
         }
     }
 
-    private async handleStrReplace(params: ITextEditorParams): Promise<vscode.LanguageModelToolResult> {
+    private async handleStrReplace(params: ITextEditorParams): Promise<CliToolResult> {
         if (!params.path || !params.old_str || params.new_str === undefined) {
             return this.createErrorResult('path, old_str, and new_str are required for str_replace command');
         }
@@ -203,9 +217,7 @@ Examples: Safely replacing function names across files, creating new configurati
         // Write file
         await fs.writeFile(fullPath, newContent, 'utf8');
 
-        // Notify VS Code
-        const uri = vscode.Uri.file(fullPath);
-        await vscode.workspace.fs.writeFile(uri, Buffer.from(newContent, 'utf8'));
+        // File written successfully (VS Code notification removed)
 
         return this.createSuccessResult(null, [
             `**✏️ String Replace Complete**`,
@@ -217,7 +229,7 @@ Examples: Safely replacing function names across files, creating new configurati
         ].join('\n'));
     }
 
-    private async handleCreate(params: ITextEditorParams): Promise<vscode.LanguageModelToolResult> {
+    private async handleCreate(params: ITextEditorParams): Promise<CliToolResult> {
         if (!params.path || params.file_text === undefined) {
             return this.createErrorResult('path and file_text are required for create command');
         }
@@ -241,9 +253,7 @@ Examples: Safely replacing function names across files, creating new configurati
         // Create file
         await fs.writeFile(fullPath, params.file_text, 'utf8');
 
-        // Notify VS Code
-        const uri = vscode.Uri.file(fullPath);
-        await vscode.workspace.fs.writeFile(uri, Buffer.from(params.file_text, 'utf8'));
+        // File created successfully (VS Code notification removed)
 
         return this.createSuccessResult(null, [
             `**📝 File Created**`,
@@ -254,7 +264,7 @@ Examples: Safely replacing function names across files, creating new configurati
         ].join('\n'));
     }
 
-    private async handleInsert(params: ITextEditorParams): Promise<vscode.LanguageModelToolResult> {
+    private async handleInsert(params: ITextEditorParams): Promise<CliToolResult> {
         if (!params.path || params.file_text === undefined || params.insert_line === undefined) {
             return this.createErrorResult('path, file_text, and insert_line are required for insert command');
         }
@@ -282,9 +292,7 @@ Examples: Safely replacing function names across files, creating new configurati
         // Write file
         await fs.writeFile(fullPath, newContent, 'utf8');
 
-        // Notify VS Code
-        const uri = vscode.Uri.file(fullPath);
-        await vscode.workspace.fs.writeFile(uri, Buffer.from(newContent, 'utf8'));
+        // File updated successfully (VS Code notification removed)
 
         return this.createSuccessResult(null, [
             `**📝 Text Inserted**`,
@@ -296,7 +304,7 @@ Examples: Safely replacing function names across files, creating new configurati
         ].join('\n'));
     }
 
-    private async handleUndoEdit(params: ITextEditorParams): Promise<vscode.LanguageModelToolResult> {
+    private async handleUndoEdit(params: ITextEditorParams): Promise<CliToolResult> {
         if (!params.path) {
             return this.createErrorResult('path is required for undo_edit command');
         }
@@ -315,9 +323,7 @@ Examples: Safely replacing function names across files, creating new configurati
         // Restore original content
         await fs.writeFile(fullPath, recentEdit.original_content, 'utf8');
 
-        // Notify VS Code
-        const uri = vscode.Uri.file(fullPath);
-        await vscode.workspace.fs.writeFile(uri, Buffer.from(recentEdit.original_content, 'utf8'));
+        // File reverted successfully (VS Code notification removed)
 
         // Remove from history
         const editIndex = TextEditorTool.editHistory.indexOf(recentEdit);

@@ -258,9 +258,11 @@ Use when: Tool parameters fail to match content, debugging parameter issues, ana
             filePath: filePath || ''
         };
 
-        const mockError = new Error(errorMessage);
-        (mockError as { type: string; filePath: string }).type = 'NoMatchError';
-        (mockError as { type: string; filePath: string }).filePath = filePath;
+        const mockError = new Error(errorMessage) as Error & { type: string; filePath?: string };
+        mockError.type = 'NoMatchError';
+        if (filePath) {
+            mockError.filePath = filePath;
+        }
 
         // Read file content if path provided
         // let _fileContent = '';
@@ -276,9 +278,9 @@ Use when: Tool parameters fail to match content, debugging parameter issues, ana
         const startTime = performance.now();
         const healingResult = await this.integration.attemptHealing(
             sourceModel,
-            mockTool as { name: string; invoke: (options: unknown, token: unknown) => Promise<unknown> },
+            mockTool as any,
             mockParameters,
-            mockError as { type: string; filePath: string; message: string },
+            mockError as any,
             this.context
         );
         const duration = performance.now() - startTime;
@@ -499,18 +501,18 @@ Cache has been reset and will rebuild on next healing operation.`;
                 tags: ['test']
             };
 
-            const mockError = new Error('Test no match error');
-            (mockError as { type: string }).type = 'NoMatchError';
+            const mockError = new Error('Test no match error') as Error & { type: string };
+            mockError.type = 'NoMatchError';
 
             try {
                 const result = await this.integration.attemptHealing(
                     testCase.sourceModel,
-                    mockTool as { name: string; invoke: (options: unknown, token: unknown) => Promise<unknown> },
+                    mockTool as any,
                     {
                         oldString: testCase.oldString,
                         newString: testCase.newString
                     },
-                    mockError as { type: string; message: string }
+                    mockError as any
                 );
 
                 const passed = result.success && result.healingMethod === testCase.expectedMethod;
@@ -567,9 +569,9 @@ ${passedTests < testCases.length ?
         try {
             const apiConfig = {
                 ...DEFAULT_API_CONFIG,
-                openRouterApiKey: apiKey || config?.openrouter_api_key || DEFAULT_API_CONFIG.openRouterApiKey,
-                siteUrl: config?.site_url || DEFAULT_API_CONFIG.siteUrl,
-                siteName: config?.site_name || DEFAULT_API_CONFIG.siteName
+                openRouterApiKey: apiKey || (config as any)?.openrouter_api_key || DEFAULT_API_CONFIG.openRouterApiKey,
+                siteUrl: (config as any)?.site_url || DEFAULT_API_CONFIG.siteUrl,
+                siteName: (config as any)?.site_name || DEFAULT_API_CONFIG.siteName
             };
 
             if (!apiConfig.openRouterApiKey) {

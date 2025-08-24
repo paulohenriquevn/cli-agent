@@ -3,11 +3,15 @@
  * Based on VSCode Copilot's diff utilities with superior algorithms and performance
  *--------------------------------------------------------------------------------------------*/
 
-import * as vscode from 'vscode';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { BaseTool } from '../base/baseTool';
 import { ToolRegistry } from '../registry/toolRegistry';
+import {
+    CliCancellationToken,
+    CliToolResult,
+    CliToolInvocationOptions
+} from '../types/cliTypes';
 
 interface IAdvancedDiffParams {
     action: 'compare_files' | 'compare_text' | 'analyze_changes' | 'generate_patch' | 'merge_changes';
@@ -288,11 +292,21 @@ Examples: Compare file versions, analyze config changes, generate patches, asses
     };
 
     async invoke(
-        options: vscode.LanguageModelToolInvocationOptions<IAdvancedDiffParams>,
-        _token: vscode.CancellationToken
-    ): Promise<vscode.LanguageModelToolResult> {
+        options: CliToolInvocationOptions<IAdvancedDiffParams>,
+        _token: CliCancellationToken
+    ): Promise<CliToolResult> {
         const params = options.input;
         const startTime = Date.now();
+
+        // Validate required parameters
+        if (!params.action || typeof params.action !== 'string') {
+            return this.createErrorResult('action is required and must be a string');
+        }
+
+        const validActions = ['compare_files', 'compare_text', 'analyze_changes', 'generate_patch', 'merge_changes'];
+        if (!validActions.includes(params.action)) {
+            return this.createErrorResult(`Invalid action: ${params.action}. Must be one of: ${validActions.join(', ')}`);
+        }
 
         try {
             switch (params.action) {
@@ -314,7 +328,7 @@ Examples: Compare file versions, analyze config changes, generate patches, asses
         }
     }
 
-    private async handleCompareFiles(params: IAdvancedDiffParams, startTime: number): Promise<vscode.LanguageModelToolResult> {
+    private async handleCompareFiles(params: IAdvancedDiffParams, startTime: number): Promise<CliToolResult> {
         if (!params.file_path_1 || !params.file_path_2) {
             return this.createErrorResult('Both file_path_1 and file_path_2 are required for compare_files action');
         }
@@ -341,7 +355,7 @@ Examples: Compare file versions, analyze config changes, generate patches, asses
         return this.createSuccessResult(null, response);
     }
 
-    private async handleCompareText(params: IAdvancedDiffParams, startTime: number): Promise<vscode.LanguageModelToolResult> {
+    private async handleCompareText(params: IAdvancedDiffParams, startTime: number): Promise<CliToolResult> {
         if (!params.text_1 || !params.text_2) {
             return this.createErrorResult('Both text_1 and text_2 are required for compare_text action');
         }
@@ -356,7 +370,7 @@ Examples: Compare file versions, analyze config changes, generate patches, asses
         return this.createSuccessResult(null, response);
     }
 
-    private async handleAnalyzeChanges(params: IAdvancedDiffParams, startTime: number): Promise<vscode.LanguageModelToolResult> {
+    private async handleAnalyzeChanges(params: IAdvancedDiffParams, startTime: number): Promise<CliToolResult> {
         if (!params.file_path_1 || !params.file_path_2) {
             return this.createErrorResult('Both file_path_1 and file_path_2 are required for analyze_changes action');
         }
@@ -383,7 +397,7 @@ Examples: Compare file versions, analyze config changes, generate patches, asses
         return this.createSuccessResult(null, response);
     }
 
-    private async handleGeneratePatch(params: IAdvancedDiffParams, startTime: number): Promise<vscode.LanguageModelToolResult> {
+    private async handleGeneratePatch(params: IAdvancedDiffParams, startTime: number): Promise<CliToolResult> {
         if (!params.file_path_1 || !params.file_path_2) {
             return this.createErrorResult('Both file_path_1 and file_path_2 are required for generate_patch action');
         }
@@ -410,7 +424,7 @@ Examples: Compare file versions, analyze config changes, generate patches, asses
         return this.createSuccessResult(null, response);
     }
 
-    private async handleMergeChanges(params: IAdvancedDiffParams, startTime: number): Promise<vscode.LanguageModelToolResult> {
+    private async handleMergeChanges(params: IAdvancedDiffParams, startTime: number): Promise<CliToolResult> {
         if (!params.patch_content) {
             return this.createErrorResult('patch_content is required for merge_changes action');
         }
