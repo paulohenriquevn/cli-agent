@@ -1,5 +1,5 @@
 /*---------------------------------------------------------------------------------------------
- * Fixed Tools Integration Tests - Test the 13 tools that were fixed for parameter validation
+ * Fixed Tools Integration Tests - Test the 12 tools that were fixed for parameter validation
  *--------------------------------------------------------------------------------------------*/
 
 import { ToolRegistry } from '../registry/toolRegistry';
@@ -18,7 +18,6 @@ describe('Fixed Tools Integration Tests', () => {
         'test_analyzer',    // Error "Unknown action: undefined"
         'mcp_integration',  // Error "Unknown MCP action: get-capabilities"
         'notebook_edit',    // Error "cell_id is required for replace mode"
-        'sub_agents',       // Error "Unknown sub-agents action: undefined"
         'symbol_analysis',  // Error "Unknown action: undefined"
         'text_editor'       // Error "path is required for view command"
     ];
@@ -33,7 +32,7 @@ describe('Fixed Tools Integration Tests', () => {
 
     test('tools should handle missing action parameter gracefully', async () => {
         const context = createTestContext();
-        const toolsWithActions = ['advanced_diff', 'advanced_notebook', 'test_analyzer', 'sub_agents', 'symbol_analysis', 'mcp_integration'];
+        const toolsWithActions = ['advanced_diff', 'advanced_notebook', 'test_analyzer', 'symbol_analysis', 'mcp_integration'];
         
         for (const toolName of toolsWithActions) {
             const tool = ToolRegistry.getTool(toolName);
@@ -112,7 +111,7 @@ describe('Fixed Tools Integration Tests', () => {
     test('should provide proper error messages for invalid actions', async () => {
         const context = createTestContext();
         
-        const toolsWithActions = ['advanced_diff', 'test_analyzer', 'sub_agents']; // symbol_analysis needs both action and symbol_name
+        const toolsWithActions = ['advanced_diff', 'test_analyzer']; // symbol_analysis needs both action and symbol_name
         
         for (const toolName of toolsWithActions) {
             const result = await ToolRegistry.executeTool(toolName, {
@@ -159,8 +158,8 @@ describe('Fixed Tools Integration Tests', () => {
         const allTools = ToolRegistry.getTools();
         const totalTools = allTools.length;
         
-        // We expect to have all 30 tools registered now
-        expect(totalTools).toBe(30);
+        // We expect to have all 28 tools registered now  
+        expect(totalTools).toBe(28);
         
         // All tools should have proper schemas
         allTools.forEach(tool => {

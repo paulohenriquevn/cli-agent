@@ -37,17 +37,15 @@ import './tools/implementations/createExecutionPlanTool';
 import './tools/implementations/enhancedWebSearchTool';
 import './tools/implementations/exitPlanModeTool';
 import './tools/implementations/fetchDocumentationTool';
-import './tools/implementations/hooksManagementTool';
 import './tools/implementations/intelligentTestAnalyzerTool';
 import './tools/implementations/mcpIntegrationTool';
 import './tools/implementations/notebookEditTool';
 import './tools/implementations/notebookReadTool';
 import './tools/implementations/searchCodeTool';
-import './tools/implementations/subAgentsTool';
 import './tools/implementations/symbolAnalysisTool';
 import './tools/implementations/textEditorTool';
-import './tools/implementations/toolHealingTool';
-import './tools/implementations/toolNormalizationTool';
+// import './tools/implementations/toolHealingTool'; // Temporarily disabled - healing system has type issues
+// import './tools/implementations/toolNormalizationTool'; // Temporarily disabled
 
 const program = new Command();
 
@@ -55,7 +53,7 @@ const program = new Command();
 const context: CliExecutionContext = {
     workingDirectory: process.cwd(),
     sessionId: `cli-session-${Date.now()}`,
-    environment: process.env
+    environment: process.env as Record<string, string>
 };
 
 /**
@@ -66,16 +64,15 @@ async function executeTool(toolName: string, params: Record<string, unknown>): P
         const cancellationToken = new CliCancellationToken();
         const result = await ToolRegistry.executeTool(toolName, params, context, cancellationToken);
         
-        if (result.isSuccess) {
+        if (!result.hasErrors()) {
             // Output the result
-            if (result.output && typeof result.output === 'string') {
-                console.log(result.output);
-            } else if (result.data) {
-                console.log(JSON.stringify(result.data, null, 2));
+            const output = result.getText();
+            if (output && typeof output === 'string') {
+                console.log(output);
             }
             process.exit(0);
         } else {
-            console.error(chalk.red('❌ Tool execution failed:'), result.error);
+            console.error(chalk.red('❌ Tool execution failed:'), result.getErrors().join(', '));
             process.exit(1);
         }
     } catch (error) {
@@ -94,9 +91,9 @@ function createToolCommands(): void {
             .description(tool.description);
         
         // Add options based on tool schema
-        if (tool.inputSchema && tool.inputSchema.properties) {
-            for (const [propName, propSchema] of Object.entries(tool.inputSchema.properties as Record<string, unknown>)) {
-                const isRequired = tool.inputSchema.required?.includes(propName) || false;
+        if (tool.inputSchema && (tool.inputSchema as any).properties) {
+            for (const [propName, propSchema] of Object.entries((tool.inputSchema as any).properties as Record<string, unknown>)) {
+                const isRequired = (tool.inputSchema as any).required?.includes(propName) || false;
                 const optionFlag = `--${propName} <${propName}>`;
                 const description = (propSchema as { description?: string }).description || `${propName} parameter`;
                 
@@ -169,11 +166,11 @@ program
             console.log(`${chalk.yellow('Tags:')} ${tool.tags.join(', ')}`);
         }
         
-        if (tool.inputSchema && tool.inputSchema.properties) {
+        if (tool.inputSchema && (tool.inputSchema as any).properties) {
             console.log(chalk.yellow('\nParameters:'));
-            const required = tool.inputSchema.required || [];
+            const required = (tool.inputSchema as any).required || [];
             
-            for (const [propName, propSchema] of Object.entries(tool.inputSchema.properties as Record<string, unknown>)) {
+            for (const [propName, propSchema] of Object.entries((tool.inputSchema as any).properties as Record<string, unknown>)) {
                 const isRequired = required.includes(propName);
                 const mark = isRequired ? chalk.red('*') : ' ';
                 const schemaObj = propSchema as { type?: string; description?: string; examples?: unknown[] };
@@ -191,8 +188,8 @@ program
         console.log(chalk.yellow('\nUsage:'));
         let exampleCommand = `cli-agent ${tool.name}`;
         
-        if (tool.inputSchema && tool.inputSchema.properties) {
-            const required = tool.inputSchema.required || [];
+        if (tool.inputSchema && (tool.inputSchema as any).properties) {
+            const required = (tool.inputSchema as any).required || [];
             for (const propName of required) {
                 exampleCommand += ` --${propName}="<value>"`;
             }

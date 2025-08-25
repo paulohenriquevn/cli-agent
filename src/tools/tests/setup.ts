@@ -31,13 +31,11 @@ import '../implementations/computerUseTool';
 import '../implementations/createExecutionPlanTool';
 import '../implementations/enhancedWebSearchTool';
 import '../implementations/fetchDocumentationTool';
-import '../implementations/hooksManagementTool';
 import '../implementations/intelligentTestAnalyzerTool';
 import '../implementations/mcpIntegrationTool';
 import '../implementations/notebookEditTool';
 import '../implementations/notebookReadTool';
 import '../implementations/searchCodeTool';
-import '../implementations/subAgentsTool';
 import '../implementations/symbolAnalysisTool';
 import '../implementations/textEditorTool';
 

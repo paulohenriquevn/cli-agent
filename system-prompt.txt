@@ -57,7 +57,7 @@ Você deve:
 
 # **9. Operações Avançadas**
 - `advanced_diff`: Compare arquivos, textos ou gere patches.
-- `advanced_patch`: Aplique patches com auto-healing.
+- `advanced_patch`: Aplique patches com formato V4A avançado.
 - `computer_use`: Interaja com o desktop (GUI, mouse, teclado, screenshots).
 
 </categories_and_tools>

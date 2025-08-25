@@ -16,19 +16,17 @@ describe('Non-Refactored Tools', () => {
         'createExecutionPlanTool',
         'enhancedWebSearchTool',
         'fetchDocumentationTool',
-        'hooksManagementTool',
         'intelligentTestAnalyzerTool',
         'mcpIntegrationTool',
         'notebookEditTool',
         'notebookReadTool',
         'searchCodeTool',
-        'subAgentsTool',
         'symbolAnalysisTool',
         'textEditorTool'
     ];
 
     test('should have all non-refactored tools listed', () => {
-        expect(nonRefactoredTools).toHaveLength(16);
+        expect(nonRefactoredTools).toHaveLength(14);
     });
 
     test('should be aware of tools that need refactoring', () => {
@@ -116,15 +114,6 @@ describe('Non-Refactored Tools', () => {
         });
     });
 
-    describe('hooksManagementTool', () => {
-        test('should exist as file', () => {
-            expect(nonRefactoredTools).toContain('hooksManagementTool');
-        });
-
-        test('placeholder - needs refactoring for CLI', () => {
-            expect(true).toBe(true); // Placeholder until refactored
-        });
-    });
 
     describe('intelligentTestAnalyzerTool', () => {
         test('should exist as file', () => {
@@ -176,15 +165,6 @@ describe('Non-Refactored Tools', () => {
         });
     });
 
-    describe('subAgentsTool', () => {
-        test('should exist as file', () => {
-            expect(nonRefactoredTools).toContain('subAgentsTool');
-        });
-
-        test('placeholder - needs refactoring for CLI', () => {
-            expect(true).toBe(true); // Placeholder until refactored
-        });
-    });
 
     describe('symbolAnalysisTool', () => {
         test('should exist as file', () => {
@@ -208,7 +188,7 @@ describe('Non-Refactored Tools', () => {
 
     test('should track refactoring progress', () => {
         const refactoredCount = 14; // Number of already refactored tools
-        const totalCount = 30; // Total tools in the system
+        const totalCount = 28; // Total tools in the system (removed hooksManagementTool and subAgentsTool)
         const remainingCount = nonRefactoredTools.length;
 
         expect(refactoredCount + remainingCount).toBe(totalCount);

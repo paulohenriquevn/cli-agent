@@ -45,13 +45,11 @@ import '../tools/implementations/createExecutionPlanTool';
 import '../tools/implementations/enhancedWebSearchTool';
 import '../tools/implementations/exitPlanModeTool';
 import '../tools/implementations/fetchDocumentationTool';
-import '../tools/implementations/hooksManagementTool';
 import '../tools/implementations/intelligentTestAnalyzerTool';
 import '../tools/implementations/mcpIntegrationTool';
 import '../tools/implementations/notebookEditTool';
 import '../tools/implementations/notebookReadTool';
 import '../tools/implementations/searchCodeTool';
-import '../tools/implementations/subAgentsTool';
 import '../tools/implementations/symbolAnalysisTool';
 import '../tools/implementations/textEditorTool';
 // import '../tools/implementations/toolHealingTool'; // Temporarily disabled - healing system has type issues
