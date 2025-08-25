@@ -29,17 +29,26 @@ npm run demo:complete
 The CLI Agent SDK achieves **96.7% functionality** (29/30 tools working):
 
 ### ✅ Functional Categories (100% working)
-- **File Operations**: 7/7 tools (read_file, write_file, edit_file, multi_edit, text_editor, ls, glob)
-- **System Operations**: 3/3 tools (bash, execute_command)
-- **Search Operations**: 3/3 tools (grep, search_code)
-- **Web Operations**: 4/4 tools (web_search, web_fetch, fetch_documentation, enhanced_web_search)
-- **Planning Operations**: 4/4 tools (todo_write, create_execution_plan, exit_plan_mode, task)
-- **Analysis Operations**: 4/4 tools (symbol_analysis, test_analyzer, advanced_diff, advanced_patch)
-- **Integration Operations**: 4/4 tools (sub_agents, mcp_integration, hooks_management)
-- **Notebook Operations**: 3/3 tools (notebook_read, notebook_edit, advanced_notebook)
+- **file_operations**: 5/5 tools (read_file, write_file, edit_file, multi_edit, ls)
+- **file-operations**: 2/2 tools (advanced_patch, text_editor) 
+- **command-execution**: 2/2 tools (bash, execute_command)
+- **search**: 2/2 tools (glob, grep)
+- **search-analysis**: 1/1 tool (search_code)
+- **web**: 2/2 tools (web_search, web_fetch)
+- **web-documentation**: 2/2 tools (enhanced_web_search, fetch_documentation)
+- **planning**: 2/2 tools (todo_write, exit_plan_mode)
+- **delegation**: 1/1 tool (task)
+- **project-management**: 1/1 tool (create_execution_plan)
+- **analysis**: 1/1 tool (advanced_diff)
+- **code-analysis**: 1/1 tool (symbol_analysis)
+- **testing_quality**: 1/1 tool (test_analyzer)
+- **integrations**: 1/1 tool (mcp_integration)
+- **ai_assistance**: 1/1 tool (sub_agents)
+- **system-customization**: 1/1 tool (hooks_management)
+- **notebook-operations**: 3/3 tools (advanced_notebook, notebook_edit, notebook_read)
 
 ### ⚠️ Partial Categories
-- **Advanced Tools**: 0/1 tools (`computer_use` requires `xdotool` system dependency)
+- **advanced-tools**: 0/1 tool (`computer_use` requires `xdotool` system dependency)
 
 ## 📊 Performance Metrics
 

@@ -22,7 +22,7 @@ const sdk = new CliAgentSDK({
 await sdk.initialize();
 
 // Executar uma ferramenta
-const result = await sdk.executeTool('readFile', {
+const result = await sdk.executeTool('read_file', {
     filePath: 'package.json'
 });
 
@@ -36,34 +36,34 @@ if (result.success) {
 ## 🛠️ **Ferramentas Disponíveis**
 
 ### **Arquivos e Sistema**
-- `readFile` - Ler arquivos
-- `writeFile` - Escrever arquivos 
-- `editFile` - Editar arquivos (com healing automático)
-- `listDirectory` - Listar diretórios
-- `executeCommand` - Executar comandos do sistema
-- `bashCommand` - Executar scripts bash
+- `read_file` - Ler arquivos
+- `write_file` - Escrever arquivos 
+- `edit_file` - Editar arquivos (com healing automático)
+- `ls` - Listar diretórios
+- `execute_command` - Executar comandos do sistema
+- `bash` - Executar scripts bash
 
 ### **Busca e Análise**
 - `grep` - Busca por padrões em arquivos
 - `glob` - Busca por arquivos com padrões
-- `searchCode` - Busca inteligente em código
-- `symbolAnalysis` - Análise de símbolos
+- `search_code` - Busca inteligente em código
+- `symbol_analysis` - Análise de símbolos
 
 ### **Web e Rede**
-- `webSearch` - Busca na web
-- `webFetch` - Fazer requisições HTTP
-- `fetchDocumentation` - Buscar documentação online
+- `web_search` - Busca na web
+- `web_fetch` - Fazer requisições HTTP
+- `fetch_documentation` - Buscar documentação online
 
 ### **Desenvolvimento**
-- `multiEdit` - Editar múltiplos arquivos
-- `advancedPatch` - Aplicar patches avançados
-- `intelligentTestAnalyzer` - Análise inteligente de testes
-- `todoWrite` - Gerenciar lista de tarefas
+- `multi_edit` - Editar múltiplos arquivos
+- `advanced_patch` - Aplicar patches avançados
+- `test_analyzer` - Análise inteligente de testes
+- `todo_write` - Gerenciar lista de tarefas
 
 ### **Integrações**
 - `task` - Executar sub-agentes especializados
-- `mcpIntegration` - Integração com MCP
-- `hooksManagement` - Gerenciar hooks Git
+- `mcp_integration` - Integração com MCP
+- `hooks_management` - Gerenciar hooks Git
 
 ## 🔧 **Configuração Avançada**
 

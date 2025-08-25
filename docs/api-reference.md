@@ -79,7 +79,7 @@ Executes a single tool with the provided parameters.
 
 **Example:**
 ```typescript
-const result = await sdk.executeTool('readFile', {
+const result = await sdk.executeTool('read_file', {
     filePath: './package.json'
 });
 
@@ -110,7 +110,7 @@ const batchResult = await sdk.executeBatch({
     operations: [
         {
             id: 'read-config',
-            toolName: 'readFile',
+            toolName: 'read_file',
             parameters: { filePath: 'config.json' }
         },
         {
@@ -168,7 +168,7 @@ Gets detailed information about a specific tool.
 
 **Example:**
 ```typescript
-const toolInfo = sdk.getToolInfo('readFile');
+const toolInfo = sdk.getToolInfo('read_file');
 if (toolInfo) {
     console.log(`Tool: ${toolInfo.name}`);
     console.log(`Description: ${toolInfo.description}`);
@@ -829,7 +829,7 @@ Environment variables that affect SDK behavior:
 Supported LLM models:
 
 - **OpenAI**: `gpt-4o-mini`, `gpt-4o`, `gpt-4-turbo`
-- **Anthropic**: `claude-3-sonnet`, `claude-3-opus`, `claude-3-haiku`
+- **Jose.com**: `Jose-3-sonnet`, `Jose-3-opus`, `Jose-3-haiku`
 - **Google**: `gemini-pro`, `gemini-pro-vision`
 - **DeepSeek**: `deepseek-coder`, `deepseek-chat`
 

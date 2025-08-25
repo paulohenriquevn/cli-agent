@@ -196,9 +196,9 @@ export abstract class BaseTool<T extends IToolParams> {
 ```typescript
 const result = await sdk.executeBatch({
     operations: [
-        { id: 'step1', toolName: 'readFile', parameters: {...} },
-        { id: 'step2', toolName: 'editFile', parameters: {...}, dependsOn: ['step1'] },
-        { id: 'step3', toolName: 'writeFile', parameters: {...}, dependsOn: ['step2'] }
+        { id: 'step1', toolName: 'read_file', parameters: {...} },
+        { id: 'step2', toolName: 'edit_file', parameters: {...}, dependsOn: ['step1'] },
+        { id: 'step3', toolName: 'write_file', parameters: {...}, dependsOn: ['step2'] }
     ],
     options: { parallel: false }
 });
@@ -210,7 +210,7 @@ const result = await sdk.executeBatch({
     operations: [
         { id: 'task1', toolName: 'grep', parameters: {...} },
         { id: 'task2', toolName: 'glob', parameters: {...} },
-        { id: 'task3', toolName: 'webSearch', parameters: {...} }
+        { id: 'task3', toolName: 'web_search', parameters: {...} }
     ],
     options: { parallel: true }
 });
@@ -275,7 +275,7 @@ sdk.on('tool.execution.complete', (result) => {
 User Input → CLI Parser → Tool Registry → Tool Execution → Result Output
      ↓             ↓              ↓              ↓              ↓
 cli-agent    Parse flags    Find tool    Invoke method    Format output
-readFile     Extract        Get readFile Execute with    Display content
+read_file    Extract        Get read_file Execute with    Display content
 --filePath   parameters     instance     parameters      or error
 ```
 
@@ -285,7 +285,7 @@ readFile     Extract        Get readFile Execute with    Display content
 SDK Call → Parameter Processing → Tool Registry → Execution → Event Emission → Result
     ↓              ↓                     ↓             ↓           ↓             ↓
 executeTool   Validate params      Find & validate  Execute   Emit events   Return result
-('readFile',  Check schema        Check tool        tool.     'complete'    ToolExecutionResult
+('read_file', Check schema        Check tool        tool.     'complete'    ToolExecutionResult
 {filePath})   Apply transforms    exists & ready    invoke()  event         with metadata
 ```
 

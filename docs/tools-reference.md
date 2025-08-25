@@ -11,26 +11,29 @@ Complete reference for all 30+ built-in tools available in the CLI Agent system.
 - [Analysis Operations](#analysis-operations)
 - [Development Operations](#development-operations)
 - [Advanced Operations](#advanced-operations)
+  - [computer_use](#computer_use)
+  - [advanced_diff](#advanced_diff)
+  - [advanced_patch](#advanced_patch)
+  - [advanced_notebook](#advanced_notebook)
 - [Integration Operations](#integration-operations)
 - [Notebook Operations](#notebook-operations)
-- [System Tools](#system-tools)
 
 ---
 
 ## File Operations
 
-### readFile
+### read_file
 
 Read contents from a file.
 
 **CLI Usage:**
 ```bash
-cli-agent readFile --filePath="path/to/file.txt"
+cli-agent read_file --filePath="path/to/file.txt"
 ```
 
 **SDK Usage:**
 ```typescript
-const result = await sdk.executeTool('readFile', {
+const result = await sdk.executeTool('read_file', {
     filePath: './package.json'
 });
 ```
@@ -51,18 +54,18 @@ const result = await sdk.executeTool('readFile', {
 
 ---
 
-### writeFile
+### write_file
 
 Write content to a file.
 
 **CLI Usage:**
 ```bash
-cli-agent writeFile --filePath="output.txt" --content="Hello World"
+cli-agent write_file --filePath="output.txt" --content="Hello World"
 ```
 
 **SDK Usage:**
 ```typescript
-const result = await sdk.executeTool('writeFile', {
+const result = await sdk.executeTool('write_file', {
     filePath: './output.txt',
     content: 'Hello World\nMultiple lines supported'
 });
@@ -87,31 +90,30 @@ const result = await sdk.executeTool('writeFile', {
 
 ---
 
-### editFile
+### edit_file
 
 Edit a file by replacing specific text content.
 
 **CLI Usage:**
 ```bash
-cli-agent editFile --filePath="src/app.js" --oldString="var x = 1;" --newString="const x = 1;"
+cli-agent edit_file --filePath="src/app.js" --oldText="var x = 1;" --newText="const x = 1;"
 ```
 
 **SDK Usage:**
 ```typescript
-const result = await sdk.executeTool('editFile', {
+const result = await sdk.executeTool('edit_file', {
     filePath: './src/app.js',
-    oldString: 'console.log("debug")',
-    newString: '// Debug removed',
+    oldText: 'console.log("debug")',
+    newText: '// Debug removed',
     replaceAll: false
 });
 ```
 
 **Parameters:**
 - `filePath` (string, required) - Path to the file to edit
-- `oldString` (string, required) - Text to find and replace
-- `newString` (string, required) - Replacement text
+- `oldText` (string, required) - Text to find and replace
+- `newText` (string, required) - Replacement text
 - `replaceAll` (boolean, optional) - Replace all occurrences (default: false)
-- `expectedReplacements` (number, optional) - Expected number of replacements for validation
 
 **Returns:**
 - Number of replacements made
@@ -119,45 +121,45 @@ const result = await sdk.executeTool('editFile', {
 - File modification confirmation
 
 **Features:**
-- **Automatic healing** - If `oldString` doesn't match exactly, AI corrects it
+- **Automatic healing** - If `oldText` doesn't match exactly, AI corrects it
 - Exact match validation
 - Multiple replacement strategies
 - Undo capability
 
 ---
 
-### multiEdit
+### multi_edit
 
 Perform multiple edits on a single file in one operation.
 
 **CLI Usage:**
 ```bash
-cli-agent multiEdit --filePath="src/app.js" --edits='[{"oldString":"var","newString":"const"},{"oldString":"function","newString":"const"}]'
+cli-agent multi_edit --file_path="src/app.js" --edits='[{"old_string":"var","new_string":"const"},{"old_string":"function","new_string":"const"}]'
 ```
 
 **SDK Usage:**
 ```typescript
-const result = await sdk.executeTool('multiEdit', {
-    filePath: './src/app.js',
+const result = await sdk.executeTool('multi_edit', {
+    file_path: './src/app.js',
     edits: [
         {
-            oldString: 'var apiUrl = "localhost"',
-            newString: 'const apiUrl = process.env.API_URL'
+            old_string: 'var apiUrl = "localhost"',
+            new_string: 'const apiUrl = process.env.API_URL'
         },
         {
-            oldString: 'var port = 3000',
-            newString: 'const port = process.env.PORT || 3000'
+            old_string: 'var port = 3000',
+            new_string: 'const port = process.env.PORT || 3000'
         }
     ]
 });
 ```
 
 **Parameters:**
-- `filePath` (string, required) - Path to the file to edit
+- `file_path` (string, required) - Path to the file to edit
 - `edits` (array, required) - Array of edit operations
-  - `oldString` (string) - Text to find
-  - `newString` (string) - Replacement text
-  - `replaceAll` (boolean, optional) - Replace all occurrences
+  - `old_string` (string) - Text to find
+  - `new_string` (string) - Replacement text
+  - `replace_all` (boolean, optional) - Replace all occurrences
 
 **Returns:**
 - Summary of all edits applied
@@ -172,32 +174,31 @@ const result = await sdk.executeTool('multiEdit', {
 
 ---
 
-### textEditor
+### text_editor
 
 Advanced text manipulation operations.
 
 **CLI Usage:**
 ```bash
-cli-agent textEditor --filePath="README.md" --operation="append" --content="## New Section"
+cli-agent text_editor --path="README.md" --command="str_replace" --old_str="old text" --new_str="new text"
 ```
 
 **SDK Usage:**
 ```typescript
-const result = await sdk.executeTool('textEditor', {
-    filePath: './README.md',
-    operation: 'insertAt',
-    lineNumber: 10,
-    content: 'New content at line 10'
+const result = await sdk.executeTool('text_editor', {
+    path: './README.md',
+    command: 'str_replace',
+    old_str: 'old text',
+    new_str: 'new text'
 });
 ```
 
 **Parameters:**
-- `filePath` (string, required) - Path to the file
-- `operation` (string, required) - Operation type: `append`, `prepend`, `insertAt`, `deleteLine`, `replaceRange`
-- `content` (string) - Content for insert/append/prepend operations
-- `lineNumber` (number) - Line number for line-specific operations
-- `startLine` (number) - Start line for range operations
-- `endLine` (number) - End line for range operations
+- `path` (string, required) - Path to the file
+- `command` (string, required) - Command type: `view`, `str_replace`, `create`
+- `old_str` (string) - Text to find (for str_replace)
+- `new_str` (string) - Replacement text (for str_replace)
+- `content` (string) - Content for create operations
 
 **Returns:**
 - Operation result
@@ -214,18 +215,18 @@ const result = await sdk.executeTool('textEditor', {
 
 ## System Operations
 
-### executeCommand
+### execute_command
 
 Execute system commands with output capture.
 
 **CLI Usage:**
 ```bash
-cli-agent executeCommand --command="npm test" --workingDirectory="/project"
+cli-agent execute_command --command="npm test" --workingDirectory="/project"
 ```
 
 **SDK Usage:**
 ```typescript
-const result = await sdk.executeTool('executeCommand', {
+const result = await sdk.executeTool('execute_command', {
     command: 'git status --porcelain',
     workingDirectory: './my-project',
     timeout: 30000
@@ -253,19 +254,19 @@ const result = await sdk.executeTool('executeCommand', {
 
 ---
 
-### bashCommand
+### bash
 
 Execute bash scripts with enhanced features.
 
 **CLI Usage:**
 ```bash
-cli-agent bashCommand --script="echo 'Hello' && pwd && date"
+cli-agent bash --command="echo 'Hello' && pwd && date"
 ```
 
 **SDK Usage:**
 ```typescript
-const result = await sdk.executeTool('bashCommand', {
-    script: `
+const result = await sdk.executeTool('bash', {
+    command: `
 #!/bin/bash
 set -e
 echo "Starting deployment..."
@@ -297,18 +298,18 @@ echo "Deployment complete!"
 
 ---
 
-### listDirectory
+### ls
 
 List contents of a directory with detailed information.
 
 **CLI Usage:**
 ```bash
-cli-agent listDirectory --path="src" --recursive=true
+cli-agent ls --path="src"
 ```
 
 **SDK Usage:**
 ```typescript
-const result = await sdk.executeTool('listDirectory', {
+const result = await sdk.executeTool('ls', {
     path: './src',
     recursive: false,
     includeHidden: false,
@@ -421,18 +422,18 @@ const result = await sdk.executeTool('grep', {
 
 ---
 
-### searchCode
+### search_code
 
 Intelligent code search with semantic understanding.
 
 **CLI Usage:**
 ```bash
-cli-agent searchCode --query="authentication function" --path="src" --fileTypes='["js","ts"]'
+cli-agent search_code --query="authentication function" --path="src" --fileTypes='["js","ts"]'
 ```
 
 **SDK Usage:**
 ```typescript
-const result = await sdk.executeTool('searchCode', {
+const result = await sdk.executeTool('search_code', {
     query: 'JWT token validation',
     path: './src',
     fileTypes: ['js', 'ts', 'jsx', 'tsx'],
@@ -465,18 +466,18 @@ const result = await sdk.executeTool('searchCode', {
 
 ## Web Operations
 
-### webSearch
+### web_search
 
 Search the web for information.
 
 **CLI Usage:**
 ```bash
-cli-agent webSearch --query="React hooks tutorial" --allowedDomains='["reactjs.org","developer.mozilla.org"]'
+cli-agent web_search --query="React hooks tutorial" --allowedDomains='["reactjs.org","developer.mozilla.org"]'
 ```
 
 **SDK Usage:**
 ```typescript
-const result = await sdk.executeTool('webSearch', {
+const result = await sdk.executeTool('web_search', {
     query: 'TypeScript best practices 2024',
     allowedDomains: ['typescriptlang.org', 'github.com'],
     blockedDomains: ['spam-site.com'],
@@ -506,18 +507,18 @@ const result = await sdk.executeTool('webSearch', {
 
 ---
 
-### webFetch
+### web_fetch
 
 Fetch content from web URLs.
 
 **CLI Usage:**
 ```bash
-cli-agent webFetch --url="https://api.github.com/repos/microsoft/vscode" --method="GET"
+cli-agent web_fetch --url="https://api.github.com/repos/microsoft/vscode" --method="GET"
 ```
 
 **SDK Usage:**
 ```typescript
-const result = await sdk.executeTool('webFetch', {
+const result = await sdk.executeTool('web_fetch', {
     url: 'https://api.example.com/data',
     method: 'POST',
     headers: {
@@ -552,18 +553,18 @@ const result = await sdk.executeTool('webFetch', {
 
 ---
 
-### fetchDocumentation
+### fetch_documentation
 
 Fetch and process documentation from URLs.
 
 **CLI Usage:**
 ```bash
-cli-agent fetchDocumentation --url="https://nodejs.org/api/fs.html" --format="markdown"
+cli-agent fetch_documentation --url="https://nodejs.org/api/fs.html" --format="markdown"
 ```
 
 **SDK Usage:**
 ```typescript
-const result = await sdk.executeTool('fetchDocumentation', {
+const result = await sdk.executeTool('fetch_documentation', {
     url: 'https://docs.python.org/3/library/os.html',
     format: 'markdown',
     maxLength: 5000,
@@ -594,18 +595,18 @@ const result = await sdk.executeTool('fetchDocumentation', {
 
 ---
 
-### enhancedWebSearch
+### enhanced_web_search
 
 Advanced web search with additional processing.
 
 **CLI Usage:**
 ```bash
-cli-agent enhancedWebSearch --query="machine learning tutorials" --searchDepth="comprehensive"
+cli-agent enhanced_web_search --query="machine learning tutorials" --searchDepth="comprehensive"
 ```
 
 **SDK Usage:**
 ```typescript
-const result = await sdk.executeTool('enhancedWebSearch', {
+const result = await sdk.executeTool('enhanced_web_search', {
     query: 'Vue.js 3 composition API guide',
     searchDepth: 'comprehensive',
     includeCode: true,
@@ -640,60 +641,65 @@ const result = await sdk.executeTool('enhancedWebSearch', {
 
 ## Analysis Operations
 
-### symbolAnalysis
+### symbol_analysis
 
-Analyze code symbols (functions, classes, variables) in files.
+Analyze code symbols with intelligent navigation and usage analysis.
 
 **CLI Usage:**
 ```bash
-cli-agent symbolAnalysis --filePath="src/main.ts" --analysisType="functions"
+cli-agent symbol_analysis --action="find_usages" --symbol_name="authenticate" --file_paths='["src/main.ts"]' --include_tests=true
 ```
 
 **SDK Usage:**
 ```typescript
-const result = await sdk.executeTool('symbolAnalysis', {
-    filePath: './src/api/users.js',
-    analysisType: 'all',
-    includePrivate: false,
-    generateDocs: true
+const result = await sdk.executeTool('symbol_analysis', {
+    action: 'find_usages',
+    symbol_name: 'authenticate',
+    file_paths: ['./src/api/users.js', './src/auth.js'],
+    include_tests: false,
+    max_results: 100,
+    search_scope: 'project'
 });
 ```
 
 **Parameters:**
-- `filePath` (string, required) - File to analyze
-- `analysisType` (string, optional) - `functions`, `classes`, `variables`, `all`
-- `includePrivate` (boolean, optional) - Include private members
-- `generateDocs` (boolean, optional) - Generate documentation
-- `outputFormat` (string, optional) - `json`, `markdown`, `text`
+- `action` (string, required) - `find_usages`, `find_definitions`, `find_implementations`, `analyze_symbol`, `find_references`
+- `symbol_name` (string, required) - Name of the symbol to analyze
+- `file_paths` (array, optional) - Specific files to search in
+- `include_tests` (boolean, optional) - Include test files in analysis
+- `max_results` (number, optional) - Maximum number of results to return
+- `search_scope` (string, optional) - `workspace`, `project`, `file`
 
 **Returns:**
-- Symbol definitions and signatures
-- Code complexity metrics
-- Documentation suggestions
-- Dependency analysis
-- Code quality indicators
+- Symbol locations (definitions, references, implementations)
+- Usage patterns and analysis
+- Code snippets with context
+- Refactoring safety assessment
+- Recommendations for code improvements
 
 **Features:**
 - Multi-language support
-- AST-based analysis
-- Documentation generation
-- Complexity calculation
-- Dependency tracking
+- Intelligent symbol navigation
+- Usage pattern analysis
+- Refactoring safety scoring
+- Context-aware recommendations
 
 ---
 
-### intelligentTestAnalyzer
+### test_analyzer
 
 Analyze test files and coverage.
 
 **CLI Usage:**
 ```bash
-cli-agent intelligentTestAnalyzer --testPath="tests/" --analysisType="coverage"
+cli-agent test_analyzer --action="analyze_failures" --test_output="Test failed: assertion error" --testPath="tests/"
 ```
 
 **SDK Usage:**
 ```typescript
-const result = await sdk.executeTool('intelligentTestAnalyzer', {
+const result = await sdk.executeTool('test_analyzer', {
+    action: 'analyze_failures',
+    test_output: 'Test failed: assertion error in auth.test.js',
     testPath: './tests',
     analysisType: 'comprehensive',
     includeBenchmarks: true,
@@ -726,18 +732,18 @@ const result = await sdk.executeTool('intelligentTestAnalyzer', {
 
 ## Development Operations
 
-### todoWrite
+### todo_write
 
 Manage and track project todos and tasks.
 
 **CLI Usage:**
 ```bash
-cli-agent todoWrite --todos='[{"content":"Fix auth bug","status":"pending","activeForm":"Fixing auth bug"}]'
+cli-agent todo_write --todos='[{"content":"Fix auth bug","status":"pending","activeForm":"Fixing auth bug"}]'
 ```
 
 **SDK Usage:**
 ```typescript
-const result = await sdk.executeTool('todoWrite', {
+const result = await sdk.executeTool('todo_write', {
     todos: [
         {
             content: 'Implement user authentication',
@@ -779,22 +785,22 @@ const result = await sdk.executeTool('todoWrite', {
 
 ---
 
-### createExecutionPlan
+### create_execution_plan
 
 Create detailed execution plans for development tasks.
 
 **CLI Usage:**
 ```bash
-cli-agent createExecutionPlan --description="Implement OAuth" --requirements='["Setup provider","Add middleware","Create endpoints"]'
+cli-agent create_execution_plan --description="Implement OAuth" --tasks='[{"content":"Setup provider","status":"pending","priority":"high","id":"1"},{"content":"Add middleware","status":"pending","priority":"medium","id":"2"}]'
 ```
 
 **SDK Usage:**
 ```typescript
-const result = await sdk.executeTool('createExecutionPlan', {
+const result = await sdk.executeTool('create_execution_plan', {
     description: 'Refactor authentication system',
-    requirements: [
-        'Update login flow',
-        'Add OAuth support',
+    tasks: [
+        {content: 'Update login flow', status: 'pending', priority: 'high', id: '1'},
+        {content: 'Add OAuth support', status: 'pending', priority: 'medium', id: '2'},
         'Implement JWT tokens',
         'Add password reset functionality'
     ],
@@ -827,18 +833,18 @@ const result = await sdk.executeTool('createExecutionPlan', {
 
 ---
 
-### exitPlanMode
+### exit_plan_mode
 
 Exit planning mode and summarize the plan.
 
 **CLI Usage:**
 ```bash
-cli-agent exitPlanMode --plan="Complete authentication refactor with OAuth integration"
+cli-agent exit_plan_mode --plan="Complete authentication refactor with OAuth integration"
 ```
 
 **SDK Usage:**
 ```typescript
-const result = await sdk.executeTool('exitPlanMode', {
+const result = await sdk.executeTool('exit_plan_mode', {
     plan: 'Comprehensive testing strategy implementation',
     nextSteps: [
         'Set up testing framework',
@@ -868,62 +874,139 @@ const result = await sdk.executeTool('exitPlanMode', {
 
 ## Advanced Operations
 
-### advancedDiff
+### computer_use
 
-Generate advanced diffs between files or versions.
+Control the desktop with mouse clicks, keyboard input, and screen capture (like Claude Computer Use).
 
 **CLI Usage:**
 ```bash
-cli-agent advancedDiff --filePath="src/app.js" --compareWith="HEAD~1" --diffType="unified"
+cli-agent computer_use --action="screenshot"
+cli-agent computer_use --action="left_click" --coordinate="[300,400]"
+cli-agent computer_use --action="type" --text="Hello World"
 ```
 
 **SDK Usage:**
 ```typescript
-const result = await sdk.executeTool('advancedDiff', {
-    filePath: './src/api.js',
-    compareWith: 'staging-branch',
-    diffType: 'side-by-side',
-    contextLines: 5,
-    ignoreWhitespace: true
+// Take a screenshot
+const result = await sdk.executeTool('computer_use', {
+    action: 'screenshot'
+});
+
+// Click at coordinates
+const clickResult = await sdk.executeTool('computer_use', {
+    action: 'left_click',
+    coordinate: [300, 400]
+});
+
+// Type text
+const typeResult = await sdk.executeTool('computer_use', {
+    action: 'type',
+    text: 'Hello World!'
+});
+
+// Press a key
+const keyResult = await sdk.executeTool('computer_use', {
+    action: 'key',
+    key: 'Ctrl+C'
 });
 ```
 
 **Parameters:**
-- `filePath` (string, required) - File to compare
-- `compareWith` (string, required) - Comparison target (branch, commit, file)
-- `diffType` (string, optional) - `unified`, `side-by-side`, `contextual`
-- `contextLines` (number, optional) - Context lines around changes
-- `ignoreWhitespace` (boolean, optional) - Ignore whitespace changes
-- `colorOutput` (boolean, optional) - Colored diff output
+- `action` (string, required) - Desktop action: `screenshot`, `left_click`, `right_click`, `middle_click`, `double_click`, `triple_click`, `type`, `key`, `scroll`, `mouse_move`, `left_click_drag`
+- `coordinate` (array, optional) - [x, y] coordinates for mouse actions
+- `text` (string, optional) - Text to type (for `type` action)
+- `key` (string, optional) - Key to press (for `key` action)
+- `scroll_direction` (string, optional) - Direction: `up`, `down`, `left`, `right`
+- `scroll_amount` (number, optional) - Amount to scroll
+- `drag_to` (array, optional) - [x, y] coordinates for drag destination
 
 **Returns:**
-- Formatted diff output
-- Change statistics
-- File modification summary
-- Conflict identification
+- Screenshot image data (for screenshot action)
+- Action confirmation and results
+- Coordinate information
+- Error details if action fails
 
 **Features:**
-- Multiple diff formats
-- Git integration
-- Syntax highlighting
-- Change statistics
-- Conflict detection
+- Cross-platform support (Windows, macOS, Linux)
+- Screen capture capabilities
+- Mouse control (clicks, drags, movements)
+- Keyboard input (text typing, key combinations)
+- Scrolling support
+- Visual feedback
+
+**Note:** Requires a display environment (GUI). Will fail in headless environments.
 
 ---
 
-### advancedPatch
+### advanced_diff
 
-Apply patches to files with advanced features.
+Generate advanced diffs between files, text, or apply patches with detailed analysis.
 
 **CLI Usage:**
 ```bash
-cli-agent advancedPatch --patchContent="..." --targetFile="src/app.js" --dryRun=true
+cli-agent advanced_diff --action="compare_files" --file_path_1="src/app.js" --file_path_2="src/app.backup.js" --context_lines=3
 ```
 
 **SDK Usage:**
 ```typescript
-const result = await sdk.executeTool('advancedPatch', {
-    patchContent: `
+const result = await sdk.executeTool('advanced_diff', {
+    action: 'compare_files',
+    file_path_1: './src/api/users.js',
+    file_path_2: './src/api/users.backup.js',
+    context_lines: 5,
+    ignore_whitespace: true,
+    algorithm: 'myers'
+});
+
+// Compare text directly
+const textResult = await sdk.executeTool('advanced_diff', {
+    action: 'compare_text',
+    text_1: 'Hello world',
+    text_2: 'Hello universe',
+    ignore_case: false
+});
+```
+
+**Parameters:**
+- `action` (string, required) - `compare_files`, `compare_text`, `analyze_changes`, `generate_patch`, `merge_changes`
+- `file_path_1` (string, optional) - Path to the first file
+- `file_path_2` (string, optional) - Path to the second file
+- `text_1` (string, optional) - First text content to compare
+- `text_2` (string, optional) - Second text content to compare
+- `patch_content` (string, optional) - Patch content for merge operations
+- `context_lines` (number, optional) - Number of context lines to include
+- `ignore_whitespace` (boolean, optional) - Ignore whitespace differences
+- `ignore_case` (boolean, optional) - Ignore case differences
+- `algorithm` (string, optional) - `myers`, `patience`, `histogram`
+
+**Returns:**
+- Detailed diff output with line numbers
+- Change statistics and analysis
+- Patch format generation
+- Conflict identification and resolution
+
+**Features:**
+- Multiple diff algorithms
+- File and text comparison
+- Patch generation and application
+- Advanced filtering options
+- Detailed change analysis
+
+---
+
+### advanced_patch
+
+Apply patches to files with advanced V4A format support and intelligent healing.
+
+**CLI Usage:**
+```bash
+cli-agent advanced_patch --patch="..." --explanation="Fix authentication token parsing" --dry_run=true
+```
+
+**SDK Usage:**
+```typescript
+const result = await sdk.executeTool('advanced_patch', {
+    patch: `
 --- a/src/api.js
 +++ b/src/api.js
 @@ -10,7 +10,7 @@
@@ -934,32 +1017,29 @@ const result = await sdk.executeTool('advancedPatch', {
      return res.status(401).json({ error: 'No token provided' });
    }
     `,
-    targetFile: './src/api.js',
-    dryRun: false,
-    backupOriginal: true
+    explanation: 'Fix authentication token parsing to handle Bearer tokens',
+    dry_run: false,
+    auto_heal: true
 });
 ```
 
 **Parameters:**
-- `patchContent` (string, required) - Patch content in unified format
-- `targetFile` (string, required) - File to patch
-- `dryRun` (boolean, optional) - Test without applying changes
-- `backupOriginal` (boolean, optional) - Create backup of original file
-- `fuzzyMatching` (boolean, optional) - Allow fuzzy line matching
-- `reverseApply` (boolean, optional) - Apply patch in reverse
+- `patch` (string, required) - Patch content in V4A format
+- `explanation` (string, optional) - Description of what the patch does
+- `auto_heal` (boolean, optional) - Enable automatic healing if patch fails
+- `dry_run` (boolean, optional) - Test without applying changes
 
 **Returns:**
 - Patch application results
-- Modified files list
-- Backup locations
-- Conflict reports
+- Modified files list  
+- Healing information (if auto_heal enabled)
+- Detailed change summary
 
 **Features:**
-- Standard patch format support
-- Dry run capability
-- Automatic backup creation
-- Conflict resolution
-- Fuzzy matching for changed contexts
+- V4A patch format support
+- Intelligent auto-healing
+- Dry-run mode for testing
+- Detailed application feedback
 
 ---
 
@@ -1051,18 +1131,18 @@ const result = await sdk.executeTool('task', {
 
 ---
 
-### subAgents
+### sub_agents
 
 Orchestrate multiple sub-agents for complex tasks.
 
 **CLI Usage:**
 ```bash
-cli-agent subAgents --taskType="full-audit" --payload='{"targetPath":"./src","scanTypes":["security","performance"]}'
+cli-agent sub_agents --taskType="full-audit" --payload='{"targetPath":"./src","scanTypes":["security","performance"]}'
 ```
 
 **SDK Usage:**
 ```typescript
-const result = await sdk.executeTool('subAgents', {
+const result = await sdk.executeTool('sub_agents', {
     taskType: 'comprehensive-review',
     payload: {
         codebase: './src',
@@ -1096,18 +1176,18 @@ const result = await sdk.executeTool('subAgents', {
 
 ---
 
-### mcpIntegration
+### mcp_integration
 
 Integrate with Model Context Protocol (MCP) servers.
 
 **CLI Usage:**
 ```bash
-cli-agent mcpIntegration --server="file-server" --action="list-capabilities"
+cli-agent mcp_integration --server="file-server" --action="list-capabilities"
 ```
 
 **SDK Usage:**
 ```typescript
-const result = await sdk.executeTool('mcpIntegration', {
+const result = await sdk.executeTool('mcp_integration', {
     server: 'database-server',
     action: 'query',
     parameters: {
@@ -1139,18 +1219,18 @@ const result = await sdk.executeTool('mcpIntegration', {
 
 ---
 
-### hooksManagement
+### hooks_management
 
 Manage Git hooks and development workflows.
 
 **CLI Usage:**
 ```bash
-cli-agent hooksManagement --hookType="pre-commit" --action="install" --repoPath="."
+cli-agent hooks_management --hookType="pre-commit" --action="install" --repoPath="."
 ```
 
 **SDK Usage:**
 ```typescript
-const result = await sdk.executeTool('hooksManagement', {
+const result = await sdk.executeTool('hooks_management', {
     hookType: 'pre-push',
     action: 'create',
     script: `#!/bin/bash
@@ -1186,19 +1266,19 @@ echo "Pre-push checks passed"`,
 
 ## Notebook Operations
 
-### notebookRead
+### notebook_read
 
 Read and analyze Jupyter notebooks.
 
 **CLI Usage:**
 ```bash
-cli-agent notebookRead --notebookPath="analysis.ipynb" --format="json"
+cli-agent notebook_read --notebook_path="analysis.ipynb" --format="json"
 ```
 
 **SDK Usage:**
 ```typescript
-const result = await sdk.executeTool('notebookRead', {
-    notebookPath: './data-analysis.ipynb',
+const result = await sdk.executeTool('notebook_read', {
+    notebook_path: './data-analysis.ipynb',
     format: 'structured',
     includeCellOutputs: true,
     extractCode: true
@@ -1226,23 +1306,23 @@ const result = await sdk.executeTool('notebookRead', {
 
 ---
 
-### notebookEdit
+### notebook_edit
 
 Edit Jupyter notebook cells and structure.
 
 **CLI Usage:**
 ```bash
-cli-agent notebookEdit --notebookPath="analysis.ipynb" --cellIndex=0 --newSource="print('Hello World')"
+cli-agent notebook_edit --notebook_path="analysis.ipynb" --edit_mode="replace" --cell_id="1" --new_source="print('Hello World')" --cell_type="code"
 ```
 
 **SDK Usage:**
 ```typescript
-const result = await sdk.executeTool('notebookEdit', {
-    notebookPath: './data-analysis.ipynb',
-    operation: 'insert',
-    cellIndex: 2,
-    cellType: 'markdown',
-    newSource: '## Data Processing\n\nThis section processes the raw data.'
+const result = await sdk.executeTool('notebook_edit', {
+    notebook_path: './data-analysis.ipynb',
+    edit_mode: 'insert',
+    cell_id: '2',
+    cell_type: 'markdown',
+    new_source: '## Data Processing\n\nThis section processes the raw data.'
 });
 ```
 
@@ -1267,18 +1347,18 @@ const result = await sdk.executeTool('notebookEdit', {
 
 ---
 
-### advancedNotebook
+### advanced_notebook
 
 Advanced notebook analysis and operations.
 
 **CLI Usage:**
 ```bash
-cli-agent advancedNotebook --notebookPath="analysis.ipynb" --operation="analyze" --analysisType="dependencies"
+cli-agent advanced_notebook --notebookPath="analysis.ipynb" --operation="analyze" --analysisType="dependencies"
 ```
 
 **SDK Usage:**
 ```typescript
-const result = await sdk.executeTool('advancedNotebook', {
+const result = await sdk.executeTool('advanced_notebook', {
     notebookPath: './ml-model.ipynb',
     operation: 'optimize',
     analysisType: 'comprehensive',
@@ -1308,98 +1388,6 @@ const result = await sdk.executeTool('advancedNotebook', {
 - Code quality assessment
 - Optimization recommendations
 - Format conversion
-
----
-
-## System Tools
-
-### toolHealing
-
-Debug and repair tool parameter issues.
-
-**CLI Usage:**
-```bash
-cli-agent toolHealing --originalTool="editFile" --originalParams='{"filePath":"test.txt"}' --healingStrategy="unescape"
-```
-
-**SDK Usage:**
-```typescript
-const result = await sdk.executeTool('toolHealing', {
-    originalTool: 'editFile',
-    originalParams: {
-        filePath: 'app.js',
-        oldString: 'some\\nescaped\\nstring',
-        newString: 'corrected string'
-    },
-    healingStrategy: 'llm_correction',
-    errorDetails: 'NoMatchError: oldString not found'
-});
-```
-
-**Parameters:**
-- `originalTool` (string, required) - Tool that failed
-- `originalParams` (object, required) - Original parameters that failed
-- `healingStrategy` (string, optional) - Strategy: `unescape`, `llm_correction`, `auto`
-- `errorDetails` (string, optional) - Error message details
-- `fileContent` (string, optional) - File content for context
-
-**Returns:**
-- Healed parameters
-- Healing strategy applied
-- Confidence score
-- Explanation of changes made
-
-**Features:**
-- Multiple healing strategies
-- AI-powered correction
-- Context-aware healing
-- Healing confidence scoring
-
----
-
-### toolNormalization
-
-Normalize tool schemas for different model families.
-
-**CLI Usage:**
-```bash
-cli-agent toolNormalization --toolName="readFile" --modelFamily="claude-3" --inputSchema='{"type":"object"}'
-```
-
-**SDK Usage:**
-```typescript
-const result = await sdk.executeTool('toolNormalization', {
-    toolName: 'editFile',
-    modelFamily: 'gpt-4',
-    inputSchema: {
-        type: 'object',
-        properties: {
-            filePath: { type: 'string' },
-            oldString: { type: 'string' }
-        }
-    },
-    optimizeForModel: true
-});
-```
-
-**Parameters:**
-- `toolName` (string, required) - Tool to normalize
-- `modelFamily` (string, required) - Target model family
-- `inputSchema` (object, required) - Original tool schema
-- `optimizeForModel` (boolean, optional) - Apply model-specific optimizations
-- `validationLevel` (string, optional) - Validation strictness
-
-**Returns:**
-- Normalized schema
-- Applied transformations
-- Compatibility notes
-- Validation results
-
-**Features:**
-- Multi-model compatibility
-- Schema optimization
-- Validation enhancement
-- Transformation tracking
 
 ---
 

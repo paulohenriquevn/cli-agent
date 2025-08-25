@@ -22,7 +22,7 @@
 
 The CLI Agent is a comprehensive system that provides:
 
-- **30+ Built-in Tools** for file operations, system commands, web operations, and AI tasks
+- **30 Built-in Tools** for file operations, system commands, web operations, and AI tasks (96.7% functional)
 - **LLM-Friendly CLI** for direct tool execution without conversational overhead
 - **Complete SDK** for programmatic integration into other systems
 - **Automatic Healing** system that fixes failed tool parameters using AI
@@ -149,10 +149,10 @@ export OPENROUTER_API_KEY="your-openrouter-api-key"
 npm start list-tools
 
 # Test basic file operations
-npm start readFile --filePath="package.json"
+npm start read_file --filePath="package.json"
 
 # Test with healing (intentionally use escaped string)
-npm start editFile --filePath="test.txt" --oldString="line\\nwith\\nescapes" --newString="corrected line"
+npm start edit_file --filePath="test.txt" --oldText="line\\nwith\\nescapes" --newText="corrected line"
 ```
 
 ---
@@ -186,24 +186,24 @@ cli-agent <toolName> --param1="value1" --param2="value2"
 
 ```bash
 # Read a file
-cli-agent readFile --filePath="src/app.js"
+cli-agent read_file --filePath="src/app.js"
 
 # Write content to file  
-cli-agent writeFile --filePath="output.txt" --content="Hello World"
+cli-agent write_file --filePath="output.txt" --content="Hello World"
 
 # Edit file with healing
-cli-agent editFile --filePath="src/app.js" \
-  --oldString="var apiUrl = 'localhost'" \
-  --newString="const apiUrl = process.env.API_URL"
+cli-agent edit_file --filePath="src/app.js" \
+  --oldText="var apiUrl = 'localhost'" \
+  --newText="const apiUrl = process.env.API_URL"
 
 # Multiple edits in one operation
-cli-agent multiEdit --filePath="src/app.js" --edits='[
-  {"oldString": "var x = 1", "newString": "const x = 1"},
-  {"oldString": "var y = 2", "newString": "const y = 2"}
+cli-agent multi_edit --file_path="src/app.js" --edits='[
+  {"old_string": "var x = 1", "new_string": "const x = 1"},
+  {"old_string": "var y = 2", "new_string": "const y = 2"}
 ]'
 
 # List directory contents
-cli-agent listDirectory --path="src"
+cli-agent ls --path="src"
 ```
 
 ### Search Operations Examples
@@ -216,35 +216,35 @@ cli-agent glob --pattern="**/*.ts" --path="src"
 cli-agent grep --pattern="TODO|FIXME" --path="." --outputMode="content"
 
 # Intelligent code search
-cli-agent searchCode --query="authentication" --path="src" --fileTypes='["js","ts"]'
+cli-agent search_code --query="authentication" --path="src" --fileTypes='["js","ts"]'
 ```
 
 ### System Operations Examples
 
 ```bash
 # Execute system commands
-cli-agent executeCommand --command="npm test"
+cli-agent execute_command --command="npm test"
 
 # Run bash scripts (Linux/Mac)
-cli-agent bashCommand --script="echo 'Hello' && pwd && date"
+cli-agent bash --command="echo 'Hello' && pwd && date"
 
 # Advanced system operations
-cli-agent computerUse --action="screenshot" --coordinates="0,0,800,600"
+cli-agent computer_use --action="left_click" --coordinate="[100,100]"
 ```
 
 ### Web Operations Examples
 
 ```bash
 # Search the web
-cli-agent webSearch --query="Node.js best practices 2024" \
+cli-agent web_search --query="Node.js best practices 2024" \
   --blockedDomains='["example.com"]'
 
 # Fetch web content
-cli-agent webFetch --url="https://api.github.com/repos/microsoft/vscode" \
+cli-agent web_fetch --url="https://api.github.com/repos/microsoft/vscode" \
   --method="GET"
 
 # Get documentation
-cli-agent fetchDocumentation --url="https://nodejs.org/api/fs.html" \
+cli-agent fetch_documentation --url="https://nodejs.org/api/fs.html" \
   --format="markdown" --maxLength=1000
 ```
 
@@ -257,32 +257,34 @@ cli-agent task --description="Code security audit" \
   --subagent_type="security-analyst"
 
 # Manage project todos
-cli-agent todoWrite --todos='[
+cli-agent todo_write --todos='[
   {"content": "Implement authentication", "status": "pending", "activeForm": "Implementing authentication"},
   {"content": "Add tests", "status": "in_progress", "activeForm": "Adding tests"}
 ]'
 
 # Create execution plan
-cli-agent createExecutionPlan --description="Refactor API endpoints" \
-  --requirements='["Update routes", "Add validation", "Improve error handling"]'
+cli-agent create_execution_plan --description="Refactor API endpoints" \
+  --tasks='[
+    {"content": "Update routes", "status": "pending", "priority": "high", "id": "1"},
+    {"content": "Add validation", "status": "pending", "priority": "medium", "id": "2"}
+  ]'
 ```
 
 ### Advanced Operations Examples
 
 ```bash
 # Advanced file diffs
-cli-agent advancedDiff --filePath="src/app.js" --compareWith="HEAD~1" --diffType="unified"
+cli-agent advanced_diff --action="compare_files" --file_path_1="src/app.js" --file_path_2="src/app.backup.js" --diffType="unified"
 
 # Apply patches
-cli-agent advancedPatch --patchContent="..." --targetFile="src/app.js" --dryRun=true
+cli-agent advanced_patch --patch="..." --targetFile="src/app.js" --dryRun=true
 
 # Notebook operations
-cli-agent notebookRead --notebookPath="analysis.ipynb" --format="json"
-cli-agent notebookEdit --notebookPath="analysis.ipynb" --cellIndex=0 --newSource="print('hello')"
+cli-agent notebook_read --notebook_path="analysis.ipynb" --format="json"
+cli-agent notebook_edit --notebook_path="analysis.ipynb" --edit_mode="replace" --cell_id="1" --new_source="print('hello')" --cell_type="code"
 
-# Tool healing and normalization
-cli-agent toolHealing --originalTool="editFile" --originalParams="{...}" --healingStrategy="unescape"
-cli-agent toolNormalization --toolName="readFile" --modelFamily="gpt-4" --inputSchema="{...}"
+# Advanced system operations
+cli-agent advanced_notebook --action="analyze" --notebook_path="analysis.ipynb" --operation="analyze"
 ```
 
 ### Batch Execution
@@ -322,7 +324,7 @@ const sdk = new CliAgentSDK({
 await sdk.initialize();
 
 // Execute single tool
-const result = await sdk.executeTool('readFile', {
+const result = await sdk.executeTool('read_file', {
     filePath: 'package.json'
 });
 
@@ -337,7 +339,7 @@ const batchResult = await sdk.executeBatch({
     operations: [
         {
             id: 'read-config',
-            toolName: 'readFile',
+            toolName: 'read_file',
             parameters: { filePath: 'config.json' }
         },
         {
@@ -467,54 +469,62 @@ await sdk.installPlugin(myPlugin);
 
 ### Categories
 
-| Category | Tools | Description |
-|----------|-------|-------------|
-| **Files** | readFile, writeFile, editFile, multiEdit, textEditor | File operations with healing |
-| **System** | executeCommand, bashCommand, listDirectory | System commands and file listing |
-| **Search** | glob, grep, searchCode | Pattern matching and code search |
-| **Web** | webSearch, webFetch, fetchDocumentation, enhancedWebSearch | Web operations and API calls |
-| **Analysis** | symbolAnalysis, intelligentTestAnalyzer | Code analysis and testing |
-| **Development** | todoWrite, createExecutionPlan, exitPlanMode | Development workflow tools |
-| **Advanced** | advancedDiff, advancedPatch, computerUse | Advanced file operations |
-| **Integration** | task, subAgents, mcpIntegration, hooksManagement | AI tasks and integrations |
-| **Notebooks** | notebookRead, notebookEdit, advancedNotebook | Jupyter notebook operations |
-| **System** | toolHealing, toolNormalization | Internal system tools |
+| Category | Tools | Status | Description |
+|----------|-------|--------|-------------|
+| **file_operations** | read_file, write_file, edit_file, multi_edit, ls | 5/5 ✅ | Core file operations |
+| **file-operations** | advanced_patch, text_editor | 2/2 ✅ | Advanced file operations |
+| **command-execution** | bash, execute_command | 2/2 ✅ | System commands |
+| **search** | glob, grep | 2/2 ✅ | Pattern matching |
+| **search-analysis** | search_code | 1/1 ✅ | Intelligent code search |
+| **web** | web_search, web_fetch | 2/2 ✅ | Web operations |
+| **web-documentation** | enhanced_web_search, fetch_documentation | 2/2 ✅ | Documentation fetching |
+| **planning** | todo_write, exit_plan_mode | 2/2 ✅ | Planning tools |
+| **delegation** | task | 1/1 ✅ | AI task delegation |
+| **project-management** | create_execution_plan | 1/1 ✅ | Project management |
+| **analysis** | advanced_diff | 1/1 ✅ | File analysis |
+| **code-analysis** | symbol_analysis | 1/1 ✅ | Code analysis |
+| **testing_quality** | test_analyzer | 1/1 ✅ | Test analysis |
+| **integrations** | mcp_integration | 1/1 ✅ | MCP integration |
+| **ai_assistance** | sub_agents | 1/1 ✅ | AI sub-agents |
+| **system-customization** | hooks_management | 1/1 ✅ | Git hooks |
+| **notebook-operations** | advanced_notebook, notebook_edit, notebook_read | 3/3 ✅ | Jupyter notebooks |
+| **advanced-tools** | computer_use | 0/1 ❌ | GUI automation (requires xdotool) |
 
 ### File Operations
 
-#### readFile
+#### read_file
 ```bash
-cli-agent readFile --filePath="path/to/file.txt"
+cli-agent read_file --filePath="path/to/file.txt"
 ```
 - **Purpose**: Read file contents
 - **Parameters**: `filePath` (required)
 - **Returns**: File content as string
 - **Features**: Encoding detection, large file handling
 
-#### writeFile  
+#### write_file  
 ```bash
-cli-agent writeFile --filePath="path/to/file.txt" --content="Hello World"
+cli-agent write_file --filePath="path/to/file.txt" --content="Hello World"
 ```
 - **Purpose**: Write content to file
 - **Parameters**: `filePath` (required), `content` (required)
 - **Returns**: Write confirmation
 - **Features**: Directory creation, encoding options
 
-#### editFile
+#### edit_file
 ```bash
-cli-agent editFile --filePath="file.txt" --oldString="search" --newString="replace"
+cli-agent edit_file --filePath="file.txt" --oldText="search" --newText="replace"
 ```
 - **Purpose**: Edit file with string replacement
-- **Parameters**: `filePath`, `oldString`, `newString`, `replaceAll` (optional)
+- **Parameters**: `filePath`, `oldText`, `newText`, `replaceAll` (optional)
 - **Returns**: Edit confirmation with changes made
-- **Features**: **Automatic healing** if oldString doesn't match exactly
+- **Features**: **Automatic healing** if oldText doesn't match exactly
 
-#### multiEdit
+#### multi_edit
 ```bash
-cli-agent multiEdit --filePath="file.txt" --edits='[{"oldString":"a","newString":"b"}]'
+cli-agent multi_edit --file_path="file.txt" --edits='[{"old_string":"a","new_string":"b"}]'
 ```
 - **Purpose**: Multiple edits in single operation
-- **Parameters**: `filePath`, `edits` (array of edit operations)
+- **Parameters**: `file_path`, `edits` (array of edit operations)
 - **Returns**: Summary of all edits applied
 - **Features**: Atomic operations, healing for each edit
 
@@ -538,9 +548,9 @@ cli-agent grep --pattern="TODO|FIXME" --path="." --outputMode="content"
 - **Returns**: Matching lines or files
 - **Features**: Regex support, context lines, case-insensitive
 
-#### searchCode
+#### search_code
 ```bash
-cli-agent searchCode --query="function authenticate" --path="src" --fileTypes='["js","ts"]'
+cli-agent search_code --query="function authenticate" --path="src" --fileTypes='["js","ts"]'
 ```
 - **Purpose**: Intelligent code search
 - **Parameters**: `query`, `path`, `fileTypes` (optional)
@@ -549,18 +559,18 @@ cli-agent searchCode --query="function authenticate" --path="src" --fileTypes='[
 
 ### Web Operations
 
-#### webSearch
+#### web_search
 ```bash
-cli-agent webSearch --query="Node.js tutorial" --allowedDomains='["nodejs.org"]'
+cli-agent web_search --query="Node.js tutorial" --allowedDomains='["nodejs.org"]'
 ```
 - **Purpose**: Search the web
 - **Parameters**: `query`, `allowedDomains` (optional), `blockedDomains` (optional)
 - **Returns**: Search results with URLs and snippets
 - **Features**: Domain filtering, result ranking
 
-#### webFetch
+#### web_fetch
 ```bash
-cli-agent webFetch --url="https://api.example.com/data" --method="GET"
+cli-agent web_fetch --url="https://api.example.com/data" --method="GET"
 ```
 - **Purpose**: HTTP requests
 - **Parameters**: `url`, `method` (optional), `headers` (optional), `body` (optional)
@@ -580,9 +590,9 @@ cli-agent task --description="Code review" --prompt="Review this code for issues
 
 ### System Operations
 
-#### executeCommand
+#### execute_command
 ```bash
-cli-agent executeCommand --command="npm test" --workingDirectory="/project"
+cli-agent execute_command --command="npm test" --workingDirectory="/project"
 ```
 - **Purpose**: Execute system commands
 - **Parameters**: `command`, `workingDirectory` (optional), `timeout` (optional)
