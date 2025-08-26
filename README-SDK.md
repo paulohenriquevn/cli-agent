@@ -4,18 +4,18 @@
 
 Transform any LangGraph agent with powerful CLI Agent tools - file operations, code analysis, web search, command execution, and more.
 
-[![npm version](https://badge.fury.io/js/@paulohenriquevn%2Fsdkagent.svg)](https://badge.fury.io/js/@paulohenriquevn%2Fsdkagent)
+[![npm version](https://badge.fury.io/js/cli-agent-tools-sdk.svg)](https://badge.fury.io/js/cli-agent-tools-sdk)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue.svg)](https://www.typescriptlang.org/)
 
-## Quick Start
+## 🚀 Quick Start
 
 ```bash
-npm install @paulohenriquevn/sdkagent @langchain/core @langchain/langgraph
+npm install sdkagent @langchain/core @langchain/langgraph
 ```
 
 ```javascript
-import { CLIAgentTools } from '@paulohenriquevn/sdkagent';
+import { CLIAgentTools } from 'sdkagent';
 import { createReactAgent } from '@langchain/langgraph/prebuilt';
 import { ChatOpenAI } from '@langchain/openai';
 
@@ -40,7 +40,7 @@ const result = await agent.invoke({
 });
 ```
 
-## Available Tools (28+ Total)
+## 🛠️ Available Tools (28+ Total)
 
 ### **File Operations (7)**
 - `read_file` - Read files with line ranges and encoding detection
@@ -86,7 +86,7 @@ const result = await agent.invoke({
 - `task` - Sub-agent delegation and task management
 - `tool_healing` - Self-healing tool recovery
 
-## Advanced Usage
+## 📖 Advanced Usage
 
 ### **Filter Tools by Category**
 
@@ -121,7 +121,7 @@ const tools = CLIAgentTools.getAllTools({
 ### **Direct Tool Execution**
 
 ```javascript
-import { SDKLangGraph } from '@paulohenriquevn/sdkagent';
+import { SDKLangGraph } from 'sdkagent';
 
 const sdk = new SDKLangGraph({
     workingDirectory: './project',
@@ -148,7 +148,7 @@ const slaMetrics = sdk.getSLAMetrics();
 console.log('Success rates:', slaMetrics);
 ```
 
-## Real-World Examples
+## 🎯 Real-World Examples
 
 ### **Code Analysis Workflow**
 
@@ -199,7 +199,7 @@ await testAgent.invoke({
 });
 ```
 
-## Configuration Options
+## 🔧 Configuration Options
 
 ```typescript
 interface SDKLangGraphConfig {
@@ -216,7 +216,7 @@ interface SDKLangGraphConfig {
 }
 ```
 
-## Security & Best Practices
+## 🛡️ Security & Best Practices
 
 ### **Safe Command Execution**
 - All bash commands run in isolated contexts
@@ -233,21 +233,21 @@ interface SDKLangGraphConfig {
 - Graceful degradation on failures
 - Detailed error reporting and recovery
 
-## Performance & Reliability
+## 📊 Performance & Reliability
 
-- **99% SLA** - Production-tested reliability
-- **Sub-second response** - Optimized for speed
-- **Memory efficient** - Smart caching and resource management
-- **Scalable** - Handles large codebases and complex operations
+- ✅ **99% SLA** - Production-tested reliability
+- ✅ **Sub-second response** - Optimized for speed
+- ✅ **Memory efficient** - Smart caching and resource management
+- ✅ **Scalable** - Handles large codebases and complex operations
 
-## Troubleshooting
+## 🔍 Troubleshooting
 
 ### **Common Issues**
 
 ```javascript
 // Issue: Tools not found
 // Solution: Ensure proper import
-import { CLIAgentTools } from '@paulohenriquevn/sdkagent';
+import { CLIAgentTools } from 'sdkagent';
 
 // Issue: Permission errors
 // Solution: Set proper working directory
@@ -271,7 +271,7 @@ const tools = CLIAgentTools.getAllTools({
 });
 ```
 
-## API Reference
+## 📚 API Reference
 
 ### **CLIAgentTools**
 
@@ -289,21 +289,21 @@ const tools = CLIAgentTools.getAllTools({
 - `getExecutionStats()` - Get usage statistics
 - `getSLAMetrics()` - Get reliability metrics
 
-## Contributing
+## 🤝 Contributing
 
 We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
 
-## License
+## 📄 License
 
 MIT License - see [LICENSE](LICENSE) file for details.
 
-## Links
+## 🔗 Links
 
 - [Documentation](https://docs.example.com)
-- [GitHub Repository](https://github.com/paulohenriquevn/sdkagent)
-- [Issue Tracker](https://github.com/paulohenriquevn/sdkagent/issues)
+- [GitHub Repository](https://github.com/yourusername/cli-agent-tools-sdk)
+- [Issue Tracker](https://github.com/yourusername/cli-agent-tools-sdk/issues)
 - [LangGraph Documentation](https://langchain-ai.github.io/langgraph/)
 
 ---
 
-**Ready to supercharge your LangGraph agents? Install CLI Agent Tools SDK today!**
+**Ready to supercharge your LangGraph agents? Install CLI Agent Tools SDK today!** 🚀

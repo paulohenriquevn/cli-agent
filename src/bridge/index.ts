@@ -1,21 +1,21 @@
 /*---------------------------------------------------------------------------------------------
- * LangGraph Bridge - Main Export File
+ * CLI Agent SDK for LangGraph - Main Export File
  * 
  * Exports all bridge functionality for easy import in external LangGraph projects
  *--------------------------------------------------------------------------------------------*/
 
-// Main bridge classes and interfaces
+// Main SDK classes and interfaces
 export {
-    LangGraphBridge,
+    SDKLangGraph,
     CLIAgentTools,
     type LangChainToolInterface,
-    type BridgeConfig,
+    type SDKLangGraphConfig,
     type ToolMetadata,
-    type BridgeExecutionResult
-} from './langGraphBridge';
+    type SDKExecutionResult
+} from './SDKLangGraph';
 
 // Import for use in QuickStart class
-import { CLIAgentTools } from './langGraphBridge';
+import { CLIAgentTools } from './SDKLangGraph';
 
 // Examples for reference (commented out to avoid execution)
 // export * from './examples/basicUsage';
@@ -47,7 +47,7 @@ export class QuickStart {
      * Get tools for code analysis workflows
      */
     static getCodeAnalysisTools() {
-        const bridge = CLIAgentTools.createBridge({
+        const bridge = CLIAgentTools.createSDK({
             includeCategories: ['file_operations', 'search-analysis'],
             includeTags: ['core', 'essential', 'search-analysis']
         });
@@ -58,7 +58,7 @@ export class QuickStart {
      * Get tools for web-based workflows
      */
     static getWebWorkflowTools() {
-        const bridge = CLIAgentTools.createBridge({
+        const bridge = CLIAgentTools.createSDK({
             includeCategories: ['file_operations', 'web', 'network'],
             includeTags: ['core', 'essential', 'web', 'api']
         });
@@ -83,4 +83,4 @@ const agent = createReactAgent({ llm: model, tools });
 ## See README.md for complete documentation and examples.
 `;
 
-console.log('LangGraph Bridge loaded - 30+ CLI Agent tools ready for LangGraph projects! 🚀');
+console.log('CLI Agent SDK loaded - 30+ CLI Agent tools ready for LangGraph projects! 🚀');

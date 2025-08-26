@@ -1,10 +1,10 @@
 /*---------------------------------------------------------------------------------------------
- * Bridge Test - Validate that CLI Agent tools work correctly through the bridge
+ * SDK Test - Validate that CLI Agent tools work correctly through the SDK
  * 
- * This test validates the bridge functionality without requiring LangGraph dependencies
+ * This test validates the SDK functionality without requiring LangGraph dependencies
  *--------------------------------------------------------------------------------------------*/
 
-import { LangGraphBridge, CLIAgentTools, BridgeConfig } from '../langGraphBridge';
+import { SDKLangGraph, CLIAgentTools, type SDKLangGraphConfig } from '../SDKLangGraph';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -15,7 +15,7 @@ interface TestResult {
     duration?: number;
 }
 
-class BridgeTestSuite {
+class SDKTestSuite {
     private results: TestResult[] = [];
     private testDir: string;
 
@@ -99,12 +99,12 @@ const express = require('express');
         try {
             // Test 1: Bridge Initialization
             await this.runTest('Bridge Initialization', async () => {
-                const config: BridgeConfig = {
+                const config: SDKLangGraphConfig = {
                     workingDirectory: this.testDir,
                     enableLogging: false
                 };
                 
-                const bridge = new LangGraphBridge(config);
+                const bridge = new SDKLangGraph(config);
                 const tools = bridge.getAllTools();
                 
                 if (tools.length === 0) {
@@ -116,13 +116,13 @@ const express = require('express');
 
             // Test 2: Tool Filtering
             await this.runTest('Tool Filtering', async () => {
-                const bridge = new LangGraphBridge({
+                const bridge = new SDKLangGraph({
                     workingDirectory: this.testDir,
                     includeCategories: ['file_operations']
                 });
                 
                 const fileTools = bridge.getAllTools();
-                const hasReadTool = fileTools.some(tool => tool.name === 'read_file');
+                const hasReadTool = fileTools.some((tool: any) => tool.name === 'read_file');
                 
                 if (!hasReadTool) {
                     throw new Error('read_file tool not found in file_operations category');
@@ -154,7 +154,7 @@ const express = require('express');
 
             // Test 4: Tool Execution - read_file
             await this.runTest('Tool Execution - read_file', async () => {
-                const bridge = new LangGraphBridge({
+                const bridge = new SDKLangGraph({
                     workingDirectory: this.testDir,
                     enableLogging: false
                 });
@@ -176,7 +176,7 @@ const express = require('express');
 
             // Test 5: Tool Execution - ls
             await this.runTest('Tool Execution - ls', async () => {
-                const bridge = new LangGraphBridge({
+                const bridge = new SDKLangGraph({
                     workingDirectory: this.testDir,
                     enableLogging: false
                 });
@@ -198,7 +198,7 @@ const express = require('express');
 
             // Test 6: Tool Execution - search_code
             await this.runTest('Tool Execution - search_code', async () => {
-                const bridge = new LangGraphBridge({
+                const bridge = new SDKLangGraph({
                     workingDirectory: this.testDir,
                     enableLogging: false
                 });
@@ -222,7 +222,7 @@ const express = require('express');
 
             // Test 7: Tool Execution - write_file
             await this.runTest('Tool Execution - write_file', async () => {
-                const bridge = new LangGraphBridge({
+                const bridge = new SDKLangGraph({
                     workingDirectory: this.testDir,
                     enableLogging: false
                 });
@@ -253,7 +253,7 @@ const express = require('express');
 
             // Test 8: Error Handling
             await this.runTest('Error Handling', async () => {
-                const bridge = new LangGraphBridge({
+                const bridge = new SDKLangGraph({
                     workingDirectory: this.testDir,
                     enableLogging: false
                 });
@@ -275,7 +275,7 @@ const express = require('express');
 
             // Test 9: Tool Metadata
             await this.runTest('Tool Metadata', async () => {
-                const bridge = new LangGraphBridge({
+                const bridge = new SDKLangGraph({
                     workingDirectory: this.testDir
                 });
                 
@@ -285,7 +285,7 @@ const express = require('express');
                     throw new Error('No tool metadata returned');
                 }
                 
-                const readToolMeta = metadata.find(meta => meta.name === 'read_file');
+                const readToolMeta = metadata.find((meta: any) => meta.name === 'read_file');
                 if (!readToolMeta) {
                     throw new Error('read_file metadata not found');
                 }
@@ -299,7 +299,7 @@ const express = require('express');
 
             // Test 10: Execution Stats
             await this.runTest('Execution Stats', async () => {
-                const bridge = new LangGraphBridge({
+                const bridge = new SDKLangGraph({
                     workingDirectory: this.testDir,
                     enableLogging: false
                 });
@@ -358,7 +358,7 @@ const express = require('express');
 
 // Run tests if this file is executed directly
 if (require.main === module) {
-    const testSuite = new BridgeTestSuite();
+    const testSuite = new SDKTestSuite();
     testSuite.runAllTests().then(() => {
         testSuite.printSummary();
         process.exit(testSuite.getResults().some(r => !r.passed) ? 1 : 0);
@@ -368,4 +368,4 @@ if (require.main === module) {
     });
 }
 
-export { BridgeTestSuite };
+export { SDKTestSuite };

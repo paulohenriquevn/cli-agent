@@ -1,0 +1,30 @@
+{
+  "name": "langgraph-cli-agent-integration-sample",
+  "version": "1.0.0",
+  "description": "Sample project demonstrating LangGraph integration with CLI Agent tools",
+  "type": "module",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "node src/main.js",
+    "demo": "node src/simple-demo.js",
+    "demo:full": "node src/main.js",
+    "install-deps": "npm install @langchain/langgraph @langchain/openai @langchain/core dotenv",
+    "setup": "npm run install-deps"
+  },
+  "dependencies": {
+    "@langchain/core": "^0.3.0",
+    "@langchain/langgraph": "^0.2.0",
+    "@langchain/openai": "^0.3.0",
+    "dotenv": "^16.3.0"
+  },
+  "devDependencies": {},
+  "keywords": [
+    "langgraph",
+    "cli-agent",
+    "tools",
+    "integration",
+    "sample"
+  ],
+  "author": "CLI Agent Team",
+  "license": "MIT"
+}
