@@ -1,13 +1,13 @@
 {
   "name": "@paulohenriquevn/sdkagent",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "CLI Agent Tools SDK for LangGraph - 28+ production-ready tools for AI agents",
   "main": "dist/bridge/index.js",
   "types": "dist/bridge/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/bridge/index.d.ts",
-      "import": "./dist/bridge/index.mjs",
+      "import": "./dist/bridge/index.js",
       "require": "./dist/bridge/index.js"
     },
     "./package.json": "./package.json"
