@@ -1,2 +1,0 @@
-This is a demo file created by CLI Agent SDK!
-Timestamp: 2025-08-25T01:13:02.560Z

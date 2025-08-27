@@ -5,6 +5,8 @@
 
 import { exec } from 'child_process';
 import { promisify } from 'util';
+import * as os from 'os';
+import * as fs from 'fs';
 import { BaseTool } from '../base/baseTool';
 import { ToolRegistry } from '../registry/toolRegistry';
 import { 
@@ -84,6 +86,121 @@ Examples: "npm run build", "git status", "npm test", "mkdir src/components". SEC
         'ssh ', 'scp ', 'rsync'
     ];
 
+    /**
+     * Get cross-platform shell options for command execution
+     */
+    private getShellOptions(): { shell?: string } {
+        const platform = os.platform();
+        
+        switch (platform) {
+            case 'win32':
+                // Windows: Try PowerShell first, fallback to cmd
+                if (this.isCommandAvailable('powershell.exe')) {
+                    return { shell: 'powershell.exe' };
+                }
+                return {}; // Use default shell (cmd.exe)
+                
+            case 'darwin':
+                // macOS: Try bash, fallback to zsh, then sh
+                if (this.isCommandAvailable('/bin/bash')) {
+                    return { shell: '/bin/bash' };
+                }
+                if (this.isCommandAvailable('/bin/zsh')) {
+                    return { shell: '/bin/zsh' };
+                }
+                return { shell: '/bin/sh' };
+                
+            case 'linux':
+                // Linux: Try bash, fallback to sh
+                if (this.isCommandAvailable('/bin/bash')) {
+                    return { shell: '/bin/bash' };
+                }
+                if (this.isCommandAvailable('/usr/bin/bash')) {
+                    return { shell: '/usr/bin/bash' };
+                }
+                return { shell: '/bin/sh' };
+                
+            default:
+                // Other Unix-like systems
+                if (this.isCommandAvailable('/bin/bash')) {
+                    return { shell: '/bin/bash' };
+                }
+                return { shell: '/bin/sh' };
+        }
+    }
+
+    /**
+     * Check if a command/shell is available on the system
+     */
+    private isCommandAvailable(command: string): boolean {
+        try {
+            // For full paths, check if file exists and is executable
+            if (command.startsWith('/') || command.includes('\\')) {
+                return fs.existsSync(command) && this.isExecutable(command);
+            }
+            
+            // For command names, it would be available in PATH
+            // This is a simple check, more sophisticated methods could be used
+            return true;
+        } catch {
+            return false;
+        }
+    }
+
+    /**
+     * Check if a file is executable
+     */
+    private isExecutable(filePath: string): boolean {
+        try {
+            const stats = fs.statSync(filePath);
+            // Check if file has execute permissions (Unix-like systems)
+            return !!(stats.mode & parseInt('111', 8));
+        } catch {
+            return false;
+        }
+    }
+
+    /**
+     * Adapt command for cross-platform compatibility
+     */
+    private adaptCommandForPlatform(command: string): string {
+        const platform = os.platform();
+        
+        if (platform === 'win32') {
+            // Windows-specific adaptations
+            let adapted = command;
+            
+            // Convert Unix-style paths to Windows paths
+            adapted = adapted.replace(/\/bin\//g, '');
+            adapted = adapted.replace(/\/usr\/bin\//g, '');
+            
+            // Convert common Unix commands to Windows equivalents
+            adapted = adapted.replace(/^ls\s/, 'dir ');
+            adapted = adapted.replace(/^ls$/, 'dir');
+            adapted = adapted.replace(/^cat\s/, 'type ');
+            adapted = adapted.replace(/^cat$/, 'type');
+            adapted = adapted.replace(/^rm\s/, 'del ');
+            adapted = adapted.replace(/^rm$/, 'del');
+            adapted = adapted.replace(/^cp\s/, 'copy ');
+            adapted = adapted.replace(/^cp$/, 'copy');
+            adapted = adapted.replace(/^mv\s/, 'move ');
+            adapted = adapted.replace(/^mv$/, 'move');
+            
+            // Handle mkdir -p specifically
+            adapted = adapted.replace(/mkdir\s+-p\s+/, 'mkdir ');
+            
+            // Convert path separators for Windows
+            // But be careful not to break URLs or other contexts
+            if (adapted.includes('/') && !adapted.includes('http')) {
+                adapted = adapted.replace(/\//g, '\\');
+            }
+            
+            return adapted;
+        }
+        
+        return command; // No adaptation needed for Unix-like systems
+    }
+
     async invoke(
         options: CliToolInvocationOptions<IBashCommandParams>,
         token: CliCancellationToken
@@ -116,15 +233,21 @@ Examples: "npm run build", "git status", "npm test", "mkdir src/components". SEC
                 this.resolveFilePath(workingDirectory) : 
                 this.getWorkspaceRoot();
 
+            // Adapt command for cross-platform compatibility
+            const adaptedCommand = this.adaptCommandForPlatform(command);
+            
             // Log command execution
-            console.log(`🔧 Executing bash command: ${command}`);
+            console.log(`🔧 Executing command: ${command}`);
+            if (adaptedCommand !== command) {
+                console.log(`🔄 Adapted for ${os.platform()}: ${adaptedCommand}`);
+            }
             if (description) {
                 console.log(`📝 Description: ${description}`);
             }
             console.log(`📁 Working directory: ${cwd}`);
             console.log(`⏱️ Timeout: ${validTimeout}ms`);
 
-            return await this.executeBashCommand(command, cwd, validTimeout, token, runInBackground);
+            return await this.executeBashCommand(adaptedCommand, cwd, validTimeout, token, runInBackground);
 
         } catch (error) {
             return this.createErrorResult(error instanceof Error ? error.message : 'Unknown error executing command');
@@ -153,12 +276,14 @@ Examples: "npm run build", "git status", "npm test", "mkdir src/components". SEC
                 controller.abort();
             });
 
-            // Execute command
+            // Execute command with cross-platform shell expansion support
+            const shellOptions = this.getShellOptions();
             const result = await execAsync(command, {
                 cwd,
                 timeout,
                 maxBuffer: 1024 * 1024, // 1MB buffer
                 signal: controller.signal,
+                ...shellOptions,
                 env: {
                     ...process.env,
                     ...this.context.environment

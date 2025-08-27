@@ -23,6 +23,9 @@
     "src/tools/registry/__tests__/*.disabled",
     "src/tools/execution/__tests__/*.disabled",
     "src/tools/implementations/toolHealingTool.ts",
-    "src/agent/cliAgent.ts"
+    "src/agent/cliAgent.ts",
+    "**/*.test.ts",
+    "**/__tests__/**/*",
+    "src/tools/tests/**/*"
   ]
 }

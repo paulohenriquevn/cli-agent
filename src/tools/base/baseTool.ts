@@ -26,6 +26,60 @@ export interface IToolResult {
     data?: unknown;
     error?: string;
     message?: string;
+    
+    // Métodos obrigatórios para compatibilidade
+    hasErrors(): boolean;
+    getErrors(): string[];
+    getText(): string;
+}
+
+/**
+ * Implementação concreta do IToolResult
+ */
+export class ToolResult implements IToolResult {
+    constructor(
+        public success: boolean,
+        public data?: unknown,
+        public error?: string,
+        public message?: string
+    ) {}
+
+    hasErrors(): boolean {
+        return !this.success || !!this.error;
+    }
+
+    getErrors(): string[] {
+        if (!this.hasErrors()) return [];
+        return this.error ? [this.error] : ['Unknown error'];
+    }
+
+    getText(): string {
+        if (this.hasErrors()) {
+            return this.getErrors().join('; ');
+        }
+        
+        if (typeof this.data === 'string') {
+            return this.data;
+        }
+        
+        if (this.message) {
+            return this.message;
+        }
+        
+        if (this.data !== undefined) {
+            return JSON.stringify(this.data, null, 2);
+        }
+        
+        return '';
+    }
+
+    static success(data?: unknown, message?: string): ToolResult {
+        return new ToolResult(true, data, undefined, message);
+    }
+
+    static error(error: string, data?: unknown): ToolResult {
+        return new ToolResult(false, data, error);
+    }
 }
 
 export interface IEditFilterData {
