@@ -187,8 +187,8 @@ describe('Non-Refactored Tools', () => {
     });
 
     test('should track refactoring progress', () => {
-        const refactoredCount = 14; // Number of already refactored tools
-        const totalCount = 28; // Total tools in the system (removed hooksManagementTool and subAgentsTool)
+        const refactoredCount = 15; // Number of already refactored tools (including memoryTool)
+        const totalCount = 29; // Total tools in the system (removed hooksManagementTool and subAgentsTool, added memoryTool)
         const remainingCount = nonRefactoredTools.length;
 
         expect(refactoredCount + remainingCount).toBe(totalCount);

@@ -28,11 +28,21 @@ export class CliCancellationToken {
  * Tool result parts for CLI output
  */
 export class CliTextPart {
+    public readonly type = 'text';
     constructor(public value: string) {}
+    
+    get text(): string {
+        return this.value;
+    }
 }
 
 export class CliErrorPart {
+    public readonly type = 'error';
     constructor(public value: Error | string) {}
+    
+    get text(): string {
+        return this.value instanceof Error ? this.value.message : this.value;
+    }
 }
 
 export type CliResultPart = CliTextPart | CliErrorPart;

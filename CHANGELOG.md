@@ -5,6 +5,119 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.2] - 2025-01-27
+
+### 🧪 Test Suite Fixes
+- **Fixed test suite to account for 29 tools** (including Memory Tool):
+  - Updated `fixed-tools-integration.test.ts` to expect 29 tools
+  - Updated `non-refactored-tools.test.ts` refactoring progress counter
+  - Corrected refactored tools count to 15 (including Memory Tool)
+  - All integration tests now passing
+
+### 📊 Current Tool Status
+- **Total Tools**: 29
+- **Refactored Tools**: 15 (52% completion)
+- **Remaining to Refactor**: 14
+- **Latest Addition**: Memory Tool with comprehensive unit tests
+
+---
+
+## [2.1.1] - 2025-01-27
+
+### 🧪 Testing & Quality Improvements
+- **Added comprehensive unit tests for Memory Tool**:
+  - 19 test cases covering all functionality
+  - Basic memory saving and retrieval
+  - Edge cases (empty facts, whitespace, long content)
+  - Priority levels and metadata handling
+  - Tags and categories validation
+  - File management scenarios
+  - Schema validation tests
+  - Error handling verification
+
+### 🔧 Bug Fixes
+- **Fixed CliErrorPart and CliTextPart types**:
+  - Added missing `type` property for proper error detection
+  - Added `text` getter for consistent API
+  - Improved error handling in tool execution
+  - Better integration with IToolResult interface
+
+### 📊 Test Coverage
+- Memory Tool: 100% coverage with 19 test cases
+- All edge cases properly handled
+- Error scenarios thoroughly tested
+- OpenAI schema compatibility validated
+
+---
+
+## [2.1.0] - 2025-01-27
+
+### 🧠 NEW FEATURE - Memory Tool
+- **Added Memory Tool (`save_memory`)** for persistent information storage:
+  - Automatically creates and manages `agent.md` file in workspace
+  - Saves important facts, preferences, and project information
+  - Supports categorization with custom categories
+  - Priority levels: low, medium, high
+  - Tag system for better organization
+  - Project association for multi-project workflows
+  - Unique fact IDs with timestamps
+  - Auto-formatting with markdown structure
+
+### ✨ Memory Tool Features
+- **Persistent Context**: Information saved across conversations
+- **Smart File Management**: Auto-detects existing agent files (`agent.md`, `.agent.md`, `context.md`, etc.)
+- **Rich Metadata**: Categories, priorities, tags, and project associations
+- **Error Handling**: Robust error handling with clear feedback
+- **OpenAI Compatible**: Full compatibility with OpenAI Function Calling
+
+### 🎯 Use Cases
+- Save user preferences and coding standards
+- Remember project configurations and decisions
+- Store important architectural patterns
+- Keep track of best practices and guidelines
+- Maintain context across development sessions
+
+### 📝 Example Usage
+```typescript
+// Basic memory saving
+await CLIAgentTools.executeTool('save_memory', {
+    fact: 'User prefers TypeScript over JavaScript'
+});
+
+// With metadata
+await CLIAgentTools.executeTool('save_memory', {
+    fact: 'Project uses React 18 with strict mode',
+    category: 'project-config',
+    priority: 'high',
+    project: 'my-app',
+    tags: ['react', 'config', 'strict-mode']
+});
+```
+
+### 📊 Updated Stats
+- **Total Tools**: 29 (added Memory Tool)
+- **New Category**: memory-management
+- **New Tags**: memory, persistence, context
+
+---
+
+## [2.0.2] - 2025-01-27
+
+### 🧹 Cleanup
+- **Removed all remaining LangChain references and dependencies**:
+  - Removed `package-sdk.json` with old LangChain references
+  - Removed `LangGraph.txt` documentation file
+  - Uninstalled extraneous LangChain packages: `@langchain/core`, `@langchain/langgraph`, etc.
+  - Clean package-lock.json regenerated without LangChain dependencies
+  - **Package is now 100% LangChain-free**
+
+### 📦 Package Improvements
+- Reduced package size further by removing unused dependencies
+- Clean dependency tree with no extraneous packages
+- Faster installation with fewer transitive dependencies
+
+---
+
 ## [2.0.1] - 2025-01-27
 
 ### 🚀 Added

@@ -33,6 +33,7 @@ import './tools/implementations/notebookReadTool';
 import './tools/implementations/searchCodeTool';
 import './tools/implementations/symbolAnalysisTool';
 import './tools/implementations/textEditorTool';
+import './tools/implementations/memoryTool';
 
 // Core exports - direct access to tools
 export { ToolRegistry } from './tools/registry/toolRegistry';
@@ -188,7 +189,7 @@ export class CLIAgentTools {
 }
 
 // Version info
-export const SDK_VERSION = '2.0.1';
+export const SDK_VERSION = '2.1.2';
 
 // Usage instructions
 export const USAGE_INSTRUCTIONS = `

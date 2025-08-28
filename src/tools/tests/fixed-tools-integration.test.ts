@@ -158,8 +158,8 @@ describe('Fixed Tools Integration Tests', () => {
         const allTools = ToolRegistry.getTools();
         const totalTools = allTools.length;
         
-        // We expect to have all 28 tools registered now  
-        expect(totalTools).toBe(28);
+        // We expect to have all 29 tools registered now (including Memory Tool)
+        expect(totalTools).toBe(29);
         
         // All tools should have proper schemas
         allTools.forEach(tool => {

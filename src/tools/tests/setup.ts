@@ -38,6 +38,7 @@ import '../implementations/notebookReadTool';
 import '../implementations/searchCodeTool';
 import '../implementations/symbolAnalysisTool';
 import '../implementations/textEditorTool';
+import '../implementations/memoryTool';
 
 // Test directories
 export const TEST_DIR = path.join(__dirname, 'test-workspace');
